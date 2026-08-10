@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
+  Home,
   LayoutDashboard,
   Users,
   Package,
-  FileText,
   Calculator,
   GraduationCap,
   Wrench,
@@ -13,6 +13,7 @@ import {
 import { classNames } from '@/lib/utils';
 
 export type Page =
+  | 'home'
   | 'dashboard'
   | 'customers'
   | 'products'
@@ -28,7 +29,8 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
+const navItems: { id: Page; label: string; icon: typeof Home }[] = [
+  { id: 'home', label: '首页', icon: Home },
   { id: 'dashboard', label: '仪表盘', icon: LayoutDashboard },
   { id: 'customers', label: '客户管理', icon: Users },
   { id: 'products', label: '产品管理', icon: Package },

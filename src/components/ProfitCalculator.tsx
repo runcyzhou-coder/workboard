@@ -1,11 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Calculator as CalcIcon, Plus, Save, Trash2, TrendingUp, TrendingDown,
-  AlertTriangle, CheckCircle2, History,
+  Save, Trash2, TrendingUp, TrendingDown,
+  AlertTriangle, CheckCircle2, History, RefreshCw, Globe2, ArrowRight,
+  DollarSign, Activity,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency, formatDate, classNames, CURRENCIES } from '@/lib/utils';
 import type { ProfitCalculation } from '@/lib/supabase';
+
+// Real-time exchange rate types
+interface RateData {
+  base: string;
+  date: string;
+  rates: Record<string, number>;
+}
+interface RateCache {
+  data: RateData | null;
+  fetchedAt: number | null;
+  loading: boolean;
+  error: string | null;
+}
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+// Fallback rates (2026 baseline) in case API is unreachable
+const FALLBACK_RATES: Record<string, number> = {
+  USD: 1, EUR: 0.92, GBP: 0.79, CNY: 7.25, JPY: 149.5, HKD: 7.80,
+  SGD: 1.34, AUD: 1.52, CAD: 1.36, KRW: 1325, INR: 83.2, RUB: 92.5,
+  BRL: 5.15, MXN: 16.8, AED: 3.67, TRY: 32.4,
+};
 
 interface CalcInput {
   title: string;
@@ -31,6 +52,11 @@ export function ProfitCalculator() {
     currency: 'USD', exchange_rate: 1, freight_cost: 0, platform_fee_pct: 0,
     platform_fee_fixed: 0, tariff_pct: 0, other_costs: 0,
   });
+  // Real-time rate state
+  const [rateCache, setRateCache] = useState<RateCache>({
+    data: null, fetchedAt: null, loading: false, error: null,
+  });
+  const [rateBase, setRateBase] = useState<string>('USD');
 
   const loadHistory = useCallback(async () => {
     const { data } = await supabase.from('profit_calculations').select('*').order('created_at', { ascending: false }).limit(20);
@@ -38,6 +64,93 @@ export function ProfitCalculator() {
   }, []);
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
+
+  // Fetch real-time exchange rates with caching & fallback
+  const fetchRates = useCallback(async (base: string, force = false) => {
+    const now = Date.now();
+    // Use cache if fresh
+    if (!force && rateCache.data && rateCache.fetchedAt && (now - rateCache.fetchedAt) < CACHE_TTL && rateCache.data.base === base) {
+      return;
+    }
+    setRateCache(prev => ({ ...prev, loading: true, error: null }));
+    try {
+      // Frankfurter API: open-source, no key needed (EUR-based), supports USD base via latest?from=
+      // Try frankfurter first
+      let data: RateData | null = null;
+      try {
+        const symbols = Object.keys(FALLBACK_RATES).filter(s => s !== base).join(',');
+        const res = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${symbols}`);
+        if (res.ok) {
+          const json = await res.json();
+          data = { base: json.base || base, date: json.date || new Date().toISOString().slice(0, 10), rates: json.rates || {} };
+        }
+      } catch { /* ignore, try next API */ }
+      // Backup: exchangerate.host (free tier, no key for EUR-based)
+      if (!data) {
+        try {
+          const res2 = await fetch(`https://api.exchangerate.host/latest?base=${base}`);
+          if (res2.ok) {
+            const j2 = await res2.json();
+            if (j2.rates) {
+              data = { base: j2.base || base, date: j2.date || new Date().toISOString().slice(0, 10), rates: j2.rates };
+            }
+          }
+        } catch { /* ignore */ }
+      }
+      // Fallback: build synthetic data using baseline normalized to requested base
+      if (!data) {
+        const usdToBase = 1 / (FALLBACK_RATES[base] || 1);
+        const rates: Record<string, number> = {};
+        Object.keys(FALLBACK_RATES).forEach(code => {
+          if (code === base) rates[code] = 1;
+          else rates[code] = (FALLBACK_RATES[code] || 1) * usdToBase;
+        });
+        data = { base, date: new Date().toISOString().slice(0, 10), rates };
+        setRateCache(prev => ({ ...prev, data, fetchedAt: now, loading: false, error: 'API暂不可用，使用参考基准汇率（非实时）' }));
+        return;
+      }
+      setRateCache({ data, fetchedAt: now, loading: false, error: null });
+    } catch (e) {
+      // Last-resort fallback
+      const msg = e instanceof Error ? e.message : '获取汇率失败';
+      const usdToBase = 1 / (FALLBACK_RATES[base] || 1);
+      const rates: Record<string, number> = {};
+      Object.keys(FALLBACK_RATES).forEach(code => {
+        if (code === base) rates[code] = 1;
+        else rates[code] = (FALLBACK_RATES[code] || 1) * usdToBase;
+      });
+      setRateCache({
+        data: { base, date: new Date().toISOString().slice(0, 10), rates },
+        fetchedAt: now, loading: false,
+        error: `${msg}，已使用参考汇率`,
+      });
+    }
+  }, [rateCache.data, rateCache.fetchedAt]);
+
+  // Auto-load rates on mount and when base changes
+  useEffect(() => { fetchRates(rateBase); }, [rateBase, fetchRates]);
+
+  function getRate(from: string, to: string): number {
+    if (from === to) return 1;
+    const rates = rateCache.data?.rates;
+    if (!rates) {
+      // Fallback via USD baseline
+      const fu = FALLBACK_RATES[from] || 1, tu = FALLBACK_RATES[to] || 1;
+      return tu / fu;
+    }
+    if (rateCache.data?.base === from && rates[to]) return rates[to];
+    if (rateCache.data?.base === to && rates[from]) return 1 / rates[from];
+    // Via base cross-rate
+    const base = rateCache.data?.base || 'USD';
+    const fromInBase = (base === from) ? 1 : (rates[from] || (1 / (FALLBACK_RATES[from] || 1)));
+    const toInBase = (base === to) ? 1 : (rates[to] || (1 / (FALLBACK_RATES[to] || 1)));
+    return toInBase / fromInBase;
+  }
+
+  function applyRateToCalc(fromCode: string, toCode: string) {
+    const rate = getRate(fromCode, toCode);
+    setInput(prev => ({ ...prev, currency: toCode, exchange_rate: rate }));
+  }
 
   const quantity = input.quantity || 0;
   const totalCost = (input.cost_price * quantity) + input.freight_cost + input.other_costs + input.platform_fee_fixed;
@@ -86,6 +199,15 @@ export function ProfitCalculator() {
 
   const num = (v: string) => parseFloat(v) || 0;
 
+  const popularPairs = [
+    { from: 'USD', to: 'CNY', label: '美元 → 人民币' },
+    { from: 'EUR', to: 'CNY', label: '欧元 → 人民币' },
+    { from: 'GBP', to: 'CNY', label: '英镑 → 人民币' },
+    { from: 'JPY', to: 'CNY', label: '日元 → 人民币' },
+    { from: 'USD', to: 'EUR', label: '美元 → 欧元' },
+    { from: 'USD', to: 'GBP', label: '美元 → 英镑' },
+  ];
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -101,6 +223,123 @@ export function ProfitCalculator() {
             {saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {saved ? '已保存' : '保存核算'}
           </button>
+        </div>
+      </div>
+
+      {/* Real-time Exchange Rate Panel */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-cyan-50 to-blue-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
+              <Globe2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+                实时汇率看板
+                {rateCache.loading && (
+                  <RefreshCw className="w-3.5 h-3.5 text-cyan-600 animate-spin" />
+                )}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                数据来源: {rateCache.error ? '本地参考基准' : 'Frankfurter 公开 API'}
+                {rateCache.data?.date && ` · 数据日期 ${rateCache.data.date}`}
+                {rateCache.fetchedAt && ` · 更新于 ${new Date(rateCache.fetchedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-500 shrink-0">基准货币</label>
+            <select
+              value={rateBase}
+              onChange={e => setRateBase(e.target.value)}
+              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            >
+              {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}
+            </select>
+            <button
+              onClick={() => fetchRates(rateBase, true)}
+              disabled={rateCache.loading}
+              className="p-2 rounded-lg text-slate-500 hover:text-cyan-600 hover:bg-white border border-slate-200 disabled:opacity-50 transition-colors"
+              title="刷新汇率"
+            >
+              <RefreshCw className={classNames('w-4 h-4', rateCache.loading && 'animate-spin')} />
+            </button>
+          </div>
+        </div>
+
+        {rateCache.error && (
+          <div className="px-5 py-2 bg-amber-50 border-b border-amber-100 text-xs text-amber-700 flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />{rateCache.error}
+          </div>
+        )}
+
+        <div className="p-5">
+          {/* Popular pairs */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+            {popularPairs.map(pair => {
+              const rate = getRate(pair.from, pair.to);
+              const isCurrentCalc = input.currency === pair.to;
+              return (
+                <button
+                  key={`${pair.from}-${pair.to}`}
+                  onClick={() => applyRateToCalc(pair.from, pair.to)}
+                  className={classNames(
+                    'text-left p-3 rounded-xl border transition-all hover:shadow-md',
+                    isCurrentCalc
+                      ? 'border-cyan-400 bg-cyan-50 ring-2 ring-cyan-100'
+                      : 'border-slate-200 bg-white hover:border-cyan-300'
+                  )}
+                >
+                  <div className="flex items-center gap-1 text-[10px] text-slate-500 mb-1">
+                    <span>{pair.from}</span>
+                    <ArrowRight className="w-3 h-3 text-slate-400" />
+                    <span>{pair.to}</span>
+                  </div>
+                  <p className="text-lg font-bold text-slate-900 leading-tight">
+                    {rate.toFixed(rate >= 100 ? 2 : rate >= 10 ? 3 : 4)}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-1 truncate">{pair.label}</p>
+                  {isCurrentCalc && (
+                    <p className="text-[10px] font-medium text-cyan-700 mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />已应用到核算
+                    </p>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Full rate table */}
+          <div className="border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-cyan-600" />
+                完整汇率表 <span className="text-xs font-normal text-slate-400">(基准: 1 {rateBase})</span>
+              </h3>
+              <p className="text-[10px] text-slate-400">点击任意币种可快速切换核算币种并填入对应汇率</p>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              {CURRENCIES.map(c => {
+                if (c.code === rateBase) return null;
+                const rate = getRate(rateBase, c.code);
+                return (
+                  <button
+                    key={c.code}
+                    onClick={() => applyRateToCalc('USD' === rateBase ? 'USD' : rateBase, c.code)}
+                    className="group flex flex-col items-center p-2.5 rounded-lg border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all"
+                  >
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <DollarSign className="w-3 h-3 text-slate-400 group-hover:text-cyan-600" />
+                      <span className="text-xs font-semibold text-slate-700 group-hover:text-cyan-700">{c.code}</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-900 tabular-nums">
+                      {rate.toFixed(rate >= 100 ? 2 : rate >= 10 ? 3 : 4)}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -163,8 +402,25 @@ export function ProfitCalculator() {
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="汇率 (参考)">
-                <input type="number" step="0.0001" value={input.exchange_rate} onChange={e => setInput({ ...input, exchange_rate: num(e.target.value) })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <div className="flex gap-2">
+                  <input type="number" step="0.0001" value={input.exchange_rate} onChange={e => setInput({ ...input, exchange_rate: num(e.target.value) })}
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <button
+                    onClick={() => {
+                      const rate = getRate('CNY', input.currency);
+                      setInput(prev => ({ ...prev, exchange_rate: rate }));
+                    }}
+                    disabled={rateCache.loading}
+                    className="flex items-center gap-1 px-3 py-2 bg-cyan-50 text-cyan-700 border border-cyan-200 rounded-lg hover:bg-cyan-100 text-xs font-medium disabled:opacity-50"
+                    title="获取 CNY → 当前币种的实时汇率"
+                  >
+                    <RefreshCw className={classNames('w-3.5 h-3.5', rateCache.loading && 'animate-spin')} />
+                    取实时
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  当前币种 {input.currency} · 1 CNY = {(1 / (getRate('CNY', input.currency) || 1)).toFixed(4)} {input.currency}
+                </p>
               </Field>
             </div>
           </div>

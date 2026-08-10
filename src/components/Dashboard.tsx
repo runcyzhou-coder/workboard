@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
-  Users, Package, FileText, Quote, Calculator, TrendingUp, TrendingDown,
+  Users, Package, FileText, Quote, Calculator, TrendingUp,
   ArrowRight, Briefcase, Globe2, Clock,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency, formatDate, classNames } from '@/lib/utils';
 import type { Page } from '@/components/Sidebar';
-import type { Customer, ProformaInvoice, Quotation, Product } from '@/lib/supabase';
+import type { Customer, ProformaInvoice, Quotation } from '@/lib/supabase';
 
 interface DashboardProps {
   onNavigate: (page: Page) => void;

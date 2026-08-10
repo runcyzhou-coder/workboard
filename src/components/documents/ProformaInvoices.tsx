@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Search, FileText, X, Edit2, Trash2, Printer, Eye,
-  ArrowLeft, Calendar,
+  ArrowLeft,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency, formatDate, generateDocNumber, classNames, CURRENCIES, TRADE_TERMS, PAYMENT_TERMS } from '@/lib/utils';

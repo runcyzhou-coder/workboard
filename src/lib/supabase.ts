@@ -1,9 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
+import { localClient } from './localClient';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const rawUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const isValidUrl = (url: string) => {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+// 判断是否配置了有效的 Supabase 凭据
+const hasValidSupabaseConfig = isValidUrl(rawUrl) && rawKey && !rawKey.startsWith('your_');
+
+// 未配置真实 Supabase 时使用 localStorage 本地适配器，保证应用功能可用
+export const supabase = hasValidSupabaseConfig
+  ? createClient(rawUrl, rawKey)
+  : localClient as any;
 
 // Database types
 export interface Customer {
