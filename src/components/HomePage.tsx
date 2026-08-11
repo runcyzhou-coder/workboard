@@ -1285,17 +1285,29 @@ export function HomePage({ onNavigate }: HomeProps) {
             <div className="flex items-center gap-2 text-xs font-medium text-white/80 mb-2">
               <Sparkles className="w-4 h-4" />
               <span>AI 智能首页</span>
-              {selectedIndustry && (
-                <button
-                  onClick={() => setShowIndustryModal(true)}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white font-semibold"
-                  title="点击切换行业"
-                >
-                  当前展示：{selectedIndustry} 🔄
-                </button>
-              )}
             </div>
-            <h1 className="text-3xl font-bold mb-1">早安，KIKI TECH</h1>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-3xl font-bold">早安，KIKI TECH</h1>
+              <button
+                onClick={() => setShowIndustryModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur transition-all text-white text-sm font-semibold border border-white/30 shadow-sm"
+                title="点击切换行业"
+              >
+                {selectedIndustry ? (
+                  <>
+                    <span className="opacity-80 text-xs">当前行业</span>
+                    <span>{selectedIndustry}</span>
+                    <RefreshIcon className="w-3.5 h-3.5" />
+                  </>
+                ) : (
+                  <>
+                    <Target className="w-3.5 h-3.5" />
+                    选择行业
+                    <RefreshIcon className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </div>
             <p className="text-white/80 text-sm">{dateStr} · 今天也是开拓全球市场的一天 💪</p>
           </div>
           <div className="flex flex-wrap gap-3">
