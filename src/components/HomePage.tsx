@@ -6,6 +6,7 @@ import {
   Sparkles, BarChart3, ChevronRight, Target,
   ListTodo, RefreshCw, AlertTriangle, X,
   ChevronLeft, Pencil, Tag, Flag,
+  RefreshCw as RefreshIcon, Loader2,
 } from 'lucide-react';
 import { formatDate, classNames } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -16,7 +17,7 @@ interface HomeProps {
   onNavigate: (page: Page) => void;
 }
 
-// ============ 行业新闻（风机行业） ============
+// ============ 行业新闻 ============
 interface IndustryNews {
   id: string;
   title: string;
@@ -27,82 +28,16 @@ interface IndustryNews {
   hotLevel: 'hot' | 'warm' | 'normal';
 }
 
-const fanIndustryNews: IndustryNews[] = [
-  {
-    id: 'n1',
-    title: '2026年全球海上风电装机量预计突破50GW，亚洲市场引领增长',
-    summary: '国际能源署(IEA)最新报告显示，中国、韩国、越南三国海上风电项目审批加速，风机制造商金风科技、明阳智能海外订单同比增长68%。',
-    source: 'Global Wind Energy Council',
-    category: '市场',
-    date: '2026-08-08',
-    hotLevel: 'hot',
-  },
-  {
-    id: 'n2',
-    title: '16MW超大容量海上风机通过DLC认证，出口欧盟门槛降低',
-    summary: '国内某头部风机厂商的H260-16MW机型获得DNV型式认证，这是目前出口欧洲市场所需的核心资质，预计Q4可批量交付德国北海项目。',
-    source: 'DNV GL 认证中心',
-    category: '技术',
-    date: '2026-08-07',
-    hotLevel: 'hot',
-  },
-  {
-    id: 'n3',
-    title: '巴西发布2026-2030国家能源规划，新增陆上风电配额18GW',
-    summary: '巴西矿产能源部(Mineral Energy)公开拍卖日程，8月28日启动第一轮1.2GW风电招标，准入门槛支持中国整机厂商以本地化率30%参与。',
-    source: '巴西矿业能源部',
-    category: '政策',
-    date: '2026-08-06',
-    hotLevel: 'warm',
-  },
-  {
-    id: 'n4',
-    title: '沙特NEOM新城绿氢配套5GW风电项目启动EPC招标',
-    summary: '沙特ACWA Power发布招标文件，要求风机在沙漠高温环境下具备45°C连续运行能力，交货窗口2027Q2-2028Q1。',
-    source: 'MEED 中东经济文摘',
-    category: '项目',
-    date: '2026-08-05',
-    hotLevel: 'hot',
-  },
-  {
-    id: 'n5',
-    title: '风机塔筒出口欧盟反倾销税率调整公告（2026年第三版）',
-    summary: '欧盟委员会最新公告，自9月15日起对原产于中国的钢制塔筒征收6.2%-14.8%的反倾销税，具体税率依出口商单独税率申请结果而定。',
-    source: 'European Commission TARIC',
-    category: '政策',
-    date: '2026-08-04',
-    hotLevel: 'warm',
-  },
-  {
-    id: 'n6',
-    title: '澳大利亚昆士兰州450MW风电项目正式签约，EPC总价约4.8亿美元',
-    summary: '某中澳联合体项目公司签约，风机选型为5.5MW陆上机型，预计2027年并网，这是近一年中国风机厂商在大洋洲的最大单笔订单。',
-    source: 'RenewEconomy Australia',
-    category: '项目',
-    date: '2026-08-03',
-    hotLevel: 'normal',
-  },
-];
-
 // ============ 热销产品 ============
 interface HotProduct {
   id: string;
   name: string;
   model: string;
-  category: '整机' | '塔筒' | '叶片' | '电控' | '配件';
+  category: string;
   revenue: string;
   growth: string;
   trend: 'up' | 'down';
 }
-
-const hotProducts: HotProduct[] = [
-  { id: 'p1', name: '陆上低风速风机', model: 'GW171-6.0MW', category: '整机', revenue: '$18.2M', growth: '+42%', trend: 'up' },
-  { id: 'p2', name: '海上大容量风机', model: 'H260-16MW', category: '整机', revenue: '$12.8M', growth: '+156%', trend: 'up' },
-  { id: 'p3', name: '钢制塔筒（含防腐）', model: '120m 三段式', category: '塔筒', revenue: '$8.6M', growth: '+28%', trend: 'up' },
-  { id: 'p4', name: '碳纤维叶片', model: '92m B型', category: '叶片', revenue: '$6.1M', growth: '+35%', trend: 'up' },
-  { id: 'p5', name: '变桨/偏航电控系统', model: 'PCS-5000', category: '电控', revenue: '$3.8M', growth: '+19%', trend: 'up' },
-  { id: 'p6', name: '高原型风机（4500m+）', model: 'GW155-4.5MW', category: '整机', revenue: '$2.9M', growth: '+8%', trend: 'up' },
-];
 
 // ============ 热销国家/地区 ============
 interface HotMarket {
@@ -116,13 +51,16 @@ interface HotMarket {
   risk: 'low' | 'medium' | 'high';
 }
 
-const hotMarkets: HotMarket[] = [
-  { id: 'm1', country: '沙特阿拉伯', flag: '🇸🇦', continent: '中东', demand: '5GW 海上+陆上', inquiries30d: 18, avgMargin: '28%', risk: 'low' },
-  { id: 'm2', country: '巴西', flag: '🇧🇷', continent: '拉美', demand: '18GW 陆上拍卖', inquiries30d: 12, avgMargin: '22%', risk: 'medium' },
-  { id: 'm3', country: '澳大利亚', flag: '🇦🇺', continent: '大洋洲', demand: '4.5GW 新项目', inquiries30d: 9, avgMargin: '31%', risk: 'low' },
-  { id: 'm4', country: '越南', flag: '🇻🇳', continent: '东南亚', demand: '3.2GW 海上一期', inquiries30d: 21, avgMargin: '19%', risk: 'medium' },
-  { id: 'm5', country: '德国', flag: '🇩🇪', continent: '欧洲', demand: '北海 2.8GW', inquiries30d: 7, avgMargin: '25%', risk: 'medium' },
-  { id: 'm6', country: '哈萨克斯坦', flag: '🇰🇿', continent: '中亚', demand: '1.8GW 陆上', inquiries30d: 5, avgMargin: '34%', risk: 'low' },
+// ============ 行业选项 ============
+const industryOptions = [
+  { value: '风电设备', icon: '🌀' },
+  { value: '光伏储能', icon: '☀️' },
+  { value: '汽配零件', icon: '🚗' },
+  { value: '3C电子', icon: '📱' },
+  { value: '机械设备', icon: '⚙️' },
+  { value: '医疗器械', icon: '🏥' },
+  { value: '家居建材', icon: '🏠' },
+  { value: '纺织服装', icon: '🧵' },
 ];
 
 // ============ 每日 To-do ============
@@ -1066,6 +1004,111 @@ www.kiki-tech.com`;
   );
 }
 
+// ============ 行业选择 Modal ============
+function IndustrySelectModal({
+  current,
+  onSelect,
+  onClose,
+}: {
+  current: string;
+  onSelect: (industry: string) => void;
+  onClose: () => void;
+}) {
+  const [customIndustry, setCustomIndustry] = useState('');
+  const hasIndustry = !!current;
+
+  function handleConfirm() {
+    const trimmed = customIndustry.trim();
+    if (trimmed) onSelect(trimmed);
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-500 px-6 py-5 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold">
+                {hasIndustry ? '切换主营行业' : '欢迎！请选择您的主营行业'}
+              </h2>
+              <p className="text-sm text-white/80 mt-1">
+                {hasIndustry ? '切换后首页数据将自动刷新' : 'AI 将根据您的行业定制首页内容'}
+              </p>
+            </div>
+            {hasIndustry && (
+              <button onClick={onClose} className="text-white/80 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {industryOptions.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => onSelect(opt.value)}
+                className={classNames(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left',
+                  current === opt.value
+                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                    : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                )}
+              >
+                <span className="text-2xl">{opt.icon}</span>
+                <div>
+                  <p className={classNames(
+                    'text-sm font-semibold',
+                    current === opt.value ? 'text-indigo-700' : 'text-slate-700'
+                  )}>
+                    {opt.value}
+                  </p>
+                  {current === opt.value && (
+                    <p className="text-[10px] text-indigo-500 font-medium">当前选择</p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* 自定义输入 */}
+          <div className="border-t border-slate-100 pt-4">
+            <label className="text-xs font-medium text-slate-500 mb-2 block">
+              没有找到？输入您的行业名称：
+            </label>
+            <div className="flex gap-2">
+              <input
+                value={customIndustry}
+                onChange={e => setCustomIndustry(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && customIndustry.trim()) handleConfirm(); }}
+                placeholder="如：五金工具、食品机械..."
+                className="flex-1 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                onClick={handleConfirm}
+                disabled={!customIndustry.trim()}
+                className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                确认
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        {!hasIndustry && (
+          <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-400">
+            选择行业后将自动保存，随时可切换
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function HomePage({ onNavigate }: HomeProps) {
   // To-do state
   const [todos, setTodos] = useState<TodoItem[]>(loadTodos());
@@ -1078,6 +1121,12 @@ export function HomePage({ onNavigate }: HomeProps) {
   const [riskAlerts, setRiskAlerts] = useState<RiskAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
   const [expandedAlert, setExpandedAlert] = useState<string | null>(null);
+
+  // 行业动态数据状态
+  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
+  const [showIndustryModal, setShowIndustryModal] = useState(false);
+  const [industryData, setIndustryData] = useState<{ news: IndustryNews[]; hot_markets: HotMarket[]; hot_products: HotProduct[] } | null>(null);
+  const [industryLoading, setIndustryLoading] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
@@ -1107,6 +1156,73 @@ export function HomePage({ onNavigate }: HomeProps) {
     loadAlerts();
     return () => { cancelled = true; };
   }, []);
+
+  // ===== 行业偏好加载与数据获取 =====
+  const loadIndustryData = useCallback(async (industry: string) => {
+    if (!industry) return;
+    setIndustryLoading(true);
+    try {
+      const res = await fetch(`/api/dashboard-industry-data?industry=${encodeURIComponent(industry)}`);
+      const json = await res.json();
+      if (json.data) {
+        setIndustryData({
+          news: json.data.news || [],
+          hot_markets: json.data.hot_markets || [],
+          hot_products: json.data.hot_products || [],
+        });
+      }
+    } catch {
+      setIndustryData(null);
+    }
+    setIndustryLoading(false);
+  }, []);
+
+  // 页面加载时读取用户行业偏好
+  useEffect(() => {
+    let cancelled = false;
+    async function loadProfile() {
+      try {
+        const res = await supabase.from('profiles').select('*').limit(1);
+        if (cancelled) return;
+        const profile = res.data?.[0];
+        if (profile?.selected_industry) {
+          setSelectedIndustry(profile.selected_industry);
+          loadIndustryData(profile.selected_industry);
+        } else {
+          // 未设置行业，弹出选择框
+          setShowIndustryModal(true);
+        }
+      } catch {
+        // profiles 表不存在，回退到 localStorage
+        const local = localStorage.getItem('wb_selected_industry');
+        if (local) {
+          setSelectedIndustry(local);
+          loadIndustryData(local);
+        } else {
+          setShowIndustryModal(true);
+        }
+      }
+    }
+    loadProfile();
+    return () => { cancelled = true; };
+  }, [loadIndustryData]);
+
+  // 选择/切换行业
+  async function handleSelectIndustry(industry: string) {
+    setSelectedIndustry(industry);
+    setShowIndustryModal(false);
+    // 保存到 Supabase + localStorage
+    try {
+      const checkRes = await supabase.from('profiles').select('id').limit(1);
+      if (checkRes.data && checkRes.data.length > 0) {
+        await supabase.from('profiles').update({ selected_industry: industry, updated_at: new Date().toISOString() }).eq('id', checkRes.data[0].id);
+      } else {
+        await supabase.from('profiles').insert({ selected_industry: industry });
+      }
+    } catch {}
+    localStorage.setItem('wb_selected_industry', industry);
+    loadIndustryData(industry);
+  }
 
   function addTodo() {
     const text = todoInput.trim();
@@ -1168,7 +1284,16 @@ export function HomePage({ onNavigate }: HomeProps) {
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-white/80 mb-2">
               <Sparkles className="w-4 h-4" />
-              <span>AI 智能首页 · 风机行业版</span>
+              <span>AI 智能首页</span>
+              {selectedIndustry && (
+                <button
+                  onClick={() => setShowIndustryModal(true)}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white font-semibold"
+                  title="点击切换行业"
+                >
+                  当前展示：{selectedIndustry} 🔄
+                </button>
+              )}
             </div>
             <h1 className="text-3xl font-bold mb-1">早安，KIKI TECH</h1>
             <p className="text-white/80 text-sm">{dateStr} · 今天也是开拓全球市场的一天 💪</p>
@@ -1396,8 +1521,8 @@ export function HomePage({ onNavigate }: HomeProps) {
                 <Newspaper className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">风机行业快讯</h2>
-                <p className="text-xs text-slate-500">全球风电动态实时更新</p>
+                <h2 className="text-lg font-semibold text-slate-900">{selectedIndustry || '行业'}快讯</h2>
+                <p className="text-xs text-slate-500">全球动态实时更新</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -1406,78 +1531,92 @@ export function HomePage({ onNavigate }: HomeProps) {
             </div>
           </div>
 
-          {/* 前两条重点展示 */}
-          <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
-            {fanIndustryNews.map((n, idx) => {
-              const hotColors: Record<string, string> = {
-                hot: 'bg-red-50 text-red-600 border-red-200',
-                warm: 'bg-amber-50 text-amber-600 border-amber-200',
-                normal: 'bg-slate-50 text-slate-500 border-slate-200',
-              };
-              const catColors: Record<string, string> = {
-                '政策': 'bg-violet-100 text-violet-700',
-                '市场': 'bg-blue-100 text-blue-700',
-                '技术': 'bg-emerald-100 text-emerald-700',
-                '项目': 'bg-teal-100 text-teal-700',
-              };
-              const hotLabel: Record<string, string> = { hot: '🔥 热门', warm: '✨ 关注', normal: '📰 动态' };
-              const isPrimary = idx < 2;
-              return (
-                <div
-                  key={n.id}
-                  className={classNames(
-                    'group p-3 rounded-xl border border-slate-100 hover:border-orange-200 hover:shadow-sm transition-all bg-gradient-to-br from-white to-slate-50',
-                    isPrimary ? 'ring-1 ring-orange-100' : ''
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={classNames('px-2 py-0.5 rounded text-[10px] font-semibold', catColors[n.category])}>
-                        {n.category}
-                      </span>
-                      <span className={classNames('px-2 py-0.5 rounded text-[10px] font-semibold border', hotColors[n.hotLevel])}>
-                        {hotLabel[n.hotLevel]}
-                      </span>
+          {industryLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                <p className="text-xs text-slate-400">AI 正在获取{selectedIndustry}行业快讯...</p>
+              </div>
+            </div>
+          ) : industryData?.news?.length ? (
+            <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+              {industryData.news.map((n, idx) => {
+                const hotColors: Record<string, string> = {
+                  hot: 'bg-red-50 text-red-600 border-red-200',
+                  warm: 'bg-amber-50 text-amber-600 border-amber-200',
+                  normal: 'bg-slate-50 text-slate-500 border-slate-200',
+                };
+                const catColors: Record<string, string> = {
+                  '政策': 'bg-violet-100 text-violet-700',
+                  '市场': 'bg-blue-100 text-blue-700',
+                  '技术': 'bg-emerald-100 text-emerald-700',
+                  '项目': 'bg-teal-100 text-teal-700',
+                };
+                const hotLabel: Record<string, string> = { hot: '🔥 热门', warm: '✨ 关注', normal: '📰 动态' };
+                const isPrimary = idx < 2;
+                return (
+                  <div
+                    key={n.id}
+                    className={classNames(
+                      'group p-3 rounded-xl border border-slate-100 hover:border-orange-200 hover:shadow-sm transition-all bg-gradient-to-br from-white to-slate-50',
+                      isPrimary ? 'ring-1 ring-orange-100' : ''
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={classNames('px-2 py-0.5 rounded text-[10px] font-semibold', catColors[n.category])}>
+                          {n.category}
+                        </span>
+                        <span className={classNames('px-2 py-0.5 rounded text-[10px] font-semibold border', hotColors[n.hotLevel])}>
+                          {hotLabel[n.hotLevel]}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 shrink-0">{n.date.slice(5)}</span>
                     </div>
-                    <span className="text-[10px] text-slate-400 shrink-0">{n.date.slice(5)}</span>
-                  </div>
-                  <h3 className={classNames(
-                    'font-semibold text-slate-900 leading-snug mb-1.5 group-hover:text-orange-700 transition-colors',
-                    isPrimary ? 'text-sm' : 'text-xs'
-                  )}>
-                    {n.title}
-                  </h3>
-                  <p className={classNames(
-                    'text-slate-600 leading-relaxed mb-2.5',
-                    isPrimary ? 'text-xs' : 'text-[11px] line-clamp-2'
-                  )}>
-                    {n.summary}
-                  </p>
-                  <div className="flex items-center justify-between gap-2 text-[10px]">
-                    <span className="flex items-center gap-1 text-slate-400 truncate">
-                      <Globe2 className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{n.source}</span>
-                    </span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button className="flex items-center gap-1 text-orange-600 font-medium hover:text-orange-700">
-                        原文 <ExternalLink className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => setAiLetterNews(n)}
-                        className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-medium hover:bg-indigo-100 border border-indigo-200"
-                        title="AI 提取商机写信"
-                      >
-                        <Sparkles className="w-3 h-3" />AI 写信
-                      </button>
+                    <h3 className={classNames(
+                      'font-semibold text-slate-900 leading-snug mb-1.5 group-hover:text-orange-700 transition-colors',
+                      isPrimary ? 'text-sm' : 'text-xs'
+                    )}>
+                      {n.title}
+                    </h3>
+                    <p className={classNames(
+                      'text-slate-600 leading-relaxed mb-2.5',
+                      isPrimary ? 'text-xs' : 'text-[11px] line-clamp-2'
+                    )}>
+                      {n.summary}
+                    </p>
+                    <div className="flex items-center justify-between gap-2 text-[10px]">
+                      <span className="flex items-center gap-1 text-slate-400 truncate">
+                        <Globe2 className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{n.source}</span>
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button className="flex items-center gap-1 text-orange-600 font-medium hover:text-orange-700">
+                          原文 <ExternalLink className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => setAiLetterNews(n)}
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-medium hover:bg-indigo-100 border border-indigo-200"
+                          title="AI 提取商机写信"
+                        >
+                          <Sparkles className="w-3 h-3" />AI 写信
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-2 text-center text-[10px] text-slate-400">
-            ↕ 滚动查看更多快讯
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-16 text-sm text-slate-400">
+              暂无快讯数据
+            </div>
+          )}
+          {industryData?.news && industryData.news.length > 2 && (
+            <div className="mt-2 text-center text-[10px] text-slate-400">
+              ↕ 滚动查看更多快讯
+            </div>
+          )}
         </div>
 
         {/* 列2：热销产品排行 */}
@@ -1489,50 +1628,72 @@ export function HomePage({ onNavigate }: HomeProps) {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">热销产品排行</h2>
-                <p className="text-xs text-slate-500">本季度风机出口热销品类</p>
+                <p className="text-xs text-slate-500">本季度{selectedIndustry || '行业'}出口热销品类</p>
               </div>
             </div>
             <TrendingUp className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="space-y-2">
-            {hotProducts.map((p, idx) => {
-              const catColor: Record<string, string> = {
-                '整机': 'bg-blue-50 text-blue-600',
-                '塔筒': 'bg-amber-50 text-amber-600',
-                '叶片': 'bg-violet-50 text-violet-600',
-                '电控': 'bg-teal-50 text-teal-600',
-                '配件': 'bg-slate-50 text-slate-600',
-              };
-              return (
-                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onClick={() => onNavigate('products')}>
-                  <div className={classNames(
-                    'w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0',
-                    idx < 3 ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white' : 'bg-slate-100 text-slate-500'
-                  )}>
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{p.name}</p>
-                      <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', catColor[p.category])}>
-                        {p.category}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">{p.model}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-slate-900">{p.revenue}</p>
-                    <p className={classNames(
-                      'text-[10px] font-medium flex items-center justify-end gap-0.5',
-                      p.trend === 'up' ? 'text-emerald-600' : 'text-red-600'
+          {industryLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                <p className="text-xs text-slate-400">加载热销产品数据...</p>
+              </div>
+            </div>
+          ) : industryData?.hot_products?.length ? (
+            <div className="space-y-2">
+              {industryData.hot_products.map((p, idx) => {
+                const catColor: Record<string, string> = {
+                  '整机': 'bg-blue-50 text-blue-600',
+                  '塔筒': 'bg-amber-50 text-amber-600',
+                  '叶片': 'bg-violet-50 text-violet-600',
+                  '电控': 'bg-teal-50 text-teal-600',
+                  '配件': 'bg-slate-50 text-slate-600',
+                  '高端系列': 'bg-blue-50 text-blue-600',
+                  '标准系列': 'bg-amber-50 text-amber-600',
+                  '定制系列': 'bg-violet-50 text-violet-600',
+                  '入门系列': 'bg-slate-50 text-slate-600',
+                  '组件': 'bg-blue-50 text-blue-600',
+                  '储能': 'bg-amber-50 text-amber-600',
+                  '逆变器': 'bg-teal-50 text-teal-600',
+                  '支架': 'bg-violet-50 text-violet-600',
+                  '耗材': 'bg-slate-50 text-slate-600',
+                };
+                return (
+                  <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onClick={() => onNavigate('products')}>
+                    <div className={classNames(
+                      'w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0',
+                      idx < 3 ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white' : 'bg-slate-100 text-slate-500'
                     )}>
-                      <Zap className="w-3 h-3" />{p.growth}
-                    </p>
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{p.name}</p>
+                        <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', catColor[p.category] || 'bg-slate-50 text-slate-600')}>
+                          {p.category}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">{p.model}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-slate-900">{p.revenue}</p>
+                      <p className={classNames(
+                        'text-[10px] font-medium flex items-center justify-end gap-0.5',
+                        p.trend === 'up' ? 'text-emerald-600' : 'text-red-600'
+                      )}>
+                        <Zap className="w-3 h-3" />{p.growth}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-16 text-sm text-slate-400">
+              暂无热销产品数据
+            </div>
+          )}
           <button
             onClick={() => onNavigate('products')}
             className="mt-4 w-full text-sm text-emerald-600 font-medium py-2 rounded-lg border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition-colors flex items-center justify-center gap-1"
@@ -1555,43 +1716,56 @@ export function HomePage({ onNavigate }: HomeProps) {
             </div>
             <MapPin className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="space-y-2">
-            {hotMarkets.map((m) => {
-              const riskColors: Record<string, string> = {
-                low: 'bg-emerald-50 text-emerald-600',
-                medium: 'bg-amber-50 text-amber-600',
-                high: 'bg-red-50 text-red-600',
-              };
-              const riskLabels: Record<string, string> = {
-                low: '风险低',
-                medium: '风险中',
-                high: '风险高',
-              };
-              return (
-                <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onClick={() => onNavigate('customers')}>
-                  <div className="text-2xl shrink-0 w-9 text-center">{m.flag}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{m.country}</p>
-                      <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', riskColors[m.risk])}>
-                        {riskLabels[m.risk]}
-                      </span>
+          {industryLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                <p className="text-xs text-slate-400">加载热门市场数据...</p>
+              </div>
+            </div>
+          ) : industryData?.hot_markets?.length ? (
+            <div className="space-y-2">
+              {industryData.hot_markets.map((m) => {
+                const riskColors: Record<string, string> = {
+                  low: 'bg-emerald-50 text-emerald-600',
+                  medium: 'bg-amber-50 text-amber-600',
+                  high: 'bg-red-50 text-red-600',
+                };
+                const riskLabels: Record<string, string> = {
+                  low: '风险低',
+                  medium: '风险中',
+                  high: '风险高',
+                };
+                return (
+                  <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onClick={() => onNavigate('customers')}>
+                    <div className="text-2xl shrink-0 w-9 text-center">{m.flag}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{m.country}</p>
+                        <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', riskColors[m.risk])}>
+                          {riskLabels[m.risk]}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 flex items-center gap-1 truncate">
+                        <Briefcase className="w-3 h-3 shrink-0" /><span className="truncate">{m.demand}</span>
+                      </p>
                     </div>
-                    <p className="text-[11px] text-slate-500 flex items-center gap-1 truncate">
-                      <Briefcase className="w-3 h-3 shrink-0" /><span className="truncate">{m.demand}</span>
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0 space-y-0.5">
-                    <div className="flex items-center justify-end gap-1 text-[11px] text-slate-500">
-                      <AlertCircle className="w-3 h-3" />
-                      询盘 <span className="font-semibold text-slate-900">{m.inquiries30d}</span>
+                    <div className="text-right shrink-0 space-y-0.5">
+                      <div className="flex items-center justify-end gap-1 text-[11px] text-slate-500">
+                        <AlertCircle className="w-3 h-3" />
+                        询盘 <span className="font-semibold text-slate-900">{m.inquiries30d}</span>
+                      </div>
+                      <p className="text-xs font-bold text-emerald-600">利润 {m.avgMargin}</p>
                     </div>
-                    <p className="text-xs font-bold text-emerald-600">利润 {m.avgMargin}</p>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-16 text-sm text-slate-400">
+              暂无市场数据
+            </div>
+          )}
           <button
             onClick={() => onNavigate('customers')}
             className="mt-4 w-full text-sm text-blue-600 font-medium py-2 rounded-lg border border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors flex items-center justify-center gap-1"
@@ -1717,6 +1891,15 @@ export function HomePage({ onNavigate }: HomeProps) {
       {/* AI 写信 Modal */}
       {aiLetterNews && (
         <AILetterModal news={aiLetterNews} onClose={() => setAiLetterNews(null)} />
+      )}
+
+      {/* 行业选择 Modal */}
+      {showIndustryModal && (
+        <IndustrySelectModal
+          current={selectedIndustry}
+          onSelect={handleSelectIndustry}
+          onClose={() => { if (selectedIndustry) setShowIndustryModal(false); }}
+        />
       )}
     </div>
   );
