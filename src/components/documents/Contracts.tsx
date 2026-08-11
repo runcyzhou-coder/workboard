@@ -154,15 +154,27 @@ function ContractViewModal({ contract, onClose }: { contract: Contract & { custo
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 print:hidden"><div className="flex items-center gap-3"><button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-lg font-semibold text-slate-900">Preview Contract</h2></div><button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button></div>
         <div className="p-8 print:p-10" id="pi-document">
           <DocHeader title="SALES CONTRACT" docNumber={contract.contract_number} />
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
-              <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{contract.customer?.contact_name || '—'}</span></div>
-              <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{contract.customer?.company_name || '—'}</span></div>
-              <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{contract.customer?.address || '—'}</span></div>
-              <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{contract.customer?.phone || '—'}</span></div>
-              <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{contract.customer?.email || '—'}</span></div>
+          <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">BUYER</p>
+              <div className="space-y-1">
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Cont.Pers:</span><span className="text-slate-700">{contract.customer?.contact_name || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Company:</span><span className="text-slate-700">{contract.customer?.company_name || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Address:</span><span className="text-slate-700">{contract.customer?.address || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Tel. No.:</span><span className="text-slate-700">{contract.customer?.phone || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">E-mail:</span><span className="text-slate-700">{contract.customer?.email || '—'}</span></div>
+              </div>
             </div>
-            <div className="bg-slate-50 rounded-lg p-4"><p className="text-xs font-semibold text-slate-400 uppercase mb-2">Contract Details</p><div className="space-y-1 text-sm"><div className="flex justify-between"><span className="text-slate-500">Date:</span><span className="text-slate-900">{formatDate(contract.created_at)}</span></div><div className="flex justify-between"><span className="text-slate-500">Delivery Date:</span><span className="text-slate-900">{contract.delivery_date || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Trade Terms:</span><span className="text-slate-900">{contract.delivery_terms || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Payment Terms:</span><span className="text-slate-900">{contract.payment_terms || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Port of Loading:</span><span className="text-slate-900">{contract.port_of_loading || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Port of Discharge:</span><span className="text-slate-900">{contract.port_of_discharge || '—'}</span></div></div></div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">CONTRACT DETAILS</p>
+              <div className="space-y-1">
+                <div className="flex justify-between"><span className="text-slate-400">Date:</span><span className="text-slate-700">{formatDate(contract.created_at)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Trade Terms:</span><span className="text-slate-700">{contract.delivery_terms || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Payment:</span><span className="text-slate-700">{contract.payment_terms || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{contract.currency || 'USD'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Destination:</span><span className="text-slate-700">{contract.destination_country || '—'}</span></div>
+              </div>
+            </div>
           </div>
           <table className="w-full text-sm mb-6"><thead><tr className="bg-slate-900 text-white"><th className="px-3 py-2 text-center font-medium rounded-l">#</th><th className="px-3 py-2 text-center font-medium">Description</th><th className="px-3 py-2 text-center font-medium">Qty</th><th className="px-3 py-2 text-center font-medium">Unit Price</th><th className="px-3 py-2 text-center font-medium rounded-r">Amount</th></tr></thead><tbody>{contract.items.length === 0 ? <tr><td colSpan={5} className="text-center py-6 text-slate-400">No items</td></tr> : contract.items.map((item, idx) => <tr key={item.id} className="border-b border-slate-100"><td className="px-3 py-2.5 text-slate-500">{idx + 1}</td><td className="px-3 py-2.5 text-slate-900">{item.description}</td><td className="px-3 py-2.5 text-right text-slate-600">{item.quantity}</td><td className="px-3 py-2.5 text-right text-slate-600">{formatCurrency(item.unit_price, contract.currency)}</td><td className="px-3 py-2.5 text-right font-medium text-slate-900">{formatCurrency(item.total, contract.currency)}</td></tr>)}</tbody></table>
           <div className="flex justify-end mb-6"><div className="w-64 space-y-2"><div className="flex justify-between text-lg font-bold border-t border-slate-200 pt-2"><span className="text-slate-900">Total</span><span className="text-emerald-600">{formatCurrency(total, contract.currency)}</span></div></div></div>

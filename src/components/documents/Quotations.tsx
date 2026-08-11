@@ -259,12 +259,26 @@ export function Quotations() {
 
             <div className="p-8 print:p-10" id="pi-document">
               <DocHeader title="QUOTATION" docNumber={viewing.quote_number} />
-              <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
-                <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{viewing.customer?.contact_name || '—'}</span></div>
-                <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{viewing.customer?.company_name || '—'}</span></div>
-                <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{viewing.customer?.address || '—'}</span></div>
-                <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{viewing.customer?.phone || '—'}</span></div>
-                <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{viewing.customer?.email || '—'}</span></div>
+              <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">QUOTED TO</p>
+                  <div className="space-y-1">
+                    <div className="flex"><span className="w-24 shrink-0 text-slate-400">Cont.Pers:</span><span className="text-slate-700">{viewing.customer?.contact_name || '—'}</span></div>
+                    <div className="flex"><span className="w-24 shrink-0 text-slate-400">Company:</span><span className="text-slate-700">{viewing.customer?.company_name || '—'}</span></div>
+                    <div className="flex"><span className="w-24 shrink-0 text-slate-400">Address:</span><span className="text-slate-700">{viewing.customer?.address || '—'}</span></div>
+                    <div className="flex"><span className="w-24 shrink-0 text-slate-400">Tel. No.:</span><span className="text-slate-700">{viewing.customer?.phone || '—'}</span></div>
+                    <div className="flex"><span className="w-24 shrink-0 text-slate-400">E-mail:</span><span className="text-slate-700">{viewing.customer?.email || '—'}</span></div>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">QUOTATION DETAILS</p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between"><span className="text-slate-400">Date:</span><span className="text-slate-700">{formatDate(viewing.created_at)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Valid Until:</span><span className="text-slate-700">{viewing.valid_until ? formatDate(viewing.valid_until) : '—'}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{viewing.currency || 'USD'}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Trade Terms:</span><span className="text-slate-700">{viewing.delivery_terms || '—'}</span></div>
+                  </div>
+                </div>
               </div>
               <table className="w-full text-sm mb-6">
                 <thead>

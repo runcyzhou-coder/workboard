@@ -343,24 +343,25 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
         <div className="p-8 print:p-10" id="pi-document">
           <DocHeader title="PROFORMA INVOICE" docNumber={pi.pi_number} />
 
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
-              <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{pi.customer?.contact_name || '—'}</span></div>
-              <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{pi.customer?.company_name || '—'}</span></div>
-              <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{pi.customer?.address || '—'}</span></div>
-              <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{pi.customer?.phone || '—'}</span></div>
-              <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{pi.customer?.email || '—'}</span></div>
+          <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">BUYER</p>
+              <div className="space-y-1">
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Cont.Pers:</span><span className="text-slate-700">{pi.customer?.contact_name || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Company:</span><span className="text-slate-700">{pi.customer?.company_name || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Address:</span><span className="text-slate-700">{pi.customer?.address || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">Tel. No.:</span><span className="text-slate-700">{pi.customer?.phone || '—'}</span></div>
+                <div className="flex"><span className="w-24 shrink-0 text-slate-400">E-mail:</span><span className="text-slate-700">{pi.customer?.email || '—'}</span></div>
+              </div>
             </div>
-            <div className="bg-slate-50 rounded-lg p-4">
-              <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Invoice Details</p>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-slate-500">Date:</span><span className="text-slate-900">{formatDate(pi.created_at)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Valid Until:</span><span className="text-slate-900">{formatDate(pi.valid_until)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Trade Terms:</span><span className="text-slate-900">{pi.delivery_terms || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Payment Terms:</span><span className="text-slate-900">{pi.payment_terms || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Shipping Method:</span><span className="text-slate-900">{pi.shipping_method || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Origin:</span><span className="text-slate-900">{pi.origin_country || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Destination:</span><span className="text-slate-900">{pi.destination_country || '—'}</span></div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">PROFORMA INVOICE DETAILS</p>
+              <div className="space-y-1">
+                <div className="flex justify-between"><span className="text-slate-400">Date:</span><span className="text-slate-700">{formatDate(pi.created_at)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Valid Until:</span><span className="text-slate-700">{pi.valid_until ? formatDate(pi.valid_until) : '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{pi.currency || 'USD'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Trade Terms:</span><span className="text-slate-700">{pi.delivery_terms || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Payment:</span><span className="text-slate-700">{pi.payment_terms || '—'}</span></div>
               </div>
             </div>
           </div>
