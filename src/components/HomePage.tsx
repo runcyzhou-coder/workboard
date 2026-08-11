@@ -7,6 +7,7 @@ import {
   ListTodo, RefreshCw, AlertTriangle, X,
 } from 'lucide-react';
 import { formatDate, classNames } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 import type { Page } from '@/components/Sidebar';
 
 interface HomeProps {
@@ -130,25 +131,44 @@ interface TodoItem {
   done: boolean;
   dueTime?: string;
   category?: '客户' | '报价' | '单据' | '市场' | '其他';
+  date?: string;
 }
 
-const STORAGE_KEY = 'wb_home_todos_v1';
+const STORAGE_KEY = 'wb_home_todos_v2';
+
+function getTodayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getDateStr(offsetDays: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function loadTodos(): TodoItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
+  const today = getTodayStr();
+  const yesterday = getDateStr(-1);
+  const tomorrow = getDateStr(1);
   return [
-    { id: 't1', text: '给沙特ACWA发送16MW风机技术参数及报价', priority: 'high', done: false, dueTime: '10:30', category: '报价' },
-    { id: 't2', text: '跟进巴西客户询盘的塔筒反倾销税率计算', priority: 'high', done: false, dueTime: '14:00', category: '客户' },
-    { id: 't3', text: '更新越南Vinh Phuc项目的形式发票（PI）', priority: 'medium', done: false, dueTime: '16:00', category: '单据' },
-    { id: 't4', text: '查看德国DNV最新认证要求并核对产品文档', priority: 'medium', done: true, dueTime: '', category: '市场' },
-    { id: 't5', text: '整理本周风机出口数据并发送周报', priority: 'low', done: false, dueTime: '周五前', category: '其他' },
+    { id: 't1', text: '给沙特ACWA发送16MW风机技术参数及报价', priority: 'high', done: false, dueTime: '10:30', category: '报价', date: today },
+    { id: 't2', text: '跟进巴西客户询盘的塔筒反倾销税率计算', priority: 'high', done: false, dueTime: '14:00', category: '客户', date: today },
+    { id: 't3', text: '更新越南Vinh Phuc项目的形式发票（PI）', priority: 'medium', done: false, dueTime: '16:00', category: '单据', date: today },
+    { id: 't4', text: '查看德国DNV最新认证要求并核对产品文档', priority: 'medium', done: true, dueTime: '', category: '市场', date: today },
+    { id: 't5', text: '整理本周风机出口数据并发送周报', priority: 'low', done: false, dueTime: '周五前', category: '其他', date: today },
+    { id: 't6', text: '确认沙特项目SI截单资料是否齐全', priority: 'high', done: false, dueTime: '09:00', category: '单据', date: tomorrow },
+    { id: 't7', text: '安排澳洲客户验货时间视频会议', priority: 'medium', done: false, dueTime: '15:00', category: '客户', date: tomorrow },
+    { id: 't8', text: '归档昨天与越南客户的沟通记录', priority: 'low', done: true, dueTime: '', category: '其他', date: yesterday },
+    { id: 't9', text: '准备德国CE认证申请材料', priority: 'medium', done: false, dueTime: '11:00', category: '市场', date: yesterday },
   ];
 }
 
-// ============ 收汇与物流风控预警数据 ============
+// ============ 收汇与物流风控预警（AI 动态生成） ============
 interface RiskAlert {
   id: string;
   docNumber: string;
@@ -157,30 +177,288 @@ interface RiskAlert {
   status: string;
   action: string;
   level: 'critical' | 'warning' | 'info';
+  reason: string;
 }
 
-const riskAlerts: RiskAlert[] = [
-  { id: 'r1', docNumber: 'PI-20260805-001', customer: 'Saudi ACWA Power', amount: '$890K', status: '已报关未放单', action: '严禁放单', level: 'critical' },
-  { id: 'r2', docNumber: 'PI-20260728-004', customer: 'Vietnam Vinh Phuc', amount: '$320K', status: '已到港未提货', action: '催促付款', level: 'warning' },
-  { id: 'r3', docNumber: 'SHP-20260810-002', customer: 'Australia QLD', amount: '—', status: '物流延误 7 天', action: '关注到港', level: 'info' },
-];
+// 初始化本地演示数据（首次使用时自动填充）
+async function ensureSeedData() {
+  const seedKey = 'wb_seed_alerts_v1';
+  try {
+    if (localStorage.getItem(seedKey)) return;
+    const piData = await supabase.from('proforma_invoices').select('id').limit(1);
+    if (piData.data && piData.data.length > 0) {
+      localStorage.setItem(seedKey, '1');
+      return;
+    }
+    // 插入演示数据
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+
+    // 1. 客户数据
+    const customers = [
+      { id: 'c-saudi', company_name: 'Saudi ACWA Power', country: 'Saudi Arabia' },
+      { id: 'c-vietnam', company_name: 'Vietnam Vinh Phuc', country: 'Vietnam' },
+      { id: 'c-australia', company_name: 'Australia QLD Energy', country: 'Australia' },
+      { id: 'c-brazil', company_name: 'Brazil Wind Energy', country: 'Brazil' },
+    ];
+    for (const c of customers) {
+      await supabase.from('customers').insert(c);
+    }
+
+    // 2. PI 数据
+    const pis = [
+      {
+        id: 'pi-001', pi_number: 'PI-20260805-001', customer_id: 'c-saudi',
+        status: 'confirmed', currency: 'USD', total_amount: 890000,
+        payment_terms: '30% deposit T/T, 70% balance against B/L copy',
+        created_at: thirtyDaysAgo.toISOString(), updated_at: now.toISOString(),
+      },
+      {
+        id: 'pi-002', pi_number: 'PI-20260728-004', customer_id: 'c-vietnam',
+        status: 'sent', currency: 'USD', total_amount: 320000,
+        payment_terms: '30% deposit, 70% balance at sight',
+        created_at: sixtyDaysAgo.toISOString(), updated_at: thirtyDaysAgo.toISOString(),
+      },
+      {
+        id: 'pi-003', pi_number: 'PI-20260710-002', customer_id: 'c-australia',
+        status: 'confirmed', currency: 'USD', total_amount: 1250000,
+        payment_terms: 'T/T 30% deposit, 70% D/P',
+        created_at: ninetyDaysAgo.toISOString(), updated_at: sixtyDaysAgo.toISOString(),
+      },
+      {
+        id: 'pi-004', pi_number: 'PI-20260815-003', customer_id: 'c-brazil',
+        status: 'sent', currency: 'USD', total_amount: 450000,
+        payment_terms: 'L/C at sight',
+        created_at: thirtyDaysAgo.toISOString(), updated_at: now.toISOString(),
+      },
+    ];
+    for (const p of pis) {
+      await supabase.from('proforma_invoices').insert(p);
+    }
+
+    // 3. 物流数据
+    const shipments = [
+      {
+        id: 'sh-001', shipment_number: 'SHP-20260901-001', inquiry_id: null,
+        customer_id: 'c-saudi', status: 'in_transit',
+        forwarder_name: 'DHL Logistics', container_number: 'CBHU-1234567',
+        bl_number: 'BL-SHP-001', vessel_voyage: 'COSCO PRIDE / 042E',
+        etd: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        atd: new Date(now.getTime() - 9 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        eta: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        ata: null,
+        port_of_loading: 'Shanghai', port_of_discharge: 'Jeddah',
+        shipping_method: 'sea',
+        created_at: thirtyDaysAgo.toISOString(), updated_at: now.toISOString(),
+      },
+      {
+        id: 'sh-002', shipment_number: 'SHP-20260810-002', inquiry_id: null,
+        customer_id: 'c-vietnam', status: 'arrived',
+        forwarder_name: 'Maersk', container_number: 'MAEU-7654321',
+        bl_number: 'BL-SHP-002', vessel_voyage: 'MAERSK ESSEN / 038S',
+        etd: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        atd: new Date(now.getTime() - 19 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        eta: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        ata: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        port_of_loading: 'Ningbo', port_of_discharge: 'Ho Chi Minh',
+        shipping_method: 'sea',
+        created_at: sixtyDaysAgo.toISOString(), updated_at: now.toISOString(),
+      },
+      {
+        id: 'sh-003', shipment_number: 'SHP-20260720-003', inquiry_id: null,
+        customer_id: 'c-australia', status: 'delivered',
+        forwarder_name: 'Expeditors', container_number: 'EXDU-9988776',
+        bl_number: 'BL-SHP-003', vessel_voyage: 'TS TACOMA / 045W',
+        etd: new Date(now.getTime() - 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        atd: new Date(now.getTime() - 34 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        eta: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        ata: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        port_of_loading: 'Shanghai', port_of_discharge: 'Brisbane',
+        shipping_method: 'sea',
+        created_at: ninetyDaysAgo.toISOString(), updated_at: now.toISOString(),
+      },
+    ];
+    for (const s of shipments) {
+      await supabase.from('shipments').insert(s);
+    }
+
+    localStorage.setItem(seedKey, '1');
+  } catch {}
+}
+
+// AI 风控规则引擎：根据订单+物流数据自动判断预警
+function generateRiskAlerts(
+  invoices: any[],
+  shipments: any[],
+  customers: any[],
+): RiskAlert[] {
+  const alerts: RiskAlert[] = [];
+  const today = new Date();
+
+  // 辅助：计算两个日期之间的天数差
+  function daysBetween(a: string, b: string): number {
+    const dA = new Date(a);
+    const dB = new Date(b);
+    return Math.floor((dB.getTime() - dA.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  // 辅助：格式化金额
+  function formatAmount(amount: number): string {
+    if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
+    if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`;
+    return `$${amount}`;
+  }
+
+  // 辅助：获取客户名
+  function getCustomerName(customerId: string | null): string {
+    if (!customerId) return '未知客户';
+    const c = customers.find(c => c.id === customerId);
+    return c ? c.company_name : '未知客户';
+  }
+
+  for (const pi of invoices) {
+    const piId = pi.id;
+    const relatedShipments = shipments.filter(s => s.customer_id === pi.customer_id);
+    const customerName = getCustomerName(pi.customer_id);
+    const amount = formatAmount(pi.total_amount || 0);
+    const paymentTerms = (pi.payment_terms || '').toLowerCase();
+
+    // 规则1：未收齐尾款 + 已报关/已开船 → 严禁放单（严重）
+    // 判断条件：付款条款包含 deposit/30% 等预付款，PI 已确认/发送，且关联物流已进入运输环节
+    const hasDeposit = /deposit|预付款|30%\s*deposit|t\/t\s*30%/.test(paymentTerms);
+    const hasBalance = /balance|尾款|70%|remaining/.test(paymentTerms);
+    const isPiActive = pi.status === 'confirmed' || pi.status === 'sent';
+
+    for (const shipment of relatedShipments) {
+      const shipmentInTransit = ['customs_cleared', 'in_transit', 'arrived'].includes(shipment.status);
+      if (hasDeposit && hasBalance && isPiActive && shipmentInTransit) {
+        // 检查是否已收到尾款（简化判断：如果物流已到港但付款条款要求尾款到单付款，则视为风险）
+        const balanceNotPaidYet = /balance.*(?:against|after|upon|copy|bl|提货)/.test(paymentTerms) ||
+                                 /(?:against|after|upon).*(?:bl|copy|提单|提货)/.test(paymentTerms);
+        if (balanceNotPaidYet) {
+          alerts.push({
+            id: `alert-1-${piId}`,
+            docNumber: pi.pi_number,
+            customer: customerName,
+            amount,
+            status: `物流状态：${shipment.status === 'customs_cleared' ? '已报关' : shipment.status === 'in_transit' ? '运输中' : '已到港'}`,
+            action: '严禁放单',
+            level: 'critical',
+            reason: `付款条件「${pi.payment_terms}」中的尾款尚未收到，但货物已${shipment.status === 'arrived' ? '到港' : shipment.status === 'in_transit' ? '开船运输' : '报关'}。AI 判定：存在客户不提货/不付尾款风险。`,
+          });
+        }
+      }
+    }
+
+    // 规则2：PI 超期未收汇（发送/确认超过 45 天仍在运输）
+    if (isPiActive && pi.created_at) {
+      const daysSinceCreation = daysBetween(pi.created_at, today.toISOString());
+      if (daysSinceCreation > 45) {
+        const hasRecentShipment = relatedShipments.some(s => {
+          if (!s.eta) return false;
+          return daysBetween(pi.created_at, s.eta) < 60;
+        });
+        if (!hasRecentShipment) {
+          // 检查是否已有物流
+          const anyShipment = relatedShipments.length > 0;
+          if (!anyShipment && pi.status === 'sent') {
+            alerts.push({
+              id: `alert-2-${piId}`,
+              docNumber: pi.pi_number,
+              customer: customerName,
+              amount,
+              status: `PI 已发送 ${daysSinceCreation} 天`,
+              action: '催促付款',
+              level: 'warning',
+              reason: `PI 自 ${pi.created_at?.split('T')[0] || '未知'} 发送至今已 ${daysSinceCreation} 天，无物流记录。AI 判定：客户可能暂缓订单或需要跟进。`,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // 规则3：已到港未提货（物流已到港但未签收）
+  for (const shipment of shipments) {
+    if (shipment.ata && shipment.status === 'arrived') {
+      const daysSinceArrival = daysBetween(shipment.ata, today.toISOString());
+      if (daysSinceArrival > 3) {
+        const customerName = getCustomerName(shipment.customer_id);
+        alerts.push({
+          id: `alert-3-${shipment.id}`,
+          docNumber: shipment.shipment_number,
+          customer: customerName,
+          amount: '—',
+          status: `到港 ${daysSinceArrival} 天未提货`,
+          action: '催促提货',
+          level: daysSinceArrival > 7 ? 'critical' : 'warning',
+          reason: `货物于 ${shipment.ata} 抵达 ${shipment.port_of_discharge || '目的港'}，已 ${daysSinceArrival} 天未签收。AI 判定：可能滞港费产生风险。`,
+        });
+      }
+    }
+
+    // 规则4：物流延误（实际到港 - 预计开船 > 7天）
+    if (shipment.etd && shipment.ata) {
+      const transitDays = daysBetween(shipment.etd, shipment.ata);
+      const expectedTransit = 7; // 假设正常海运约7天
+      if (transitDays > expectedTransit + 7) {
+        const customerName = getCustomerName(shipment.customer_id);
+        alerts.push({
+          id: `alert-4-${shipment.id}`,
+          docNumber: shipment.shipment_number,
+          customer: customerName,
+          amount: '—',
+          status: `运输耗时 ${transitDays} 天（预计 <${expectedTransit + 7} 天）`,
+          action: '关注到港',
+          level: 'info',
+          reason: `ETD ${shipment.etd} → ATA ${shipment.ata}，运输耗时 ${transitDays} 天，超出常规 ${expectedTransit + 7} 天。AI 判定：可能存在天气/港口拥堵等异常。`,
+        });
+      }
+    }
+  }
+
+  // 按优先级排序
+  const levelOrder = { critical: 0, warning: 1, info: 2 };
+  alerts.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
+
+  return alerts;
+}
 
 // ============ 月历组件 ============
-function MiniCalendar({ doneCount, totalTodos }: { doneCount: number; totalTodos: number }) {
+function MiniCalendar({
+  doneCount,
+  totalTodos,
+  selectedDate,
+  onDateSelect,
+  todoDates,
+}: {
+  doneCount: number;
+  totalTodos: number;
+  selectedDate: string;
+  onDateSelect: (dateStr: string) => void;
+  todoDates: Set<string>;
+}) {
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const daysInMonth = lastDay.getDate();
-  // 周一开始（中国习惯）
-  const startDayOfWeek = (firstDay.getDay() + 6) % 7; // 0=Monday
+  const startDayOfWeek = (firstDay.getDay() + 6) % 7;
 
   const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
   const cells: (number | null)[] = [];
-  // 前置空格
   for (let i = 0; i < startDayOfWeek; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const todayStr = getTodayStr();
+
+  function handleClickDay(day: number) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    onDateSelect(dateStr);
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
@@ -194,25 +472,49 @@ function MiniCalendar({ doneCount, totalTodos }: { doneCount: number; totalTodos
         {weekDays.map(d => (
           <div key={d} className="text-center text-xs font-medium text-slate-400 py-1">{d}</div>
         ))}
-        {cells.map((d, i) => (
-          <div key={i} className={classNames(
-            'aspect-square flex items-center justify-center rounded-lg text-sm',
-            d === today.getDate()
-              ? 'bg-indigo-600 text-white font-bold'
-              : d
-                ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
-                : ''
-          )}>
-            {d || ''}
-          </div>
-        ))}
+        {cells.map((d, i) => {
+          if (d === null) return <div key={i} />;
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const isToday = dateStr === todayStr;
+          const isSelected = dateStr === selectedDate;
+          const hasTodos = todoDates.has(dateStr);
+          return (
+            <button
+              key={i}
+              onClick={() => handleClickDay(d)}
+              className={classNames(
+                'aspect-square flex flex-col items-center justify-center rounded-lg text-sm relative transition-all',
+                isSelected
+                  ? 'bg-indigo-600 text-white font-bold shadow-md'
+                  : isToday
+                    ? 'bg-indigo-100 text-indigo-700 font-bold hover:bg-indigo-200'
+                    : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+              )}
+            >
+              <span>{d}</span>
+              {hasTodos && !isSelected && (
+                <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-indigo-500" />
+              )}
+            </button>
+          );
+        })}
       </div>
-      {/* 今日任务统计 */}
+      {/* 选中日期任务统计 */}
       <div className="mt-4 pt-4 border-t border-slate-100">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-500">今日任务</span>
+          <span className="text-slate-500">
+            {selectedDate === todayStr ? '今日任务' : `${selectedDate} 任务`}
+          </span>
           <span className="font-semibold text-indigo-600">{doneCount}/{totalTodos}</span>
         </div>
+        {selectedDate !== todayStr && (
+          <button
+            onClick={() => onDateSelect(todayStr)}
+            className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+          >
+            ← 返回今天
+          </button>
+        )}
       </div>
     </div>
   );
@@ -283,10 +585,47 @@ export function HomePage({ onNavigate }: HomeProps) {
   const [todoInput, setTodoInput] = useState('');
   const [filterPriority, setFilterPriority] = useState<'all' | 'pending' | 'done'>('all');
   const [aiLetterNews, setAiLetterNews] = useState<IndustryNews | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayStr());
+
+  // 风控预警状态
+  const [riskAlerts, setRiskAlerts] = useState<RiskAlert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [expandedAlert, setExpandedAlert] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
   }, [todos]);
+
+  // 初始化演示数据 + 获取风控预警
+  useEffect(() => {
+    let cancelled = false;
+    async function loadAlerts() {
+      setAlertsLoading(true);
+      try {
+        await ensureSeedData();
+        const [piRes, shipmentRes, customerRes] = await Promise.all([
+          supabase.from('proforma_invoices').select('*'),
+          supabase.from('shipments').select('*'),
+          supabase.from('customers').select('*'),
+        ]);
+        if (cancelled) return;
+        const invoices = piRes.data || [];
+        const shipments = shipmentRes.data || [];
+        const customers = customerRes.data || [];
+        const alerts = generateRiskAlerts(invoices, shipments, customers);
+        setRiskAlerts(alerts);
+      } catch {}
+      if (!cancelled) setAlertsLoading(false);
+    }
+    loadAlerts();
+    return () => { cancelled = true; };
+  }, []);
+
+  // 收集所有有任务的日期
+  const todoDates = new Set<string>();
+  todos.forEach(t => {
+    if (t.date) todoDates.add(t.date);
+  });
 
   function addTodo() {
     const text = todoInput.trim();
@@ -297,6 +636,7 @@ export function HomePage({ onNavigate }: HomeProps) {
       priority: 'medium',
       done: false,
       category: '其他',
+      date: selectedDate,
     };
     setTodos([newItem, ...todos]);
     setTodoInput('');
@@ -315,14 +655,17 @@ export function HomePage({ onNavigate }: HomeProps) {
     setTodos(todos.map(t => t.id === id ? { ...t, priority: order[(order.indexOf(t.priority) + 1) % order.length] } : t));
   }
 
-  const filteredTodos = todos.filter(t => {
+  // 按选中日期筛选任务
+  const dateFilteredTodos = todos.filter(t => (t.date || getTodayStr()) === selectedDate);
+
+  const filteredTodos = dateFilteredTodos.filter(t => {
     if (filterPriority === 'pending') return !t.done;
     if (filterPriority === 'done') return t.done;
     return true;
   });
 
-  const doneCount = todos.filter(t => t.done).length;
-  const pendingCount = todos.length - doneCount;
+  const doneCount = dateFilteredTodos.filter(t => t.done).length;
+  const pendingCount = dateFilteredTodos.length - doneCount;
   const today = new Date();
   const dateStr = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
@@ -389,7 +732,13 @@ export function HomePage({ onNavigate }: HomeProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左：月历 */}
         <div className="lg:col-span-1">
-          <MiniCalendar doneCount={doneCount} totalTodos={todos.length} />
+          <MiniCalendar
+            doneCount={doneCount}
+            totalTodos={dateFilteredTodos.length}
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            todoDates={todoDates}
+          />
         </div>
 
         {/* 右：每日任务 */}
@@ -401,7 +750,11 @@ export function HomePage({ onNavigate }: HomeProps) {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">每日任务</h2>
-                <p className="text-xs text-slate-500">今日待办一目了然，点击圆圈勾选完成</p>
+                <p className="text-xs text-slate-500">
+                  {selectedDate === getTodayStr()
+                    ? '今日待办一目了然，点击圆圈勾选完成'
+                    : `${selectedDate} 的任务记录`}
+                </p>
               </div>
             </div>
             <button
@@ -419,7 +772,7 @@ export function HomePage({ onNavigate }: HomeProps) {
               value={todoInput}
               onChange={(e) => setTodoInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') addTodo(); }}
-              placeholder="添加今日任务，如：给沙特客户发送报价..."
+              placeholder={`添加 ${selectedDate} 的任务，如：给沙特客户发送报价...`}
               className="flex-1 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
             <button
@@ -433,7 +786,7 @@ export function HomePage({ onNavigate }: HomeProps) {
           {/* 筛选 */}
           <div className="flex gap-1 mb-3 text-xs">
             {[
-              { key: 'all', label: '全部', count: todos.length },
+              { key: 'all', label: '全部', count: dateFilteredTodos.length },
               { key: 'pending', label: '待完成', count: pendingCount },
               { key: 'done', label: '已完成', count: doneCount },
             ].map((f) => (
@@ -461,7 +814,10 @@ export function HomePage({ onNavigate }: HomeProps) {
             {filteredTodos.length === 0 ? (
               <div className="text-center py-10 text-slate-400">
                 <CheckCircle2 className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">暂无任务</p>
+                <p className="text-sm">
+                  {selectedDate === getTodayStr() ? '今日暂无任务' : `${selectedDate} 暂无任务`}
+                </p>
+                <p className="text-xs mt-1">点击日历其他日期查看历史任务</p>
               </div>
             ) : (
               filteredTodos.map((todo) => {
@@ -538,7 +894,7 @@ export function HomePage({ onNavigate }: HomeProps) {
 
           {pendingCount > 0 && (
             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-              <span>💡 提示：点击优先级标签可循环切换</span>
+              <span>💡 提示：点击日历日期可跳转查看历史任务</span>
               <button
                 onClick={() => onNavigate('dashboard')}
                 className="text-indigo-600 font-medium hover:text-indigo-700 flex items-center gap-1"
@@ -570,8 +926,9 @@ export function HomePage({ onNavigate }: HomeProps) {
             </div>
           </div>
 
-          <div className="space-y-3">
-            {fanIndustryNews.map((n) => {
+          {/* 前两条重点展示 */}
+          <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+            {fanIndustryNews.map((n, idx) => {
               const hotColors: Record<string, string> = {
                 hot: 'bg-red-50 text-red-600 border-red-200',
                 warm: 'bg-amber-50 text-amber-600 border-amber-200',
@@ -584,10 +941,14 @@ export function HomePage({ onNavigate }: HomeProps) {
                 '项目': 'bg-teal-100 text-teal-700',
               };
               const hotLabel: Record<string, string> = { hot: '🔥 热门', warm: '✨ 关注', normal: '📰 动态' };
+              const isPrimary = idx < 2;
               return (
                 <div
                   key={n.id}
-                  className="group p-3 rounded-xl border border-slate-100 hover:border-orange-200 hover:shadow-sm transition-all bg-gradient-to-br from-white to-slate-50"
+                  className={classNames(
+                    'group p-3 rounded-xl border border-slate-100 hover:border-orange-200 hover:shadow-sm transition-all bg-gradient-to-br from-white to-slate-50',
+                    isPrimary ? 'ring-1 ring-orange-100' : ''
+                  )}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -600,10 +961,16 @@ export function HomePage({ onNavigate }: HomeProps) {
                     </div>
                     <span className="text-[10px] text-slate-400 shrink-0">{n.date.slice(5)}</span>
                   </div>
-                  <h3 className="text-sm font-semibold text-slate-900 leading-snug mb-1.5 group-hover:text-orange-700 transition-colors">
+                  <h3 className={classNames(
+                    'font-semibold text-slate-900 leading-snug mb-1.5 group-hover:text-orange-700 transition-colors',
+                    isPrimary ? 'text-sm' : 'text-xs'
+                  )}>
                     {n.title}
                   </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 mb-2.5">
+                  <p className={classNames(
+                    'text-slate-600 leading-relaxed mb-2.5',
+                    isPrimary ? 'text-xs' : 'text-[11px] line-clamp-2'
+                  )}>
                     {n.summary}
                   </p>
                   <div className="flex items-center justify-between gap-2 text-[10px]">
@@ -627,6 +994,9 @@ export function HomePage({ onNavigate }: HomeProps) {
                 </div>
               );
             })}
+          </div>
+          <div className="mt-2 text-center text-[10px] text-slate-400">
+            ↕ 滚动查看更多快讯
           </div>
         </div>
 
@@ -751,7 +1121,7 @@ export function HomePage({ onNavigate }: HomeProps) {
         </div>
       </div>
 
-      {/* 5. 收汇与物流风控预警卡片 */}
+      {/* 5. 收汇与物流风控预警卡片（AI 动态生成） */}
       <div className="bg-red-50 rounded-2xl border-2 border-red-300 p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -759,8 +1129,13 @@ export function HomePage({ onNavigate }: HomeProps) {
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-red-700">收汇与物流风控预警</h2>
-              <p className="text-xs text-red-500">关注未收尾款与物流异常订单</p>
+              <h2 className="text-lg font-bold text-red-700 flex items-center gap-2">
+                收汇与物流风控预警
+                <span className="text-xs font-normal bg-red-200 text-red-800 px-2 py-0.5 rounded-full">
+                  {alertsLoading ? 'AI 分析中...' : `AI 分析 · ${riskAlerts.length} 条预警`}
+                </span>
+              </h2>
+              <p className="text-xs text-red-500">AI 自动扫描订单+物流数据，智能识别风控异常</p>
             </div>
           </div>
           <button
@@ -770,53 +1145,93 @@ export function HomePage({ onNavigate }: HomeProps) {
             查看详情 <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-        <div className="space-y-2">
-          {riskAlerts.map((r) => {
-            const levelStyles: Record<string, string> = {
-              critical: 'bg-red-100 border-red-300 text-red-700',
-              warning: 'bg-orange-100 border-orange-300 text-orange-700',
-              info: 'bg-amber-50 border-amber-300 text-amber-700',
-            };
-            const levelLabel: Record<string, string> = {
-              critical: '严重',
-              warning: '警告',
-              info: '关注',
-            };
-            return (
-              <div
-                key={r.id}
-                className={classNames(
-                  'flex items-center gap-3 p-3 rounded-xl border',
-                  levelStyles[r.level]
-                )}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold">{r.docNumber}</span>
-                    <span className="text-xs">|</span>
-                    <span className="text-xs font-medium">{r.customer}</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px]">
-                    <span>未收齐尾款 <span className="font-bold">{r.amount}</span></span>
-                    <span>|</span>
-                    <span>状态：{r.status}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={classNames(
-                    'px-2 py-1 rounded-md text-xs font-bold border',
+
+        {alertsLoading ? (
+          <div className="flex items-center justify-center py-8 text-red-400 text-sm">
+            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            AI 正在扫描订单与物流数据...
+          </div>
+        ) : riskAlerts.length === 0 ? (
+          <div className="text-center py-6 bg-white/60 rounded-xl border border-red-100">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
+            <p className="text-sm text-slate-600 font-medium">暂无风控预警</p>
+            <p className="text-xs text-slate-400 mt-1">AI 判定当前所有订单收汇与物流状态正常</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {riskAlerts.map((r) => {
+              const isExpanded = expandedAlert === r.id;
+              const levelStyles: Record<string, string> = {
+                critical: 'bg-red-100 border-red-300 text-red-700',
+                warning: 'bg-orange-100 border-orange-300 text-orange-700',
+                info: 'bg-amber-50 border-amber-300 text-amber-700',
+              };
+              const levelBar: Record<string, string> = {
+                critical: 'bg-red-500',
+                warning: 'bg-orange-500',
+                info: 'bg-amber-400',
+              };
+              const levelLabel: Record<string, string> = {
+                critical: '严重',
+                warning: '警告',
+                info: '关注',
+              };
+              return (
+                <div
+                  key={r.id}
+                  className={classNames(
+                    'rounded-xl border overflow-hidden transition-all',
                     levelStyles[r.level]
-                  )}>
-                    {levelLabel[r.level]}
-                  </span>
-                  <span className="text-xs font-bold px-2 py-1 rounded bg-white/60">
-                    {r.action}
-                  </span>
+                  )}
+                >
+                  <div
+                    className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/40"
+                    onClick={() => setExpandedAlert(isExpanded ? null : r.id)}
+                  >
+                    <div className={classNames('w-1 h-10 rounded-full shrink-0', levelBar[r.level])} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold">{r.docNumber}</span>
+                        <span className="text-xs">|</span>
+                        <span className="text-xs font-medium">{r.customer}</span>
+                        <span className="text-xs font-bold">{r.amount !== '—' ? r.amount : ''}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px]">
+                        <span>{r.status}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={classNames(
+                        'px-2 py-1 rounded-md text-xs font-bold border',
+                        levelStyles[r.level]
+                      )}>
+                        {levelLabel[r.level]}
+                      </span>
+                      <span className="text-xs font-bold px-2 py-1 rounded bg-white/60">
+                        {r.action}
+                      </span>
+                      <ChevronRight className={classNames(
+                        'w-4 h-4 transition-transform',
+                        isExpanded ? 'rotate-90' : ''
+                      )} />
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className="px-3 pb-3 pt-0">
+                      <div className="bg-white/70 rounded-lg p-3 border border-white/50">
+                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-1">
+                          <Sparkles className="w-3 h-3 text-indigo-500" />
+                          <span className="font-semibold text-indigo-600">AI 分析原因</span>
+                        </div>
+                        <p className="text-xs text-slate-700 leading-relaxed">{r.reason}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* AI 写信 Modal */}
