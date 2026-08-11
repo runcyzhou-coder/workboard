@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Menu, LogOut, Search } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, Search } from 'lucide-react';
 import { Sidebar, type Page } from '@/components/Sidebar';
-import { Login } from '@/components/Login';
 import { HomePage } from '@/components/HomePage';
 import { Dashboard } from '@/components/Dashboard';
 import { Customers } from '@/components/Customers';
@@ -12,94 +11,11 @@ import { DocumentCenter, type DocType } from '@/components/DocumentCenter';
 import { ProfitCalculator } from '@/components/ProfitCalculator';
 import { AfterSales } from '@/components/AfterSales';
 import { TradeTools } from '@/components/TradeTools';
-import { supabase } from '@/lib/supabase';
-
-const ALLOWED_DOMAIN = '@kiki-tech.com';
 
 function App() {
-  const [authed, setAuthed] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
   const [page, setPage] = useState<Page>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
   const [pendingDocType, setPendingDocType] = useState<DocType | null>(null);
-
-  useEffect(() => {
-    // 检查 Supabase 是否支持 auth（本地模式没有 auth）
-    const hasAuth = typeof (supabase as any).auth !== 'undefined';
-
-    if (!hasAuth) {
-      // 本地模式：从 localStorage 恢复登录
-      const saved = localStorage.getItem('wb_auth_user');
-      if (saved && saved.endsWith(ALLOWED_DOMAIN)) {
-        setAuthed(true);
-        setUserEmail(saved);
-      }
-      setCheckingSession(false);
-      return;
-    }
-
-    // Supabase 模式：检查现有 session
-    (supabase as any).auth.getSession().then(({ data }: any) => {
-      const email = data?.session?.user?.email;
-      if (email && email.endsWith(ALLOWED_DOMAIN)) {
-        setAuthed(true);
-        setUserEmail(email);
-      }
-      setCheckingSession(false);
-    });
-
-    // 监听 auth 状态变化
-    const { data: listener } = (supabase as any).auth.onAuthStateChange((_event: any, session: any) => {
-      const email = session?.user?.email;
-      if (email && email.endsWith(ALLOWED_DOMAIN)) {
-        setAuthed(true);
-        setUserEmail(email);
-      } else {
-        setAuthed(false);
-        setUserEmail('');
-      }
-    });
-
-    return () => {
-      listener?.subscription?.unsubscribe();
-    };
-  }, []);
-
-  function handleLogin(email: string) {
-    setAuthed(true);
-    setUserEmail(email);
-  }
-
-  async function handleLogout() {
-    const hasAuth = typeof (supabase as any).auth !== 'undefined';
-    if (hasAuth) {
-      await (supabase as any).auth.signOut();
-    }
-    localStorage.removeItem('wb_auth_user');
-    setAuthed(false);
-    setUserEmail('');
-    setPage('home');
-  }
-
-  // 加载中状态
-  if (checkingSession) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0C0C0E]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_24px_rgba(59,130,246,0.45)]">
-            <span className="text-white font-bold text-lg">K</span>
-          </div>
-          <div className="w-6 h-6 border-2 border-zinc-700 border-t-[#3B82F6] rounded-full animate-spin" />
-          <p className="text-zinc-500 text-sm">加载中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!authed) {
-    return <Login onLogin={handleLogin} />;
-  }
 
   return (
     <div className="flex min-h-screen bg-[#0C0C0E] text-zinc-100">
@@ -117,9 +33,6 @@ function App() {
             <Menu className="w-6 h-6" />
           </button>
           <span className="font-semibold text-zinc-100">KIKI TECH</span>
-          <button onClick={handleLogout} className="ml-auto text-zinc-500 hover:text-[#3B82F6]">
-            <LogOut className="w-5 h-5" />
-          </button>
         </header>
 
         {/* Desktop top bar — Raycast minimalist floating header with ⌘K search */}
@@ -153,11 +66,7 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs text-zinc-500 font-mono hidden xl:inline">{userEmail}</span>
-            <button onClick={handleLogout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-400 hover:text-[#3B82F6] hover:bg-[#3B82F6]/10 border border-transparent hover:border-[#3B82F6]/20 rounded-md transition-colors">
-              <LogOut className="w-3.5 h-3.5" />
-              退出
-            </button>
+            <span className="text-xs text-zinc-500 font-mono hidden xl:inline">guest@kiki-tech.com</span>
           </div>
         </header>
 
