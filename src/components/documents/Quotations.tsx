@@ -268,7 +268,7 @@ export function Quotations() {
               </div>
               <table className="w-full text-sm mb-6">
                 <thead>
-                  <tr className="bg-slate-800 text-white">
+                  <tr className="bg-slate-900 text-white">
                     <th className="px-3 py-2 text-left font-medium rounded-l">#</th>
                     <th className="px-3 py-2 text-left font-medium">Description</th>
                     <th className="px-3 py-2 text-right font-medium">Qty</th>

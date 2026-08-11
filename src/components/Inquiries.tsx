@@ -25,7 +25,7 @@ interface GenerateResult {
   message: string;
 }
 
-export function Inquiries() {
+export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string) => void } = {}) {
   const [inquiries, setInquiries] = useState<(Inquiry & { customer?: Customer })[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,21 +78,64 @@ export function Inquiries() {
 
   function startEdit(q: Inquiry & { customer?: Customer }) {
     setEditing(q);
-    setForm(q);
-    setItems((q.items && q.items.length > 0) ? q.items : [{ product_name: '', description: '', quantity: 1, unit: 'piece', unit_price: 0, total: 0 }]);
+    setForm({
+      inquiry_number: q.inquiry_number,
+      customer_id: q.customer_id,
+      subject: q.subject,
+      status: q.status,
+      source: q.source,
+      currency: q.currency,
+      delivery_country: q.delivery_country,
+      delivery_terms: q.delivery_terms,
+      payment_terms: q.payment_terms,
+      valid_until: q.valid_until,
+      notes: q.notes,
+    });
+    const loadedItems = (q.items && q.items.length > 0) ? q.items : [{ product_name: '', description: '', quantity: 1, unit: 'piece', unit_price: 0, total: 0 }];
+    // 确保每条明细的 total 按数量*单价重新计算，不依赖历史数据
+    setItems(loadedItems.map(i => ({
+      product_name: i.product_name || '',
+      description: i.description || '',
+      quantity: Number(i.quantity) || 0,
+      unit: i.unit || 'piece',
+      unit_price: Number(i.unit_price) || 0,
+      total: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
+    })));
     setShowForm(true);
   }
 
   async function save() {
     if (!form.inquiry_number?.trim() || !form.subject?.trim()) return;
-    const validItems = items.filter(i => i.product_name?.trim() || i.description?.trim());
+    // 过滤空行，并强制按 quantity*unit_price 重算 total，避免前端未同步导致的旧 total 被保存
+    const validItems = items
+      .filter(i => (i.product_name || '').trim() || (i.description || '').trim())
+      .map(i => ({
+        product_name: i.product_name || '',
+        description: i.description || '',
+        quantity: Number(i.quantity) || 0,
+        unit: i.unit || 'piece',
+        unit_price: Number(i.unit_price) || 0,
+        total: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
+      }));
     const computedQty = validItems.reduce((s, i) => s + (i.quantity || 0), 0);
     const computedAmount = validItems.reduce((s, i) => s + (i.total || 0), 0);
+
+    // 只提交需要的字段，不把历史 DB 字段（如 id、created_at 等）带进去
     const payload: Partial<Inquiry> = {
-      ...form,
-      items: validItems.map(i => ({ ...i, total: (i.quantity || 0) * (i.unit_price || 0) })),
-      expected_quantity: form.expected_quantity || computedQty,
-      expected_amount: form.expected_amount || computedAmount,
+      inquiry_number: form.inquiry_number,
+      customer_id: form.customer_id ?? null,
+      subject: form.subject,
+      status: form.status || 'new',
+      source: form.source ?? null,
+      currency: form.currency || 'USD',
+      delivery_country: form.delivery_country ?? null,
+      delivery_terms: form.delivery_terms ?? null,
+      payment_terms: form.payment_terms ?? null,
+      valid_until: form.valid_until ?? null,
+      notes: form.notes ?? null,
+      items: validItems,
+      expected_quantity: computedQty,
+      expected_amount: computedAmount,
     };
 
     if (editing) {
@@ -453,6 +496,7 @@ export function Inquiries() {
           customer={genModal.customer}
           onClose={() => { setGenModal(null); setGenResults([]); }}
           onGenerate={(types) => generateDocuments(genModal.inquiry, genModal.customer, types)}
+          onNavigateDoc={onNavigateDoc}
           generating={generating}
           results={genResults}
         />
@@ -466,11 +510,12 @@ interface GenerateDocsModalProps {
   customer?: Customer;
   onClose: () => void;
   onGenerate: (types: string[]) => void;
+  onNavigateDoc?: (docType: string) => void;
   generating: boolean;
   results: GenerateResult[];
 }
 
-function GenerateDocsModal({ inquiry, customer, onClose, onGenerate, generating, results }: GenerateDocsModalProps) {
+function GenerateDocsModal({ inquiry, customer, onClose, onGenerate, onNavigateDoc, generating, results }: GenerateDocsModalProps) {
   const [selected, setSelected] = useState<string[]>(['quotation']);
 
   const docOptions = [
@@ -548,7 +593,16 @@ function GenerateDocsModal({ inquiry, customer, onClose, onGenerate, generating,
                   r.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
                 )}>
                   {r.success ? '✅' : '❌'} <span className="flex-1">{r.message}</span>
-                  {r.success && r.number && <ArrowRight className="w-3.5 h-3.5" />}
+                  {r.success && onNavigateDoc && (
+                    <button
+                      onClick={() => { onNavigateDoc(r.type); onClose(); }}
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-medium hover:underline"
+                      title="跳转到单据中心查看"
+                    >
+                      查看 <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {r.success && !onNavigateDoc && r.number && <ArrowRight className="w-3.5 h-3.5" />}
                 </div>
               ))}
             </div>

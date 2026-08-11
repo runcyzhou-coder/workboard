@@ -7,7 +7,7 @@ import { Dashboard } from '@/components/Dashboard';
 import { Customers } from '@/components/Customers';
 import { Inquiries } from '@/components/Inquiries';
 import { Products } from '@/components/Products';
-import { DocumentCenter } from '@/components/DocumentCenter';
+import { DocumentCenter, type DocType } from '@/components/DocumentCenter';
 import { ProfitCalculator } from '@/components/ProfitCalculator';
 import { AfterSales } from '@/components/AfterSales';
 import { TradeTools } from '@/components/TradeTools';
@@ -21,6 +21,7 @@ function App() {
   const [page, setPage] = useState<Page>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [pendingDocType, setPendingDocType] = useState<DocType | null>(null);
 
   useEffect(() => {
     // 检查 Supabase 是否支持 auth（本地模式没有 auth）
@@ -133,9 +134,9 @@ function App() {
           {page === 'home' && <HomePage onNavigate={setPage} />}
           {page === 'dashboard' && <Dashboard onNavigate={setPage} />}
           {page === 'customers' && <Customers />}
-          {page === 'inquiries' && <Inquiries />}
+          {page === 'inquiries' && <Inquiries onNavigateDoc={(t) => { setPendingDocType(t as DocType); setPage('document-center'); }} />}
           {page === 'products' && <Products />}
-          {page === 'document-center' && <DocumentCenter />}
+          {page === 'document-center' && <DocumentCenter initialDocType={pendingDocType ?? undefined} onConsumed={() => setPendingDocType(null)} />}
           {page === 'profit-calculator' && <ProfitCalculator />}
           {page === 'after-sales' && <AfterSales />}
           {page === 'tools' && <TradeTools />}

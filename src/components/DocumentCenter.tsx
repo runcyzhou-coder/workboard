@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   FileText, Receipt, Handshake, ClipboardCheck, Package2, Quote,
   Upload, ArrowLeft, Settings, Image as ImageIcon,
@@ -17,6 +17,7 @@ export type DocType = 'pi' | 'ci' | 'contract' | 'customs' | 'packing' | 'quotat
 
 interface DocumentCenterProps {
   initialDocType?: DocType;
+  onConsumed?: () => void;
 }
 
 const docTypes: { id: DocType; label: string; englishLabel: string; icon: typeof FileText; color: string; description: string }[] = [
@@ -28,11 +29,19 @@ const docTypes: { id: DocType; label: string; englishLabel: string; icon: typeof
   { id: 'quotation', label: '报价单', englishLabel: 'Quotation', icon: Quote, color: 'from-cyan-500 to-cyan-600', description: '向客户发送的产品报价，含有效期和付款条件' },
 ];
 
-export function DocumentCenter({ initialDocType }: DocumentCenterProps) {
+export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterProps) {
   const [selectedDoc, setSelectedDoc] = useState<DocType | null>(initialDocType ?? null);
   const [showSettings, setShowSettings] = useState(false);
   const { settings, loading, update, reload } = useCompanySettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 当外部传入新的初始类型时（如从询盘生成后跳转），同步到内部状态
+  useEffect(() => {
+    if (initialDocType) {
+      setSelectedDoc(initialDocType);
+      onConsumed?.();
+    }
+  }, [initialDocType]);
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
