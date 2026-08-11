@@ -16,21 +16,19 @@ export function DocHeader({ title, subtitle, docNumber }: DocHeaderProps) {
 
   return (
     <div className="mb-8">
-      {/* 顶部：Logo + 公司名（公司名字体更小） */}
-      <div className="flex items-center gap-4 mb-3">
+      {/* 顶部：Logo + 公司名（居中，公司名字体较大） */}
+      <div className="flex items-center justify-center gap-4 mb-3">
         {settings?.logo_url ? (
-          <img src={settings.logo_url} alt="Logo" className="h-14 w-auto object-contain shrink-0" />
+          <img src={settings.logo_url} alt="Logo" className="h-16 w-auto object-contain shrink-0" />
         ) : (
-          <div className="h-12 px-4 bg-slate-900 text-white rounded-lg flex items-center font-bold text-lg shrink-0">
+          <div className="h-14 px-5 bg-slate-900 text-white rounded-lg flex items-center font-bold text-xl shrink-0">
             {settings?.company_name ? settings.company_name.charAt(0) : 'K'}
           </div>
         )}
         {settings?.company_name && (
-          <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-800 tracking-wide leading-tight">
-              {settings.company_name}
-            </span>
-          </div>
+          <span className="text-2xl font-bold text-slate-900 tracking-wide leading-tight">
+            {settings.company_name}
+          </span>
         )}
       </div>
 

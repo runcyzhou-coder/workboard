@@ -167,6 +167,11 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
     const subtotal = itemsData.reduce((s, i) => s + i.total, 0);
     const customerId = inquiry.customer_id;
 
+    const labelMap: Record<string, string> = {
+      quotation: '报价单', pi: '形式发票', ci: '商业发票',
+      contract: '销售合同', customs: '报关信息', packing: '装箱单',
+    };
+
     for (const type of types) {
       try {
         let tableName = '', itemsTable = '', itemsFk = '', numberField = '', prefix = '';
@@ -174,24 +179,29 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
         else if (type === 'pi') { tableName = 'proforma_invoices'; itemsTable = 'pi_items'; itemsFk = 'pi_id'; numberField = 'pi_number'; prefix = 'PI'; }
         else if (type === 'ci') { tableName = 'commercial_invoices'; itemsTable = 'ci_items'; itemsFk = 'ci_id'; numberField = 'ci_number'; prefix = 'CI'; }
         else if (type === 'contract') { tableName = 'contracts'; itemsTable = 'contract_items'; itemsFk = 'contract_id'; numberField = 'contract_number'; prefix = 'SC'; }
+        else if (type === 'customs') { tableName = 'customs_declarations'; itemsTable = 'cd_items'; itemsFk = 'cd_id'; numberField = 'declaration_number'; prefix = 'CD'; }
+        else if (type === 'packing') { tableName = 'packing_lists'; itemsTable = 'pl_items'; itemsFk = 'pl_id'; numberField = 'pl_number'; prefix = 'PL'; }
 
         const docNumber = generateDocNumber(prefix);
 
         const basePayload: any = {
           [numberField]: docNumber,
           customer_id: customerId,
-          status: type === 'contract' ? 'draft' : (type === 'quotation' ? 'draft' : 'draft'),
-          currency: inquiry.currency || 'USD',
+          status: 'draft',
           notes: `由询盘 ${inquiry.inquiry_number} 自动生成`,
         };
+        // packing_lists 表没有 currency 字段，其余单据都需要
+        if (type !== 'packing') {
+          basePayload.currency = inquiry.currency || 'USD';
+        }
 
         // 报价单字段
         if (type === 'quotation') {
           basePayload.total_amount = subtotal;
           basePayload.valid_until = inquiry.valid_until;
         }
-        // PI / CI
-        if (type === 'pi' || type === 'ci') {
+        // PI（有 valid_until 字段）
+        if (type === 'pi') {
           basePayload.subtotal = subtotal;
           basePayload.freight = 0;
           basePayload.insurance = 0;
@@ -202,6 +212,17 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
           basePayload.destination_country = inquiry.delivery_country;
           basePayload.valid_until = inquiry.valid_until;
         }
+        // CI（commercial_invoices 表没有 valid_until 字段）
+        if (type === 'ci') {
+          basePayload.subtotal = subtotal;
+          basePayload.freight = 0;
+          basePayload.insurance = 0;
+          basePayload.other_charges = 0;
+          basePayload.total_amount = subtotal;
+          basePayload.payment_terms = inquiry.payment_terms;
+          basePayload.delivery_terms = inquiry.delivery_terms;
+          basePayload.destination_country = inquiry.delivery_country;
+        }
         // 合同
         if (type === 'contract') {
           basePayload.subtotal = subtotal;
@@ -210,17 +231,46 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
           basePayload.delivery_terms = inquiry.delivery_terms;
           basePayload.destination_country = inquiry.delivery_country;
         }
+        // 报关信息
+        if (type === 'customs') {
+          basePayload.total_amount = subtotal;
+          basePayload.destination_country = inquiry.delivery_country;
+        }
+        // 装箱单
+        if (type === 'packing') {
+          basePayload.total_packages = itemsData.length;
+        }
 
         const { data, error } = await supabase.from(tableName).insert(basePayload).select('*').single();
         if (error) throw error;
         const docId = (data as any)?.id;
         if (docId && itemsData.length > 0) {
-          await supabase.from(itemsTable).insert(itemsData.map(i => ({ ...i, [itemsFk]: docId })));
+          // 不同单据的明细表字段不同，按类型构造
+          let itemsPayload: any[];
+          if (type === 'customs') {
+            itemsPayload = itemsData.map(i => ({
+              ...i, [itemsFk]: docId,
+              hs_code: null, unit: 'piece',
+              gross_weight: 0, net_weight: 0, origin_country: null,
+            }));
+          } else if (type === 'packing') {
+            itemsPayload = itemsData.map(i => ({
+              [itemsFk]: docId,
+              description: i.description,
+              quantity: i.quantity,
+              package_count: 1, package_type: 'carton',
+              gross_weight: 0, net_weight: 0,
+              length: null, width: null, height: null, volume: 0,
+            }));
+          } else {
+            itemsPayload = itemsData.map(i => ({ ...i, [itemsFk]: docId }));
+          }
+          await supabase.from(itemsTable).insert(itemsPayload);
         }
-        const label = type === 'quotation' ? '报价单' : type === 'pi' ? '形式发票' : type === 'ci' ? '商业发票' : '合同';
+        const label = labelMap[type] || type;
         results.push({ type, number: docNumber, success: true, message: `${label} ${docNumber} 已生成` });
       } catch (err: any) {
-        const label = type === 'quotation' ? '报价单' : type === 'pi' ? '形式发票' : type === 'ci' ? '商业发票' : '合同';
+        const label = labelMap[type] || type;
         results.push({ type, number: '', success: false, message: `${label}生成失败：${err?.message || '未知错误'}` });
       }
     }
@@ -523,6 +573,8 @@ function GenerateDocsModal({ inquiry, customer, onClose, onGenerate, onNavigateD
     { id: 'pi', label: '形式发票', english: 'Proforma Invoice', icon: FileText, color: 'text-violet-600' },
     { id: 'ci', label: '商业发票', english: 'Commercial Invoice', icon: Receipt, color: 'text-blue-600' },
     { id: 'contract', label: '销售合同', english: 'Sales Contract', icon: Handshake, color: 'text-emerald-600' },
+    { id: 'customs', label: '报关信息', english: 'Customs Declaration', icon: ClipboardCheck, color: 'text-amber-600' },
+    { id: 'packing', label: '装箱单', english: 'Packing List', icon: Package2, color: 'text-rose-600' },
   ];
 
   function toggle(id: string) {
