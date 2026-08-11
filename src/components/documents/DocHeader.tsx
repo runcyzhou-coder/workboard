@@ -11,60 +11,67 @@ interface DocHeaderProps {
 export function DocHeader({ title, subtitle, docNumber }: DocHeaderProps) {
   const { settings } = useCompanySettings();
 
+  // 标题转大写（以 CONTRACT / QUOTATION / PROFORMA INVOICE 风格展示）
+  const titleUpper = title?.toUpperCase() || '';
+
   return (
     <div className="mb-8">
-      {/* 顶部 Logo 区（可选，保持左对齐，弱化显示） */}
-      {settings?.logo_url && (
-        <div className="flex items-start mb-4">
-          <img src={settings.logo_url} alt="Logo" className="h-12 w-auto object-contain" />
-        </div>
-      )}
-
-      {/* 居中标题区 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-extrabold tracking-wide text-slate-900">{title}</h1>
-        {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
-        <p className="text-sm font-semibold text-slate-700 mt-1">{docNumber}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{formatDate(new Date().toISOString())}</p>
+      {/* 顶部：Logo + 公司名（公司名字体更小） */}
+      <div className="flex items-center gap-4 mb-3">
+        {settings?.logo_url ? (
+          <img src={settings.logo_url} alt="Logo" className="h-14 w-auto object-contain shrink-0" />
+        ) : (
+          <div className="h-12 px-4 bg-slate-900 text-white rounded-lg flex items-center font-bold text-lg shrink-0">
+            {settings?.company_name ? settings.company_name.charAt(0) : 'K'}
+          </div>
+        )}
+        {settings?.company_name && (
+          <div className="flex flex-col">
+            <span className="text-base font-semibold text-slate-800 tracking-wide leading-tight">
+              {settings.company_name}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* 加粗横线（主题深蓝灰色） */}
-      <div className="mt-4 border-t-[3px] border-slate-900" />
-
-      {/* 公司信息：横线下方，深蓝灰色主题 */}
-      {(settings?.company_name || settings?.address || settings?.phone || settings?.email) && (
-        <div className="mt-3 text-center">
-          {settings?.company_name && (
-            <p className="text-sm font-bold text-slate-800 tracking-wide">{settings.company_name}</p>
+      {/* 联系信息行：电话 / 地址 / Email */}
+      {(settings?.address || settings?.phone || settings?.email) && (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-600 mb-3">
+          {settings?.address && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              {settings.address}
+            </span>
           )}
-          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 mt-1 text-xs text-slate-600">
-            {settings?.address && (
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-slate-500" />
-                {settings.address}
-              </span>
-            )}
-            {settings?.email && (
-              <span className="flex items-center gap-1">
-                <Mail className="w-3 h-3 text-slate-500" />
-                {settings.email}
-              </span>
-            )}
-            {settings?.phone && (
-              <span className="flex items-center gap-1">
-                <Phone className="w-3 h-3 text-slate-500" />
-                {settings.phone}
-              </span>
-            )}
-          </div>
-          {settings?.website && (
-            <p className="text-xs text-slate-500 mt-0.5">{settings.website}</p>
+          {settings?.email && (
+            <span className="flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              {settings.email}
+            </span>
+          )}
+          {settings?.phone && (
+            <span className="flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              {settings.phone}
+            </span>
           )}
         </div>
       )}
 
-      {/* 与正文之间的分隔 */}
-      <div className="mt-4 border-t border-slate-200" />
+      {/* 长横线（深蓝灰主题） */}
+      <div className="border-t-[3px] border-slate-900 mb-5" />
+
+      {/* 单据名称（大写）+ 编号日期 */}
+      <div className="text-center">
+        <h1 className="text-3xl font-extrabold tracking-widest text-slate-900">
+          {titleUpper}
+        </h1>
+        {subtitle && <p className="text-sm text-slate-500 mt-1.5">{subtitle}</p>}
+        <div className="flex justify-center items-center gap-6 mt-2">
+          <span className="text-sm font-semibold text-slate-700">{docNumber}</span>
+          <span className="text-xs text-slate-400">{formatDate(new Date().toISOString())}</span>
+        </div>
+      </div>
     </div>
   );
 }
