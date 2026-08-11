@@ -23,6 +23,19 @@ export const supabase = hasValidSupabaseConfig
   : localClient as any;
 
 // Database types
+export interface BackgroundReport {
+  company_type: string;
+  scale: string;
+  main_business: string;
+  key_match_products: string[];
+  risk_assessment: string;
+  ai_pitch_strategy: string;
+  tags: string[];
+  match_level: 'high' | 'medium' | 'low';
+  risk_level: 'low' | 'medium' | 'high';
+  generated_at: string;
+}
+
 export interface Customer {
   id: string;
   company_name: string;
@@ -35,6 +48,7 @@ export interface Customer {
   status: 'prospect' | 'negotiating' | 'active' | 'inactive';
   notes: string | null;
   tags: string[] | null;
+  background_report?: BackgroundReport | null;
   created_at: string;
   updated_at: string;
 }

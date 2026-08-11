@@ -4,10 +4,11 @@ import {
   Users as UsersIcon, Building2, Sparkles, Target, Clock, MessageSquare,
   TrendingUp, Calendar, CheckCircle, AlertCircle, Zap,
   BarChart3, ChevronDown, ChevronUp,
+  Search as SearchIcon, RefreshCw, FileText, Shield, Award, Send,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { classNames, formatDate } from '@/lib/utils';
-import type { Customer } from '@/lib/supabase';
+import type { Customer, BackgroundReport } from '@/lib/supabase';
 import { CustomerCharts } from '@/components/CustomerCharts';
 
 const statusOptions: { value: Customer['status']; label: string; color: string }[] = [
@@ -357,6 +358,13 @@ export function Customers() {
   const [analyzing, setAnalyzing] = useState(false);
   // Pre-compute analysis at top level (hooks rule compliance)
   const currentAnalysis = useMemo(() => analyzingCustomer ? analyzeCustomer(analyzingCustomer) : null, [analyzingCustomer]);
+
+  // 背调 state
+  const [researchCustomer, setResearchCustomer] = useState<Customer | null>(null);
+  const [researchLoading, setResearchLoading] = useState(false);
+  const [researchReport, setResearchReport] = useState<BackgroundReport | null>(null);
+  const [researchTab, setResearchTab] = useState<'report' | 'profile'>('report');
+  const [generatedLetter, setGeneratedLetter] = useState<string | null>(null);
   // 图表面板展开/收起
   const [showCharts, setShowCharts] = useState(false);
   // 智能识别 state
@@ -460,6 +468,101 @@ export function Customers() {
 
   function clearRecognized() {
     setRecognizedFields([]);
+  }
+
+  // ============== AI 一键背调 ==============
+  async function startResearch(c: Customer) {
+    setResearchCustomer(c);
+    setResearchTab('report');
+    setGeneratedLetter(null);
+    // 如果已有历史报告，直接展示
+    if (c.background_report) {
+      setResearchReport(c.background_report);
+      return;
+    }
+    // 否则展示触发界面（report 为 null）
+    setResearchReport(null);
+  }
+
+  async function runResearch() {
+    if (!researchCustomer) return;
+    setResearchLoading(true);
+    setResearchReport(null);
+    try {
+      const res = await fetch('/api/client-research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_name: researchCustomer.company_name,
+          website: researchCustomer.website,
+          country: researchCustomer.country,
+          contact_name: researchCustomer.contact_name,
+          notes: researchCustomer.notes,
+        }),
+      });
+      const data = await res.json();
+      if (data.report) {
+        setResearchReport(data.report);
+        // 持久化到 Supabase
+        await supabase
+          .from('customers')
+          .update({ background_report: data.report, updated_at: new Date().toISOString() })
+          .eq('id', researchCustomer.id);
+        // 更新本地 state
+        setCustomers(prev => prev.map(c =>
+          c.id === researchCustomer.id ? { ...c, background_report: data.report } : c
+        ));
+        setResearchCustomer(prev => prev ? { ...prev, background_report: data.report } : prev);
+      }
+    } catch {
+      // API 不可用时使用本地回退
+      setResearchReport(null);
+    }
+    setResearchLoading(false);
+  }
+
+  function generateDevLetter() {
+    if (!researchCustomer || !researchReport) return;
+    const c = researchCustomer;
+    const r = researchReport;
+    const letter = `Subject: Strategic Partnership Opportunity — Wind Turbine Supply for ${c.company_name}
+
+Dear ${c.contact_name || 'Valued Partner'},
+
+I hope this message finds you well. I am writing from KIKI TECH, a leading manufacturer of wind turbines (1.5MW–16MW) and industrial equipment based in China.
+
+Based on our research, we understand that ${c.company_name} is a ${r.company_type.toLowerCase()} operating as ${r.scale.toLowerCase()}. Your core business in ${r.main_business.split('.')[0].toLowerCase()} aligns well with our product offerings.
+
+Here is why we believe a partnership would be mutually beneficial:
+
+1. Product Match: Our key products — ${r.key_match_products.slice(0, 3).join(', ')} — directly address your procurement needs.
+
+2. Competitive Advantages:
+   - Full range of wind turbines (1.5MW to 16MW) with DNV, CE, and IEC certifications
+   - Competitive pricing with flexible payment terms (T/T, L/C, D/P)
+   - Comprehensive after-sales service and technical support
+   - Proven track record in ${c.country || 'global'} markets
+
+3. Risk Mitigation: ${r.risk_assessment}
+
+Our Recommended Approach:
+${r.ai_pitch_strategy}
+
+We would welcome the opportunity to schedule a call or video meeting at your convenience to discuss potential collaboration in detail. Please feel free to reply to this email or contact us at sales@kiki-tech.com.
+
+Best regards,
+KIKI TECH Team
+Email: sales@kiki-tech.com
+Website: www.kiki-tech.com`;
+
+    setGeneratedLetter(letter);
+  }
+
+  function closeResearch() {
+    setResearchCustomer(null);
+    setResearchReport(null);
+    setResearchLoading(false);
+    setGeneratedLetter(null);
   }
 
   function addTag() {
@@ -576,12 +679,26 @@ export function Customers() {
                 {c.notes && <p className="text-xs text-slate-500 mt-3 line-clamp-2">{c.notes}</p>}
 
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-                  <button
-                    onClick={() => { setAnalyzingCustomer(c); setAnalyzing(true); setTimeout(() => setAnalyzing(false), 600); }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />AI分析
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => { setAnalyzingCustomer(c); setAnalyzing(true); setTimeout(() => setAnalyzing(false), 600); }}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />AI分析
+                    </button>
+                    <button
+                      onClick={() => startResearch(c)}
+                      className={classNames(
+                        'flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors',
+                        c.background_report
+                          ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+                          : 'text-purple-600 bg-purple-50 hover:bg-purple-100'
+                      )}
+                    >
+                      <SearchIcon className="w-3.5 h-3.5" />一键背调
+                      {c.background_report && <CheckCircle className="w-3 h-3" />}
+                    </button>
+                  </div>
                   <div className="flex items-center gap-1">
                     <button onClick={() => startEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                       <Edit2 className="w-4 h-4" />
@@ -968,6 +1085,268 @@ export function Customers() {
                 </>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* AI 一键背调 Modal */}
+      {researchCustomer && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={closeResearch}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-t-2xl px-6 py-4 text-white">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    <SearchIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold">AI 客户一键背调</h2>
+                    <p className="text-sm text-white/80">{researchCustomer.company_name}</p>
+                  </div>
+                </div>
+                <button onClick={closeResearch} className="text-white/80 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              {/* Tabs */}
+              <div className="flex gap-1 mt-3">
+                <button
+                  onClick={() => setResearchTab('report')}
+                  className={classNames(
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                    researchTab === 'report' ? 'bg-white text-purple-700' : 'text-white/70 hover:bg-white/10'
+                  )}
+                >
+                  <FileText className="w-3.5 h-3.5 inline mr-1" />背调报告
+                </button>
+                <button
+                  onClick={() => setResearchTab('profile')}
+                  className={classNames(
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                    researchTab === 'profile' ? 'bg-white text-purple-700' : 'text-white/70 hover:bg-white/10'
+                  )}
+                >
+                  <Building2 className="w-3.5 h-3.5 inline mr-1" />客户档案
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {researchTab === 'profile' ? (
+                /* 客户档案 Tab */
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">公司名称</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.company_name}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">联系人</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.contact_name || '—'}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">国家</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.country || '—'}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">网站</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{researchCustomer.website || '—'}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">邮箱</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{researchCustomer.email || '—'}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">电话</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.phone || '—'}</p>
+                    </div>
+                  </div>
+                  {researchCustomer.notes && (
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">备注</p>
+                      <p className="text-sm text-slate-700">{researchCustomer.notes}</p>
+                    </div>
+                  )}
+                </div>
+              ) : researchLoading ? (
+                /* 加载中 */
+                <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full border-4 border-purple-100" />
+                    <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-purple-600 animate-spin" />
+                    <SearchIcon className="absolute inset-0 m-auto w-6 h-6 text-purple-600 animate-pulse" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-slate-700 font-medium">AI 正在深度调研 {researchCustomer.company_name}...</p>
+                    <p className="text-xs text-slate-400 mt-1">分析行业定位 · 采购需求 · 风险评估 · 攻单策略</p>
+                  </div>
+                </div>
+              ) : !researchReport ? (
+                /* 未背调 — 触发界面 */
+                <div className="flex flex-col items-center justify-center py-16 space-y-6">
+                  <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center">
+                    <SearchIcon className="w-10 h-10 text-purple-500" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold text-slate-900">尚未生成背调报告</h3>
+                    <p className="text-sm text-slate-500 mt-1 max-w-md">
+                      点击下方按钮，AI 将自动分析 <span className="font-medium text-slate-700">{researchCustomer.company_name}</span> 的行业定位、采购需求、决策人方向与攻单建议。
+                    </p>
+                  </div>
+                  <button
+                    onClick={runResearch}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all font-medium text-sm shadow-lg"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    开始 AI 背调
+                  </button>
+                </div>
+              ) : generatedLetter ? (
+                /* 开发信展示 */
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                      <Send className="w-5 h-5 text-indigo-500" />
+                      基于背调结果生成的开发信
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(generatedLetter);
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                      >
+                        <FileText className="w-3.5 h-3.5" />复制全文
+                      </button>
+                      <button
+                        onClick={() => setGeneratedLetter(null)}
+                        className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        返回报告
+                      </button>
+                    </div>
+                  </div>
+                  <pre className="bg-slate-50 rounded-xl p-5 text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed max-h-[60vh] overflow-y-auto border border-slate-200">
+                    {generatedLetter}
+                  </pre>
+                </div>
+              ) : (
+                /* 背调报告展示 — 卡片化布局 */
+                <div className="space-y-5">
+                  {/* 顶部卡片：企业标签 */}
+                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-5 text-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="text-lg font-bold">{researchCustomer.company_name}</h3>
+                        <p className="text-sm text-slate-300 mt-0.5">
+                          {researchReport.company_type} · {researchReport.scale}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={classNames(
+                          'px-2.5 py-1 rounded-lg text-xs font-bold',
+                          researchReport.match_level === 'high' ? 'bg-emerald-500/20 text-emerald-300'
+                            : researchReport.match_level === 'medium' ? 'bg-amber-500/20 text-amber-300'
+                            : 'bg-slate-500/20 text-slate-300'
+                        )}>
+                          {researchReport.match_level === 'high' ? '高匹配度' : researchReport.match_level === 'medium' ? '中等匹配' : '低匹配'}
+                        </span>
+                        <span className={classNames(
+                          'px-2.5 py-1 rounded-lg text-xs font-bold',
+                          researchReport.risk_level === 'low' ? 'bg-emerald-500/20 text-emerald-300'
+                            : researchReport.risk_level === 'medium' ? 'bg-amber-500/20 text-amber-300'
+                            : 'bg-red-500/20 text-red-300'
+                        )}>
+                          {researchReport.risk_level === 'low' ? '低风险' : researchReport.risk_level === 'medium' ? '中风险' : '高风险'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {researchReport.tags.map((tag, i) => (
+                        <span key={i} className="px-2.5 py-1 bg-white/10 backdrop-blur rounded-lg text-xs font-medium text-cyan-300 border border-white/10">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 中部：采购匹配度 + 推荐攻单切入点 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 采购匹配度分析 */}
+                    <div className="bg-white rounded-xl p-5 border border-slate-200">
+                      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">
+                        <Award className="w-4 h-4 text-indigo-500" />
+                        采购匹配度分析
+                      </h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">主营业务</p>
+                          <p className="text-sm text-slate-700 leading-relaxed">{researchReport.main_business}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1.5">匹配产品</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {researchReport.key_match_products.map((p, i) => (
+                              <span key={i} className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium border border-indigo-100">
+                                {p}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 推荐攻单切入点 */}
+                    <div className="bg-white rounded-xl p-5 border border-slate-200">
+                      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">
+                        <Target className="w-4 h-4 text-amber-500" />
+                        推荐攻单切入点
+                      </h3>
+                      <p className="text-sm text-slate-700 leading-relaxed">{researchReport.ai_pitch_strategy}</p>
+                    </div>
+                  </div>
+
+                  {/* 风险评估 */}
+                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">
+                      <Shield className="w-4 h-4 text-red-500" />
+                      风险评估
+                    </h3>
+                    <p className="text-sm text-slate-700 leading-relaxed">{researchReport.risk_assessment}</p>
+                  </div>
+
+                  {/* 快捷操作 */}
+                  <div className="flex items-center justify-between bg-slate-50 rounded-xl p-4 border border-slate-200">
+                    <div className="text-xs text-slate-500">
+                      <CheckCircle className="w-3.5 h-3.5 inline mr-1 text-emerald-500" />
+                      报告已保存，下次查看无需重新生成
+                      <span className="ml-2 text-slate-400">
+                        生成于 {formatDate(researchReport.generated_at)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={runResearch}
+                        disabled={researchLoading}
+                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 bg-white hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                      >
+                        <RefreshCw className={classNames('w-3.5 h-3.5', researchLoading && 'animate-spin')} />
+                        重新背调
+                      </button>
+                      <button
+                        onClick={generateDevLetter}
+                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-all shadow-sm"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        基于背调结果一键生成开发信
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
