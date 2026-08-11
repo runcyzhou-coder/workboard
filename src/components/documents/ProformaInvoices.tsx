@@ -363,9 +363,9 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
                 <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{pi.currency || 'USD'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Trade Terms:</span><span className="text-slate-700">{pi.delivery_terms || '—'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Payment:</span><span className="text-slate-700">{pi.payment_terms || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Origin:</span><span className="text-slate-700">{pi.origin_country || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Destination:</span><span className="text-slate-700">{pi.destination_country || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Shipping:</span><span className="text-slate-700">{pi.shipping_method || '—'}</span></div>
+                {pi.origin_country && <div className="flex justify-between"><span className="text-slate-400">Origin:</span><span className="text-slate-700">{pi.origin_country}</span></div>}
+                {pi.destination_country && <div className="flex justify-between"><span className="text-slate-400">Destination:</span><span className="text-slate-700">{pi.destination_country}</span></div>}
+                {pi.shipping_method && <div className="flex justify-between"><span className="text-slate-400">Shipping:</span><span className="text-slate-700">{pi.shipping_method}</span></div>}
               </div>
             </div>
           </div>

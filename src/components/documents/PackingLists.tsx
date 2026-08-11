@@ -170,12 +170,12 @@ function PlViewModal({ pl, onClose }: { pl: PackingList & { customer?: Customer;
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">PACKING LIST DETAILS</p>
               <div className="space-y-1">
                 <div className="flex justify-between"><span className="text-slate-400">Date:</span><span className="text-slate-700">{formatDate(pl.created_at)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Shipping:</span><span className="text-slate-700">{pl.shipping_method || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Vessel:</span><span className="text-slate-700">{pl.vessel_name || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">B/L No.:</span><span className="text-slate-700">{pl.bl_number || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Container No.:</span><span className="text-slate-700">{pl.container_number || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Loading Port:</span><span className="text-slate-700">{pl.port_of_loading || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Discharge Port:</span><span className="text-slate-700">{pl.port_of_discharge || '—'}</span></div>
+                {pl.shipping_method && <div className="flex justify-between"><span className="text-slate-400">Shipping:</span><span className="text-slate-700">{pl.shipping_method}</span></div>}
+                {pl.vessel_name && <div className="flex justify-between"><span className="text-slate-400">Vessel:</span><span className="text-slate-700">{pl.vessel_name}</span></div>}
+                {pl.bl_number && <div className="flex justify-between"><span className="text-slate-400">B/L No.:</span><span className="text-slate-700">{pl.bl_number}</span></div>}
+                {pl.container_number && <div className="flex justify-between"><span className="text-slate-400">Container No.:</span><span className="text-slate-700">{pl.container_number}</span></div>}
+                {pl.port_of_loading && <div className="flex justify-between"><span className="text-slate-400">Loading Port:</span><span className="text-slate-700">{pl.port_of_loading}</span></div>}
+                {pl.port_of_discharge && <div className="flex justify-between"><span className="text-slate-400">Discharge Port:</span><span className="text-slate-700">{pl.port_of_discharge}</span></div>}
               </div>
             </div>
           </div>
