@@ -46,21 +46,39 @@ export function DocumentCenter({ initialDocType }: DocumentCenterProps) {
       alert('请上传 PNG/JPG/SVG/WebP 格式的Logo');
       return;
     }
-    const fileName = `logo-${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
-    if (uploadError) {
-      // If bucket doesn't exist, try to create it
-      const { error: bucketError } = await supabase.storage.createBucket('logos', { public: true });
-      if (!bucketError) {
-        await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
-      } else {
-        alert('上传失败，请稍后重试');
-        return;
+
+    // 优先尝试 Supabase Storage（需 bucket 已创建）
+    const hasStorage = typeof (supabase as any).storage !== 'undefined';
+    if (hasStorage) {
+      try {
+        const fileName = `logo-${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+          await update({ logo_url: urlData.publicUrl });
+          reload();
+          return;
+        }
+        // 上传失败（通常是 bucket 不存在或 RLS 拒绝）→ 降级到 base64
+        console.warn('Storage 上传失败，降级使用 base64：', uploadError.message);
+      } catch (err: any) {
+        console.warn('Storage 不可用，降级使用 base64：', err?.message);
       }
     }
-    const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
-    await update({ logo_url: urlData.publicUrl });
-    reload();
+
+    // 降级方案：转 base64 data URL 直接存数据库
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      await update({ logo_url: dataUrl });
+      reload();
+    } catch (err) {
+      alert('Logo 上传失败，请稍后重试');
+    }
   }
 
   // If a document type is selected, render that document component
