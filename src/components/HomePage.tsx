@@ -1188,18 +1188,14 @@ export function HomePage({ onNavigate }: HomeProps) {
         if (profile?.selected_industry) {
           setSelectedIndustry(profile.selected_industry);
           loadIndustryData(profile.selected_industry);
-        } else {
-          // 未设置行业，弹出选择框
-          setShowIndustryModal(true);
         }
+        // 未设置行业时不主动弹窗，用户点击「选择行业」按钮时再弹出
       } catch {
         // profiles 表不存在，回退到 localStorage
         const local = localStorage.getItem('wb_selected_industry');
         if (local) {
           setSelectedIndustry(local);
           loadIndustryData(local);
-        } else {
-          setShowIndustryModal(true);
         }
       }
     }
