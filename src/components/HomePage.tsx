@@ -1122,6 +1122,9 @@ export function HomePage({ onNavigate }: HomeProps) {
   const [alertsLoading, setAlertsLoading] = useState(true);
   const [expandedAlert, setExpandedAlert] = useState<string | null>(null);
 
+  // 仪表盘统计数据
+  const [stats, setStats] = useState({ customerCount: 0, newInquiryCount: 0, pendingPayment: 0 });
+
   // 行业动态数据状态
   const [selectedIndustry, setSelectedIndustry] = useState<string>('');
   const [showIndustryModal, setShowIndustryModal] = useState(false);
@@ -1150,6 +1153,30 @@ export function HomePage({ onNavigate }: HomeProps) {
         const customers = customerRes.data || [];
         const alerts = generateRiskAlerts(invoices, shipments, customers);
         setRiskAlerts(alerts);
+
+        // 统计仪表盘数据
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const newInquiryCount = invoices.filter(pi => {
+          const d = pi.created_at ? new Date(pi.created_at) : null;
+          return d && d >= monthStart;
+        }).length;
+        // 待收尾款：付款条件含 balance/70% 且未到账
+        const pendingPayment = invoices
+          .filter(pi => {
+            const terms = (pi.payment_terms || '').toLowerCase();
+            return terms.includes('balance') || terms.includes('70%');
+          })
+          .reduce((sum, pi) => {
+            const total = Number(pi.total_amount) || 0;
+            // 尾款比例默认 70%
+            return sum + total * 0.7;
+          }, 0);
+        setStats({
+          customerCount: customers.length,
+          newInquiryCount,
+          pendingPayment: Math.round(pendingPayment),
+        });
       } catch {}
       if (!cancelled) setAlertsLoading(false);
     }
@@ -1308,18 +1335,18 @@ export function HomePage({ onNavigate }: HomeProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 border border-white/20 min-w-[130px]">
-              <p className="text-[10px] text-white/70 font-medium">本月新增询盘</p>
-              <p className="text-2xl font-bold"><span className="text-blue-200">12</span> <span className="text-sm font-normal text-white/70">个</span></p>
+              <p className="text-[10px] text-white/70 font-medium">客户总数</p>
+              <p className="text-2xl font-bold"><span className="text-blue-200">{stats.customerCount}</span> <span className="text-sm font-normal text-white/70">个</span></p>
             </div>
             <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 border border-white/20 min-w-[130px]">
-              <p className="text-[10px] text-white/70 font-medium">待跟进报价</p>
-              <p className="text-2xl font-bold text-amber-300">$34.5M</p>
+              <p className="text-[10px] text-white/70 font-medium">本月新增询盘</p>
+              <p className="text-2xl font-bold"><span className="text-blue-200">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-white/70">个</span></p>
             </div>
             <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 border border-white/20 min-w-[130px]">
               <p className="text-[10px] text-white/70 font-medium flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />待收尾款预警
               </p>
-              <p className="text-2xl font-bold text-red-300">$1.2M</p>
+              <p className="text-2xl font-bold text-red-300">${(stats.pendingPayment / 10000).toFixed(1)}M</p>
             </div>
           </div>
         </div>
