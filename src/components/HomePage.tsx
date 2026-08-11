@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Newspaper, CheckCircle2, Circle, Plus, Trash2,
   TrendingUp, Globe2, MapPin, Clock, Calendar,
   Briefcase, Zap, AlertCircle, ExternalLink,
   Sparkles, BarChart3, ChevronRight, Target,
   ListTodo, RefreshCw, AlertTriangle, X,
+  ChevronLeft, Pencil, Tag, Flag,
 } from 'lucide-react';
 import { formatDate, classNames } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import type { CalendarEvent, CalendarEventType, CalendarEventPriority } from '@/lib/supabase';
 import type { Page } from '@/components/Sidebar';
 
 interface HomeProps {
@@ -426,96 +428,511 @@ function generateRiskAlerts(
   return alerts;
 }
 
-// ============ 月历组件 ============
+// ============ 事项类型与颜色配置 ============
+const eventTypeConfig: Record<CalendarEventType, { label: string; color: string; dot: string }> = {
+  follow_up: { label: '跟进', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
+  quote:     { label: '报价', color: 'bg-violet-100 text-violet-700', dot: 'bg-violet-500' },
+  sample:    { label: '寄样', color: 'bg-teal-100 text-teal-700', dot: 'bg-teal-500' },
+  shipping:  { label: '发货', color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  visit:     { label: '拜访', color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+  other:     { label: '其他', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400' },
+};
+
+const priorityConfig: Record<CalendarEventPriority, { label: string; color: string; bar: string }> = {
+  high:   { label: '高', color: 'text-red-600', bar: 'border-l-red-500' },
+  medium: { label: '中', color: 'text-amber-600', bar: 'border-l-amber-400' },
+  low:    { label: '低', color: 'text-slate-400', bar: 'border-l-slate-300' },
+};
+
+// ============ 事项编辑弹窗 ============
+function EventModal({
+  mode,
+  event,
+  defaultDate,
+  onClose,
+  onSave,
+  onDelete,
+}: {
+  mode: 'add' | 'edit';
+  event?: CalendarEvent | null;
+  defaultDate: string;
+  onClose: () => void;
+  onSave: (data: Partial<CalendarEvent>) => void;
+  onDelete?: (id: string) => void;
+}) {
+  const [title, setTitle] = useState(event?.title || '');
+  const [eventDate, setEventDate] = useState(event?.event_date || defaultDate);
+  const [type, setType] = useState<CalendarEventType>(event?.type || 'follow_up');
+  const [priority, setPriority] = useState<CalendarEventPriority>(event?.priority || 'medium');
+  const [done, setDone] = useState(event?.done || false);
+  const [notes, setNotes] = useState(event?.notes || '');
+  const [saving, setSaving] = useState(false);
+
+  function handleSave() {
+    if (!title.trim()) return;
+    setSaving(true);
+    onSave({ id: event?.id, title: title.trim(), event_date: eventDate, type, priority, done, notes: notes.trim() || null });
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-indigo-500" />
+            <h2 className="text-lg font-bold text-slate-900">
+              {mode === 'add' ? '添加重要事项' : '修改事项'}
+            </h2>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {/* 事项标题 */}
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1 block">事项标题</label>
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && title.trim()) handleSave(); }}
+              placeholder="如：给沙特客户发送报价..."
+              autoFocus
+              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* 日期 */}
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1 block">日期</label>
+            <input
+              type="date"
+              value={eventDate}
+              onChange={e => setEventDate(e.target.value)}
+              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* 类型标签 */}
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1.5 block flex items-center gap-1">
+              <Tag className="w-3 h-3" /> 类型标签
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {(Object.keys(eventTypeConfig) as CalendarEventType[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={classNames(
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                    type === t
+                      ? `${eventTypeConfig[t].color} ring-2 ring-offset-1 ring-indigo-300`
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                  )}
+                >
+                  {eventTypeConfig[t].label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 优先级 */}
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1.5 block flex items-center gap-1">
+              <Flag className="w-3 h-3" /> 优先级
+            </label>
+            <div className="flex gap-1.5">
+              {(Object.keys(priorityConfig) as CalendarEventPriority[]).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPriority(p)}
+                  className={classNames(
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1',
+                    priority === p
+                      ? p === 'high' ? 'bg-red-100 text-red-700 ring-2 ring-red-200'
+                        : p === 'medium' ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-200'
+                        : 'bg-slate-200 text-slate-600 ring-2 ring-slate-300'
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                  )}
+                >
+                  {priorityConfig[p].label}优先
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 备注 */}
+          <div>
+            <label className="text-xs font-medium text-slate-500 mb-1 block">备注（可选）</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="补充说明..."
+              rows={2}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            />
+          </div>
+
+          {/* 已完成（编辑模式） */}
+          {mode === 'edit' && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <button
+                onClick={() => setDone(!done)}
+                className={classNames(
+                  'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all',
+                  done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 hover:border-emerald-400'
+                )}
+              >
+                {done && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+              </button>
+              <span className="text-sm text-slate-600">标记为已完成</span>
+            </label>
+          )}
+        </div>
+
+        {/* 底部操作 */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+          {mode === 'edit' && onDelete && event ? (
+            <button
+              onClick={() => onDelete(event.id)}
+              className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium"
+            >
+              <Trash2 className="w-4 h-4" /> 删除
+            </button>
+          ) : <div />}
+          <div className="flex items-center gap-2">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">取消</button>
+            <button
+              onClick={handleSave}
+              disabled={!title.trim() || saving}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {mode === 'add' ? '添加' : '保存'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============ 月历组件（增强版） ============
 function MiniCalendar({
-  doneCount,
-  totalTodos,
   selectedDate,
   onDateSelect,
-  todoDates,
+  doneCount,
+  totalTodos,
 }: {
-  doneCount: number;
-  totalTodos: number;
   selectedDate: string;
   onDateSelect: (dateStr: string) => void;
-  todoDates: Set<string>;
+  doneCount: number;
+  totalTodos: number;
 }) {
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const daysInMonth = lastDay.getDate();
-  const startDayOfWeek = (firstDay.getDay() + 6) % 7;
-
-  const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
-  const cells: (number | null)[] = [];
-  for (let i = 0; i < startDayOfWeek; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
+  const [modalDate, setModalDate] = useState<string>('');
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
 
   const todayStr = getTodayStr();
+  const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
 
-  function handleClickDay(day: number) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  // 计算日历网格
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const lastDay = new Date(viewYear, viewMonth + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startDayOfWeek = (firstDay.getDay() + 6) % 7; // 周一开始
+
+  // 构建网格单元格（含上月末尾和下月开头的补位格）
+  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+  type Cell = { day: number; dateStr: string; isCurrentMonth: boolean };
+  const cells: Cell[] = [];
+  // 前置（上月末尾）
+  for (let i = startDayOfWeek - 1; i >= 0; i--) {
+    const d = prevMonthDays - i;
+    const m = viewMonth === 0 ? 12 : viewMonth;
+    const y = viewMonth === 0 ? viewYear - 1 : viewYear;
+    cells.push({ day: d, dateStr: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, isCurrentMonth: false });
+  }
+  // 当月
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, dateStr: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`, isCurrentMonth: true });
+  }
+  // 后置（下月开头，补满 42 格 = 6 行）
+  const remaining = 42 - cells.length;
+  for (let d = 1; d <= remaining; d++) {
+    const m = viewMonth === 11 ? 1 : viewMonth + 2;
+    const y = viewMonth === 11 ? viewYear + 1 : viewYear;
+    cells.push({ day: d, dateStr: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, isCurrentMonth: false });
+  }
+
+  // 加载事项
+  const loadEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const monthStart = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-01`;
+    const monthEnd = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+      const res = await supabase
+        .from('calendar_events')
+        .select('*')
+        .gte('event_date', monthStart)
+        .lte('event_date', monthEnd)
+        .order('event_date', { ascending: true });
+      setEvents(res.data || []);
+    } catch {
+      setEvents([]);
+    }
+    setLoading(false);
+  }, [viewYear, viewMonth, daysInMonth]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+
+  // 事项按日期分组
+  const eventsByDate = new Map<string, CalendarEvent[]>();
+  events.forEach(e => {
+    const arr = eventsByDate.get(e.event_date) || [];
+    arr.push(e);
+    eventsByDate.set(e.event_date, arr);
+  });
+
+  // 导航
+  function prevMonth() {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  }
+  function nextMonth() {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  }
+  function goToday() {
+    setViewYear(today.getFullYear());
+    setViewMonth(today.getMonth());
+    onDateSelect(todayStr);
+  }
+
+  // 点击日期格子 → 联动任务 + 打开新增弹窗
+  function handleClickDay(dateStr: string, isCurrentMonth: boolean) {
     onDateSelect(dateStr);
+    // 联动：切换视图月份到点击的非当月日期
+    if (!isCurrentMonth) {
+      const [y, m] = dateStr.split('-').map(Number);
+      setViewYear(y);
+      setViewMonth(m - 1);
+    }
+  }
+
+  // 新增事项
+  function openAddModal(dateStr: string) {
+    setModalDate(dateStr);
+    setEditingEvent(null);
+    setModalMode('add');
+  }
+
+  // 编辑事项
+  function openEditModal(evt: CalendarEvent) {
+    setEditingEvent(evt);
+    setModalMode('edit');
+  }
+
+  // 保存事项（新增/更新）
+  async function handleSave(data: Partial<CalendarEvent>) {
+    try {
+      if (data.id) {
+        // 更新
+        await supabase.from('calendar_events').update({
+          title: data.title,
+          event_date: data.event_date,
+          type: data.type,
+          priority: data.priority,
+          done: data.done,
+          notes: data.notes,
+        }).eq('id', data.id);
+      } else {
+        // 新增
+        await supabase.from('calendar_events').insert({
+          title: data.title,
+          event_date: data.event_date,
+          type: data.type,
+          priority: data.priority,
+          done: data.done || false,
+          notes: data.notes,
+        }).select('*');
+      }
+      setModalMode(null);
+      setEditingEvent(null);
+      await loadEvents();
+    } catch {
+      setModalMode(null);
+    }
+  }
+
+  // 删除事项
+  async function handleDelete(id: string) {
+    try {
+      await supabase.from('calendar_events').delete().eq('id', id);
+      setModalMode(null);
+      setEditingEvent(null);
+      await loadEvents();
+    } catch {
+      setModalMode(null);
+    }
   }
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-900">
-          {year}年{month + 1}月
-        </h2>
-        <Calendar className="w-5 h-5 text-indigo-500" />
+      {/* Header：年月选择器 + 导航 */}
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <select
+            value={viewYear}
+            onChange={e => setViewYear(Number(e.target.value))}
+            className="px-2 py-1 text-sm font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+          >
+            {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
+              <option key={y} value={y}>{y}年</option>
+            ))}
+          </select>
+          <select
+            value={viewMonth}
+            onChange={e => setViewMonth(Number(e.target.value))}
+            className="px-2 py-1 text-sm font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+          >
+            {Array.from({ length: 12 }, (_, i) => i).map(m => (
+              <option key={m} value={m}>{m + 1}月</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={prevMonth} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" title="上一月">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="返回今天">
+            今天
+          </button>
+          <button onClick={nextMonth} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" title="下一月">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-      <div className="grid grid-cols-7 gap-1">
+
+      {/* 星期表头 */}
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {weekDays.map(d => (
-          <div key={d} className="text-center text-xs font-medium text-slate-400 py-1">{d}</div>
+          <div key={d} className="text-center text-[11px] font-semibold text-slate-400 py-1">{d}</div>
         ))}
-        {cells.map((d, i) => {
-          if (d === null) return <div key={i} />;
-          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const isToday = dateStr === todayStr;
-          const isSelected = dateStr === selectedDate;
-          const hasTodos = todoDates.has(dateStr);
+      </div>
+
+      {/* 日历网格 */}
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((cell, i) => {
+          const cellEvents = eventsByDate.get(cell.dateStr) || [];
+          const isToday = cell.dateStr === todayStr;
+          const isSelected = cell.dateStr === selectedDate;
+          const visibleEvents = cellEvents.slice(0, 3);
+          const hiddenCount = cellEvents.length - visibleEvents.length;
           return (
-            <button
+            <div
               key={i}
-              onClick={() => handleClickDay(d)}
+              onClick={() => handleClickDay(cell.dateStr, cell.isCurrentMonth)}
               className={classNames(
-                'aspect-square flex flex-col items-center justify-center rounded-lg text-sm relative transition-all',
+                'min-h-[56px] p-1 rounded-lg border cursor-pointer transition-all group relative',
                 isSelected
-                  ? 'bg-indigo-600 text-white font-bold shadow-md'
+                  ? 'border-indigo-400 bg-indigo-50 ring-1 ring-indigo-200'
                   : isToday
-                    ? 'bg-indigo-100 text-indigo-700 font-bold hover:bg-indigo-200'
-                    : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                    ? 'border-indigo-200 bg-indigo-50/30'
+                    : 'border-transparent hover:border-slate-200 hover:bg-slate-50',
+                !cell.isCurrentMonth && 'opacity-40'
               )}
             >
-              <span>{d}</span>
-              {hasTodos && !isSelected && (
-                <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-indigo-500" />
-              )}
-            </button>
+              {/* 日期数字 + 新增按钮 */}
+              <div className="flex items-center justify-between mb-0.5">
+                <span className={classNames(
+                  'text-xs font-medium leading-none',
+                  isSelected
+                    ? 'text-indigo-700 font-bold'
+                    : isToday
+                      ? 'text-indigo-600 font-bold'
+                      : 'text-slate-600'
+                )}>
+                  {cell.day}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); openAddModal(cell.dateStr); }}
+                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-100 rounded transition-all"
+                  title="添加事项"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
+              {/* 事项标签 */}
+              <div className="space-y-0.5">
+                {visibleEvents.map(evt => {
+                  const tc = eventTypeConfig[evt.type];
+                  const pc = priorityConfig[evt.priority];
+                  return (
+                    <div
+                      key={evt.id}
+                      onClick={(e) => { e.stopPropagation(); openEditModal(evt); }}
+                      className={classNames(
+                        'text-[10px] px-1 py-0.5 rounded truncate border-l-2 cursor-pointer hover:opacity-80 transition-opacity',
+                        tc.color, pc.bar,
+                        evt.done && 'line-through opacity-50'
+                      )}
+                      title={evt.title}
+                    >
+                      {evt.title}
+                    </div>
+                  );
+                })}
+                {hiddenCount > 0 && (
+                  <div className="text-[9px] text-slate-400 px-1 font-medium">
+                    +{hiddenCount} 项
+                  </div>
+                )}
+              </div>
+            </div>
           );
         })}
       </div>
-      {/* 选中日期任务统计 */}
-      <div className="mt-4 pt-4 border-t border-slate-100">
+
+      {/* 底部统计 */}
+      <div className="mt-3 pt-3 border-t border-slate-100">
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-500">
             {selectedDate === todayStr ? '今日任务' : `${selectedDate} 任务`}
           </span>
-          <span className="font-semibold text-indigo-600">{doneCount}/{totalTodos}</span>
+          <div className="flex items-center gap-2">
+            {loading && <RefreshCw className="w-3 h-3 text-slate-300 animate-spin" />}
+            <span className="font-semibold text-indigo-600">{doneCount}/{totalTodos}</span>
+          </div>
         </div>
-        {selectedDate !== todayStr && (
-          <button
-            onClick={() => onDateSelect(todayStr)}
-            className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-          >
-            ← 返回今天
-          </button>
-        )}
+        {/* 图例 */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          {(Object.keys(eventTypeConfig) as CalendarEventType[]).slice(0, 5).map(t => (
+            <span key={t} className="flex items-center gap-1 text-[9px] text-slate-400">
+              <span className={classNames('w-1.5 h-1.5 rounded-full', eventTypeConfig[t].dot)} />
+              {eventTypeConfig[t].label}
+            </span>
+          ))}
+        </div>
       </div>
+
+      {/* 事项编辑弹窗 */}
+      {modalMode && (
+        <EventModal
+          mode={modalMode}
+          event={editingEvent}
+          defaultDate={modalDate || selectedDate}
+          onClose={() => { setModalMode(null); setEditingEvent(null); }}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 }
@@ -620,12 +1037,6 @@ export function HomePage({ onNavigate }: HomeProps) {
     loadAlerts();
     return () => { cancelled = true; };
   }, []);
-
-  // 收集所有有任务的日期
-  const todoDates = new Set<string>();
-  todos.forEach(t => {
-    if (t.date) todoDates.add(t.date);
-  });
 
   function addTodo() {
     const text = todoInput.trim();
@@ -733,11 +1144,10 @@ export function HomePage({ onNavigate }: HomeProps) {
         {/* 左：月历 */}
         <div className="lg:col-span-1">
           <MiniCalendar
-            doneCount={doneCount}
-            totalTodos={dateFilteredTodos.length}
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
-            todoDates={todoDates}
+            doneCount={doneCount}
+            totalTodos={dateFilteredTodos.length}
           />
         </div>
 

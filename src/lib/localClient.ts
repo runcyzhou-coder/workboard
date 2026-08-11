@@ -22,11 +22,12 @@ function genId(): string {
 interface Filter {
   column: string;
   value: any;
+  op: 'eq' | 'gte' | 'lte';
 }
 
 class LocalQueryBuilder {
   private table: string;
-  private operation: 'select' | 'insert' | 'update' | 'delete' = 'select';
+  private operation: 'select' | 'insert' | 'update' | 'delete' | 'upsert' = 'select';
   private filters: Filter[] = [];
   private orderColumn?: string;
   private orderAscending = true;
@@ -51,7 +52,42 @@ class LocalQueryBuilder {
   }
 
   eq(column: string, value: any): this {
-    this.filters.push({ column, value });
+    this.filters.push({ column, value, op: 'eq' });
+    return this;
+  }
+
+  gte(column: string, value: any): this {
+    this.filters.push({ column, value, op: 'gte' });
+    return this;
+  }
+
+  lte(column: string, value: any): this {
+    this.filters.push({ column, value, op: 'lte' });
+    return this;
+  }
+
+  upsert(payload: any): this {
+    this.operation = 'upsert';
+    this.payload = payload;
+    const data = getTableData(this.table);
+    const rows = Array.isArray(payload) ? payload : [payload];
+    this.insertedRows = rows.map(row => ({
+      ...row,
+      id: row.id || genId(),
+      created_at: row.created_at || new Date().toISOString(),
+      updated_at: row.updated_at || new Date().toISOString(),
+    }));
+    // 如果有 id 则更新，否则插入
+    let updatedData = [...data];
+    for (const newRow of this.insertedRows) {
+      const idx = updatedData.findIndex(r => r.id === newRow.id);
+      if (idx >= 0) {
+        updatedData[idx] = { ...updatedData[idx], ...newRow };
+      } else {
+        updatedData.push(newRow);
+      }
+    }
+    saveTableData(this.table, updatedData);
     return this;
   }
 
@@ -125,12 +161,20 @@ class LocalQueryBuilder {
     });
   }
 
+  private matchFilter(row: any, f: Filter): boolean {
+    const val = row[f.column];
+    if (f.op === 'eq') return val === f.value;
+    if (f.op === 'gte') return val >= f.value;
+    if (f.op === 'lte') return val <= f.value;
+    return false;
+  }
+
   private execute(isSingle = false, isMaybeSingle = false): { data: any; error: any; count: any } {
     switch (this.operation) {
       case 'select': {
         let data = getTableData(this.table);
         for (const f of this.filters) {
-          data = data.filter(row => row[f.column] === f.value);
+          data = data.filter(row => this.matchFilter(row, f));
         }
         if (this.orderColumn) {
           data = [...data].sort((a, b) => {
@@ -147,7 +191,8 @@ class LocalQueryBuilder {
         if (isSingle || isMaybeSingle) return { data: data[0] || null, error: null, count: null };
         return { data, error: null, count };
       }
-      case 'insert': {
+      case 'insert':
+      case 'upsert': {
         if (this.selectColumns) {
           if (isSingle || isMaybeSingle) return { data: this.insertedRows?.[0] || null, error: null, count: null };
           return { data: this.insertedRows || [], error: null, count: this.insertedRows?.length || 0 };
@@ -157,7 +202,7 @@ class LocalQueryBuilder {
       case 'update': {
         const data = getTableData(this.table);
         const updated = data.map(row => {
-          const matches = this.filters.every(f => row[f.column] === f.value);
+          const matches = this.filters.every(f => this.matchFilter(row, f));
           return matches ? { ...row, ...this.payload } : row;
         });
         saveTableData(this.table, updated);
@@ -165,7 +210,7 @@ class LocalQueryBuilder {
       }
       case 'delete': {
         const data = getTableData(this.table);
-        const remaining = data.filter(row => !this.filters.every(f => row[f.column] === f.value));
+        const remaining = data.filter(row => !this.filters.every(f => this.matchFilter(row, f)));
         saveTableData(this.table, remaining);
         return { data: null, error: null, count: null };
       }

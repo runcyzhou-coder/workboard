@@ -427,6 +427,22 @@ export interface Shipment {
   updated_at: string;
 }
 
+// ============== 日历事项 ==============
+export type CalendarEventType = 'follow_up' | 'quote' | 'sample' | 'shipping' | 'visit' | 'other';
+export type CalendarEventPriority = 'high' | 'medium' | 'low';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  event_date: string;         // YYYY-MM-DD
+  type: CalendarEventType;
+  priority: CalendarEventPriority;
+  done: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============== 售后处理 ==============
 export interface AfterSale {
   id: string;
