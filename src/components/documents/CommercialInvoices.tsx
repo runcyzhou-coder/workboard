@@ -177,6 +177,12 @@ function CiViewModal({ ci, onClose }: { ci: CommercialInvoice & { customer?: Cus
                 <div className="flex justify-between"><span className="text-slate-400">Payment:</span><span className="text-slate-700">{ci.payment_terms || '—'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{ci.currency || 'USD'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Shipping:</span><span className="text-slate-700">{ci.shipping_method || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Origin:</span><span className="text-slate-700">{ci.origin_country || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Destination:</span><span className="text-slate-700">{ci.destination_country || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Loading Port:</span><span className="text-slate-700">{ci.port_of_loading || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Discharge Port:</span><span className="text-slate-700">{ci.port_of_discharge || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Vessel:</span><span className="text-slate-700">{ci.vessel_name || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">B/L No.:</span><span className="text-slate-700">{ci.bl_number || '—'}</span></div>
               </div>
             </div>
           </div>

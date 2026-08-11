@@ -167,10 +167,17 @@ function CdViewModal({ cd, onClose }: { cd: CustomsDeclaration & { customer?: Cu
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">DECLARATION DETAILS</p>
               <div className="space-y-1">
                 <div className="flex justify-between"><span className="text-slate-400">Date:</span><span className="text-slate-700">{formatDate(cd.created_at)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Trade Terms:</span><span className="text-slate-700">{cd.delivery_terms || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Trade Mode:</span><span className="text-slate-700">{cd.trade_mode || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Decl. Type:</span><span className="text-slate-700">{cd.declaration_type || '—'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{cd.currency || 'USD'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Loading Port:</span><span className="text-slate-700">{cd.port_of_loading || '—'}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Discharge Port:</span><span className="text-slate-700">{cd.port_of_discharge || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Origin:</span><span className="text-slate-700">{cd.origin_country || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Destination:</span><span className="text-slate-700">{cd.destination_country || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Departure Port:</span><span className="text-slate-700">{cd.port_of_departure || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Destination Port:</span><span className="text-slate-700">{cd.port_of_destination || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Transport:</span><span className="text-slate-700">{cd.transport_method || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Container No.:</span><span className="text-slate-700">{cd.container_number || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Customs Broker:</span><span className="text-slate-700">{cd.customs_broker || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">HS Code Summary:</span><span className="text-slate-700">{cd.hs_code_summary || '—'}</span></div>
               </div>
             </div>
           </div>

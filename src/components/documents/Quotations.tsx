@@ -276,7 +276,6 @@ export function Quotations() {
                     <div className="flex justify-between"><span className="text-slate-400">Date:</span><span className="text-slate-700">{formatDate(viewing.created_at)}</span></div>
                     <div className="flex justify-between"><span className="text-slate-400">Valid Until:</span><span className="text-slate-700">{viewing.valid_until ? formatDate(viewing.valid_until) : '—'}</span></div>
                     <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{viewing.currency || 'USD'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-400">Trade Terms:</span><span className="text-slate-700">{viewing.delivery_terms || '—'}</span></div>
                   </div>
                 </div>
               </div>

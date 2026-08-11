@@ -173,6 +173,10 @@ function ContractViewModal({ contract, onClose }: { contract: Contract & { custo
                 <div className="flex justify-between"><span className="text-slate-400">Payment:</span><span className="text-slate-700">{contract.payment_terms || '—'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Currency:</span><span className="text-slate-700">{contract.currency || 'USD'}</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Destination:</span><span className="text-slate-700">{contract.destination_country || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Origin:</span><span className="text-slate-700">{contract.origin_country || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Loading Port:</span><span className="text-slate-700">{contract.port_of_loading || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Discharge Port:</span><span className="text-slate-700">{contract.port_of_discharge || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Delivery Date:</span><span className="text-slate-700">{contract.delivery_date ? formatDate(contract.delivery_date) : '—'}</span></div>
               </div>
             </div>
           </div>
