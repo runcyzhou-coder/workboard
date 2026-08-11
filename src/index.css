@@ -2,11 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============ Raycast Dark Base ============ */
+html,
+body {
+  background-color: #0c0c0e;
+  color: #f4f4f5; /* zinc-100 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+}
+
+/* Raycast-style slim scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  background-clip: content-box;
+}
+
+/* Native select option dropdown in dark mode */
+option {
+  background-color: #131316;
+  color: #f4f4f5;
+}
+
+/* Form controls inherit dark surface */
+input,
+textarea,
+select {
+  color-scheme: dark;
+}
+
 @media print {
   body * {
     visibility: hidden;
   }
-  #pi-document, #pi-document * {
+  #pi-document,
+  #pi-document * {
     visibility: visible;
   }
   #pi-document {
