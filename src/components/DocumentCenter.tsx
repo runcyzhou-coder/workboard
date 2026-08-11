@@ -21,12 +21,12 @@ interface DocumentCenterProps {
 }
 
 const docTypes: { id: DocType; label: string; englishLabel: string; icon: typeof FileText; color: string; description: string }[] = [
-  { id: 'pi', label: '形式发票', englishLabel: 'Proforma Invoice', icon: FileText, color: 'from-violet-500 to-violet-600', description: '向买方提供的预估发票，用于申请进口许可、外汇审批等' },
-  { id: 'ci', label: '商业发票', englishLabel: 'Commercial Invoice', icon: Receipt, color: 'from-blue-500 to-blue-600', description: '正式结算凭证，用于报关、清关和付款' },
-  { id: 'contract', label: '合同', englishLabel: 'Sales Contract', icon: Handshake, color: 'from-emerald-500 to-emerald-600', description: '买卖双方正式签订的销售合同，含交期、检验、仲裁等条款' },
-  { id: 'customs', label: '报关信息', englishLabel: 'Customs Declaration', icon: ClipboardCheck, color: 'from-amber-500 to-amber-600', description: '出口报关申报信息，含HS编码、毛净重、包装方式等' },
-  { id: 'packing', label: '装箱单', englishLabel: 'Packing List', icon: Package2, color: 'from-rose-500 to-rose-600', description: '详细列明每箱货物的数量、重量、尺寸和体积' },
-  { id: 'quotation', label: '报价单', englishLabel: 'Quotation', icon: Quote, color: 'from-cyan-500 to-cyan-600', description: '向客户发送的产品报价，含有效期和付款条件' },
+  { id: 'pi', label: '形式发票', englishLabel: 'Proforma Invoice', icon: FileText, color: 'from-[#6B21A8] to-[#4C1D95]', description: '向买方提供的预估发票，用于申请进口许可、外汇审批等' },
+  { id: 'ci', label: '商业发票', englishLabel: 'Commercial Invoice', icon: Receipt, color: 'from-[#06B6D4] to-[#0E7490]', description: '正式结算凭证，用于报关、清关和付款' },
+  { id: 'contract', label: '合同', englishLabel: 'Sales Contract', icon: Handshake, color: 'from-[#A855F7] to-[#6B21A8]', description: '买卖双方正式签订的销售合同，含交期、检验、仲裁等条款' },
+  { id: 'customs', label: '报关信息', englishLabel: 'Customs Declaration', icon: ClipboardCheck, color: 'from-[#D8B4FE] to-[#A855F7]', description: '出口报关申报信息，含HS编码、毛净重、包装方式等' },
+  { id: 'packing', label: '装箱单', englishLabel: 'Packing List', icon: Package2, color: 'from-[#F87171] to-[#A855F7]', description: '详细列明每箱货物的数量、重量、尺寸和体积' },
+  { id: 'quotation', label: '报价单', englishLabel: 'Quotation', icon: Quote, color: 'from-[#06B6D4] to-[#0E7490]', description: '向客户发送的产品报价，含有效期和付款条件' },
 ];
 
 export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterProps) {
@@ -97,12 +97,12 @@ export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterPro
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSelectedDoc(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
+            <button onClick={() => setSelectedDoc(null)} className="p-2 text-[#78716C] hover:text-[#B8AEC8] hover:bg-[#221A3A]/50 rounded-lg">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">{docInfo.label}</h1>
-              <p className="text-sm text-slate-500">{docInfo.englishLabel}</p>
+              <h1 className="text-2xl font-bold text-[#F3EFE6]">{docInfo.label}</h1>
+              <p className="text-sm text-[#8879A0]">{docInfo.englishLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -111,7 +111,7 @@ export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterPro
             )}
             <button
               onClick={() => setShowSettings(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] text-[#F3EFE6] rounded-lg hover:bg-[#221A3A]/70 font-medium text-sm"
             >
               <Settings className="w-4 h-4" />公司设置
             </button>
@@ -144,12 +144,12 @@ export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterPro
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">单据中心</h1>
-          <p className="text-slate-500 mt-1">选择单据类型，生成专业外贸单据</p>
+          <h1 className="text-2xl font-bold text-[#F3EFE6]">单据中心</h1>
+          <p className="text-[#8879A0] mt-1">选择单据类型，生成专业外贸单据</p>
         </div>
         <button
           onClick={() => setShowSettings(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] text-[#F3EFE6] rounded-lg hover:bg-[#221A3A]/70 font-medium text-sm"
         >
           <Settings className="w-4 h-4" />公司设置
         </button>
@@ -157,11 +157,11 @@ export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterPro
 
       {/* Logo preview */}
       {settings?.logo_url && (
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
+        <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-4 flex items-center gap-4">
           <img src={settings.logo_url} alt="Company Logo" className="h-12 w-auto object-contain" />
           <div>
-            <p className="text-sm font-medium text-slate-900">{settings.company_name}</p>
-            <p className="text-xs text-slate-500">当前Logo已应用到所有单据</p>
+            <p className="text-sm font-medium text-[#F3EFE6]">{settings.company_name}</p>
+            <p className="text-xs text-[#8879A0]">当前Logo已应用到所有单据</p>
           </div>
         </div>
       )}
@@ -173,14 +173,14 @@ export function DocumentCenter({ initialDocType, onConsumed }: DocumentCenterPro
             <button
               key={doc.id}
               onClick={() => setSelectedDoc(doc.id)}
-              className="group text-left bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:border-slate-300 transition-all"
+              className="group text-left bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-6 hover:shadow-xl hover:border-[#3A2D54]/70 transition-all"
             >
               <div className={classNames('w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center mb-4 group-hover:scale-105 transition-transform', doc.color)}>
                 <Icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">{doc.label}</h3>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">{doc.englishLabel}</p>
-              <p className="text-sm text-slate-500 mt-2 leading-relaxed">{doc.description}</p>
+              <h3 className="font-semibold text-[#F3EFE6] group-hover:text-[#06B6D4] transition-colors">{doc.label}</h3>
+              <p className="text-xs text-[#78716C] font-medium mt-0.5">{doc.englishLabel}</p>
+              <p className="text-sm text-[#8879A0] mt-2 leading-relaxed">{doc.description}</p>
             </button>
           );
         })}
@@ -229,86 +229,86 @@ function CompanySettingsModal({ settings, loading, onClose, onSave, onLogoUpload
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-white">
-          <h2 className="text-lg font-semibold text-slate-900">公司设置</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">✕</button>
+      <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A2D54]/50 sticky top-0 bg-[#1B142C]/90">
+          <h2 className="text-lg font-semibold text-[#F3EFE6]">公司设置</h2>
+          <button onClick={onClose} className="text-[#78716C] hover:text-[#B8AEC8]">✕</button>
         </div>
-        <div className="p-6 space-y-5">
+        <div className="relative z-10 p-6 space-y-5">
           {/* Logo upload */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">公司Logo</label>
+            <label className="block text-sm font-medium text-[#F3EFE6] mb-2">公司Logo</label>
             <div className="flex items-center gap-4">
               {settings?.logo_url ? (
-                <img src={settings.logo_url} alt="Logo" className="h-16 w-16 object-contain border border-slate-200 rounded-lg p-1" />
+                <img src={settings.logo_url} alt="Logo" className="h-16 w-16 object-contain border border-[#3A2D54] rounded-lg p-1" />
               ) : (
-                <div className="h-16 w-16 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center">
-                  <ImageIcon className="w-6 h-6 text-slate-400" />
+                <div className="h-16 w-16 border-2 border-dashed border-[#3A2D54]/70 rounded-lg flex items-center justify-center">
+                  <ImageIcon className="w-6 h-6 text-[#78716C]" />
                 </div>
               )}
               <div>
                 <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" onChange={onLogoUpload} className="hidden" />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] text-sm font-medium"
                 >
                   <Upload className="w-4 h-4" />上传Logo
                 </button>
-                <p className="text-xs text-slate-400 mt-1.5">PNG/JPG/SVG/WebP, 最大2MB</p>
+                <p className="text-xs text-[#78716C] mt-1.5">PNG/JPG/SVG/WebP, 最大2MB</p>
               </div>
             </div>
           </div>
 
           {loading ? (
-            <p className="text-center text-slate-400 py-4">加载中...</p>
+            <p className="text-center text-[#78716C] py-4">加载中...</p>
           ) : (
             <>
               <Field label="公司名称">
                 <input value={form.company_name} onChange={e => setForm({ ...form, company_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
               </Field>
               <Field label="地址">
                 <input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
               </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="电话">
                   <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
                 </Field>
                 <Field label="邮箱">
                   <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
                 </Field>
               </div>
               <Field label="网站">
                 <input value={form.website} onChange={e => setForm({ ...form, website: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
               </Field>
               <Field label="税号">
                 <input value={form.tax_id} onChange={e => setForm({ ...form, tax_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
               </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="开户银行">
                   <input value={form.bank_name} onChange={e => setForm({ ...form, bank_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
                 </Field>
                 <Field label="银行账号">
                   <input value={form.bank_account} onChange={e => setForm({ ...form, bank_account: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
                 </Field>
               </div>
               <Field label="SWIFT Code">
                 <input value={form.swift_code} onChange={e => setForm({ ...form, swift_code: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
               </Field>
             </>
           )}
         </div>
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 sticky bottom-0 bg-white">
-          <button onClick={onClose} className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium text-sm">取消</button>
-          <button onClick={save} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm">保存</button>
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#3A2D54] sticky bottom-0 bg-[#1B142C]/90">
+          <button onClick={onClose} className="px-4 py-2 text-[#B8AEC8] hover:text-[#F3EFE6] font-medium text-sm">取消</button>
+          <button onClick={save} className="px-4 py-2 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] font-medium text-sm">保存</button>
         </div>
       </div>
     </div>
@@ -316,5 +316,5 @@ function CompanySettingsModal({ settings, loading, onClose, onSave, onLogoUpload
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div><label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>{children}</div>;
+  return <div><label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">{label}</label>{children}</div>;
 }

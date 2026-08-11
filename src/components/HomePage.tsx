@@ -266,7 +266,6 @@ function generateRiskAlerts(
     const paymentTerms = (pi.payment_terms || '').toLowerCase();
 
     // 规则1：未收齐尾款 + 已报关/已开船 → 严禁放单（严重）
-    // 判断条件：付款条款包含 deposit/30% 等预付款，PI 已确认/发送，且关联物流已进入运输环节
     const hasDeposit = /deposit|预付款|30%\s*deposit|t\/t\s*30%/.test(paymentTerms);
     const hasBalance = /balance|尾款|70%|remaining/.test(paymentTerms);
     const isPiActive = pi.status === 'confirmed' || pi.status === 'sent';
@@ -274,7 +273,6 @@ function generateRiskAlerts(
     for (const shipment of relatedShipments) {
       const shipmentInTransit = ['customs_cleared', 'in_transit', 'arrived'].includes(shipment.status);
       if (hasDeposit && hasBalance && isPiActive && shipmentInTransit) {
-        // 检查是否已收到尾款（简化判断：如果物流已到港但付款条款要求尾款到单付款，则视为风险）
         const balanceNotPaidYet = /balance.*(?:against|after|upon|copy|bl|提货)/.test(paymentTerms) ||
                                  /(?:against|after|upon).*(?:bl|copy|提单|提货)/.test(paymentTerms);
         if (balanceNotPaidYet) {
@@ -301,7 +299,6 @@ function generateRiskAlerts(
           return daysBetween(pi.created_at, s.eta) < 60;
         });
         if (!hasRecentShipment) {
-          // 检查是否已有物流
           const anyShipment = relatedShipments.length > 0;
           if (!anyShipment && pi.status === 'sent') {
             alerts.push({
@@ -342,7 +339,7 @@ function generateRiskAlerts(
     // 规则4：物流延误（实际到港 - 预计开船 > 7天）
     if (shipment.etd && shipment.ata) {
       const transitDays = daysBetween(shipment.etd, shipment.ata);
-      const expectedTransit = 7; // 假设正常海运约7天
+      const expectedTransit = 7;
       if (transitDays > expectedTransit + 7) {
         const customerName = getCustomerName(shipment.customer_id);
         alerts.push({
@@ -368,18 +365,18 @@ function generateRiskAlerts(
 
 // ============ 事项类型与颜色配置 ============
 const eventTypeConfig: Record<CalendarEventType, { label: string; color: string; dot: string }> = {
-  follow_up: { label: '跟进', color: 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]', dot: 'bg-blue-600' },
-  quote:     { label: '报价', color: 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]', dot: 'bg-violet-600' },
-  sample:    { label: '寄样', color: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]', dot: 'bg-emerald-600' },
-  shipping:  { label: '发货', color: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]', dot: 'bg-teal-600' },
-  visit:     { label: '拜访', color: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]', dot: 'bg-emerald-600' },
-  other:     { label: '其他', color: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', dot: 'bg-[#78716C]' },
+  follow_up: { label: '跟进', color: 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]', dot: 'bg-cyan-400' },
+  quote:     { label: '报价', color: 'bg-[#221A3A]/80 text-[#D8B4FE] border border-[#A855F7]/50', dot: 'bg-purple-400' },
+  sample:    { label: '寄样', color: 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]', dot: 'bg-cyan-400' },
+  shipping:  { label: '发货', color: 'bg-[#221A3A]/70 text-[#A855F7] border border-[#3A2D54]', dot: 'bg-purple-400' },
+  visit:     { label: '拜访', color: 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]', dot: 'bg-cyan-400' },
+  other:     { label: '其他', color: 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70]', dot: 'bg-[#8879A0]' },
 };
 
 const priorityConfig: Record<CalendarEventPriority, { label: string; color: string; bar: string }> = {
-  high:   { label: '高', color: 'text-[#9B2C2C]', bar: 'border-l-[#9B2C2C]' },
-  medium: { label: '中', color: 'text-[#5F8A4D]', bar: 'border-l-[#A8C28E]' },
-  low:    { label: '低', color: 'text-[#78716C]', bar: 'border-l-[#524E48]/40' },
+  high:   { label: '高', color: 'text-[#F87171]', bar: 'border-l-[#F87171]' },
+  medium: { label: '中', color: 'text-[#A855F7]', bar: 'border-l-[#A855F7]' },
+  low:    { label: '低', color: 'text-[#8879A0]', bar: 'border-l-[#3A2D54]/60' },
 };
 
 // ============ 事项编辑弹窗 ============
@@ -417,46 +414,46 @@ function EventModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-[#3D3A36]/40 backdrop-blur-[1px] z-50 flex items-center justify-center p-4">
-      <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-xl shadow-[0_4px_16px_rgba(45,42,38,0.06)] w-full max-w-md flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-[#524E48]/25">
+    <div className="fixed inset-0 bg-[#0D0B18]/70 backdrop-blur-[1px] z-50 flex items-center justify-center p-4">
+      <div className="bg-[#1B142C]/95 border-2 border-[#3A2D54] rounded-xl shadow-[0_0_30px_rgba(168,85,247,0.22)] w-full max-w-md flex flex-col intj-cut-corner">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-[#3A2D54]/60">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
-            <h2 className="text-lg font-serif font-bold text-[#2D2A26]">
+            <Calendar className="w-5 h-5 text-[#A855F7]" strokeWidth={1.75} />
+            <h2 className="text-lg font-serif font-bold text-[#F3EFE6]">
               {mode === 'add' ? '添加重要事项' : '修改事项'}
             </h2>
           </div>
-          <button onClick={onClose} className="text-[#78716C] hover:text-[#2D2A26]"><X className="w-5 h-5" strokeWidth={1.75} /></button>
+          <button onClick={onClose} className="text-[#8879A0] hover:text-[#F3EFE6]"><X className="w-5 h-5" strokeWidth={1.75} /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {/* 事项标题 */}
           <div>
-            <label className="text-xs font-medium text-[#78716C] mb-1 block">事项标题</label>
+            <label className="text-xs font-medium text-[#8879A0] mb-1 block">事项标题</label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && title.trim()) handleSave(); }}
               placeholder="如：给沙特客户发送报价..."
               autoFocus
-              className="w-full px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
+              className="intj-input"
             />
           </div>
 
           {/* 日期 */}
           <div>
-            <label className="text-xs font-medium text-[#78716C] mb-1 block">日期</label>
+            <label className="text-xs font-medium text-[#8879A0] mb-1 block">日期</label>
             <input
               type="date"
               value={eventDate}
               onChange={e => setEventDate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
+              className="intj-input"
             />
           </div>
 
           {/* 类型标签 */}
           <div>
-            <label className="text-xs font-medium text-[#78716C] mb-1.5 block flex items-center gap-1">
+            <label className="text-xs font-medium text-[#8879A0] mb-1.5 block flex items-center gap-1">
               <Tag className="w-3 h-3" strokeWidth={1.75} /> 类型标签
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -467,8 +464,8 @@ function EventModal({
                   className={classNames(
                     'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                     type === t
-                      ? `${eventTypeConfig[t].color} ring-1 ring-offset-0 ring-[#3B5A7A]/30`
-                      : 'bg-[#F7F3EB] text-[#78716C] border border-dashed border-[#524E48]/20 hover:bg-[#F2EBDC]'
+                      ? `${eventTypeConfig[t].color} ring-1 ring-offset-0 ring-[#A855F7]/30`
+                      : 'bg-[#0B0813]/60 text-[#8879A0] border border-dashed border-[#3A2D54]/50 hover:bg-[#221A3A]/60'
                   )}
                 >
                   {eventTypeConfig[t].label}
@@ -479,7 +476,7 @@ function EventModal({
 
           {/* 优先级 */}
           <div>
-            <label className="text-xs font-medium text-[#78716C] mb-1.5 block flex items-center gap-1">
+            <label className="text-xs font-medium text-[#8879A0] mb-1.5 block flex items-center gap-1">
               <Flag className="w-3 h-3" strokeWidth={1.75} /> 优先级
             </label>
             <div className="flex gap-1.5">
@@ -490,10 +487,10 @@ function EventModal({
                   className={classNames(
                     'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1',
                     priority === p
-                      ? p === 'high' ? 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6] ring-1 ring-[#9B2C2C]/30'
-                        : p === 'medium' ? 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8] ring-1 ring-[#A8C28E]/30'
-                        : 'bg-[#F7F3EB] text-[#78716C] border border-[#E0D5C1] ring-1 ring-[#524E48]/20'
-                      : 'bg-[#F7F3EB] text-[#78716C] border border-dashed border-[#524E48]/20 hover:bg-[#F2EBDC]'
+                      ? p === 'high' ? 'bg-[#3A1F1F]/80 text-[#F87171] border-2 border-[#F87171]/50 ring-1 ring-[#F87171]/30'
+                        : p === 'medium' ? 'bg-[#221A3A]/80 text-[#A855F7] border-2 border-[#A855F7]/50 ring-1 ring-[#A855F7]/30'
+                        : 'bg-[#161228]/70 text-[#8879A0] border-2 border-[#3A2D54]/50 ring-1 ring-[#3A2D54]/30'
+                      : 'bg-[#0B0813]/60 text-[#8879A0] border border-dashed border-[#3A2D54]/50 hover:bg-[#221A3A]/60'
                   )}
                 >
                   {priorityConfig[p].label}优先
@@ -504,13 +501,13 @@ function EventModal({
 
           {/* 备注 */}
           <div>
-            <label className="text-xs font-medium text-[#78716C] mb-1 block">备注（可选）</label>
+            <label className="text-xs font-medium text-[#8879A0] mb-1 block">备注（可选）</label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="补充说明..."
               rows={2}
-              className="w-full px-3 py-2 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369] resize-none"
+              className="intj-input resize-none"
             />
           </div>
 
@@ -521,38 +518,199 @@ function EventModal({
                 onClick={() => setDone(!done)}
                 className={classNames(
                   'w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-all',
-                  done ? 'bg-[#3D3A36] text-[#FAF7F2] border-[#3D3A36]' : 'border-[#3D3A36] hover:border-[#7BA369]'
+                  done ? 'bg-[#A855F7] text-white border-[#A855F7]' : 'border-[#4A3A70] hover:border-[#A855F7]'
                 )}
               >
                 {done && <span className="text-[10px] leading-none">✓</span>}
               </button>
-              <span className="text-sm text-[#78716C]">标记为已完成</span>
+              <span className="text-sm text-[#B8AEC8]">标记为已完成</span>
             </label>
           )}
         </div>
 
         {/* 底部操作 */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-dashed border-[#524E48]/25">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-dashed border-[#3A2D54]/60">
           {mode === 'edit' && onDelete && event ? (
             <button
               onClick={() => onDelete(event.id)}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-[#9B2C2C] hover:bg-[#FDF2F2] rounded-lg font-medium"
+              className="flex items-center gap-1 px-3 py-2 text-sm text-[#F87171] hover:bg-[#3A1F1F]/60 rounded-lg font-medium"
             >
               <Trash2 className="w-4 h-4" strokeWidth={1.75} /> 删除
             </button>
           ) : <div />}
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-[#78716C] hover:bg-[#F2EBDC] rounded-lg">取消</button>
+            <button onClick={onClose} className="intj-btn-ghost">取消</button>
             <button
               onClick={handleSave}
               disabled={!title.trim() || saving}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+              className="intj-btn disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={1.75} /> : <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />}
               {mode === 'add' ? '添加' : '保存'}
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ============ AI 写信 Modal ============
+function AILetterModal({ news, onClose }: { news: IndustryNews; onClose: () => void }) {
+  const letter = `Subject: Re: ${news.title} — Potential Cooperation Opportunity
+
+Dear Valued Client,
+
+We at KIKI TECH have been closely monitoring the latest development: "${news.title}". As reported by ${news.source}, ${news.summary}
+
+As a leading manufacturer in the wind energy equipment industry, KIKI TECH offers competitive solutions including:
+• High-efficiency wind turbines (4.5MW–16MW) with international certifications (DNV, IEC)
+• Complete supply chain support from manufacturing to after-sales service
+• Competitive pricing with flexible payment terms
+
+Given the current market dynamics described in the news, we believe this presents an excellent opportunity for collaboration. Our team is ready to provide detailed technical specifications and customized quotations upon your request.
+
+Would you be available for a brief call next week to discuss potential synergies?
+
+Best regards,
+KIKI TECH Team
+Email: sales@kiki-tech.com
+Tel: +86-xxx-xxxx-xxxx
+www.kiki-tech.com`;
+
+  const [copied, setCopied] = useState(false);
+
+  function copyLetter() {
+    navigator.clipboard.writeText(letter);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="fixed inset-0 bg-[#0D0B18]/70 backdrop-blur-[1px] z-50 flex items-center justify-center p-4">
+      <div className="bg-[#1B142C]/95 border-2 border-[#3A2D54] rounded-xl shadow-[0_0_40px_rgba(168,85,247,0.28)] w-full max-w-2xl max-h-[80vh] flex flex-col intj-cut-corner">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-[#3A2D54]/60">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#A855F7]" strokeWidth={1.75} />
+            <h2 className="text-lg font-serif font-bold text-[#F3EFE6]">AI 提取商机写信</h2>
+          </div>
+          <button onClick={onClose} className="text-[#8879A0] hover:bg-[#221A3A]/60 rounded-lg"><X className="w-5 h-5" strokeWidth={1.75} /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="bg-[#221A3A]/80 border border-[#3A2D54] text-[#D8B4FE] rounded-lg p-3 mb-4 text-sm">
+            📰 基于新闻：{news.title}
+          </div>
+          <pre className="whitespace-pre-wrap text-sm text-[#F3EFE6] leading-relaxed font-sans">{letter}</pre>
+        </div>
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-dashed border-[#3A2D54]/60">
+          <button onClick={onClose} className="intj-btn-ghost">关闭</button>
+          <button onClick={copyLetter} className="intj-btn">
+            {copied ? <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> : <Sparkles className="w-4 h-4" strokeWidth={1.75} />}
+            {copied ? '已复制' : '复制全文'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============ 行业选择 Modal ============
+function IndustrySelectModal({
+  current,
+  onSelect,
+  onClose,
+}: {
+  current: string;
+  onSelect: (industry: string) => void;
+  onClose: () => void;
+}) {
+  const [customIndustry, setCustomIndustry] = useState('');
+  const hasIndustry = !!current;
+
+  function handleConfirm() {
+    const trimmed = customIndustry.trim();
+    if (trimmed) onSelect(trimmed);
+  }
+
+  return (
+    <div className="fixed inset-0 bg-[#0D0B18]/70 backdrop-blur-[1px] z-50 flex items-center justify-center p-4">
+      <div className="bg-[#1B142C]/95 border-2 border-[#3A2D54] rounded-2xl shadow-[0_0_40px_rgba(168,85,247,0.28)] w-full max-w-lg overflow-hidden intj-cut-corner">
+        {/* Header */}
+        <div className="bg-[#1B142C]/95 px-6 py-5 border-b border-dashed border-[#3A2D54]/60">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-serif font-bold text-[#F3EFE6]">
+                {hasIndustry ? '切换主营行业' : '欢迎！请选择您的主营行业'}
+              </h2>
+              <p className="text-sm text-[#B8AEC8] mt-1">
+                {hasIndustry ? '切换后首页数据将自动刷新' : 'AI 将根据您的行业定制首页内容'}
+              </p>
+            </div>
+            {hasIndustry && (
+              <button onClick={onClose} className="text-[#8879A0] hover:text-[#F3EFE6]">
+                <X className="w-5 h-5" strokeWidth={1.75} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {industryOptions.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => onSelect(opt.value)}
+                className={classNames(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left',
+                  current === opt.value
+                    ? 'border-[#A855F7] bg-[#221A3A]/80 ring-1 ring-[#A855F7]/30 text-[#F3EFE6]'
+                    : 'border-[#3A2D54] bg-[#0B0813]/60 hover:border-[#A855F7] hover:bg-[#221A3A]/60 text-[#B8AEC8]'
+                )}
+              >
+                <span className="text-2xl">{opt.icon}</span>
+                <div>
+                  <p className="text-sm font-semibold">
+                    {opt.value}
+                  </p>
+                  {current === opt.value && (
+                    <p className="text-[10px] text-[#A855F7] font-handwriting">当前选择</p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* 自定义输入 */}
+          <div className="border-t border-dashed border-[#3A2D54]/60 pt-4">
+            <label className="text-xs font-medium text-[#8879A0] mb-2 block">
+              没有找到？输入您的行业名称：
+            </label>
+            <div className="flex gap-2">
+              <input
+                value={customIndustry}
+                onChange={e => setCustomIndustry(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && customIndustry.trim()) handleConfirm(); }}
+                placeholder="如：五金工具、食品机械..."
+                className="intj-input"
+              />
+              <button
+                onClick={handleConfirm}
+                disabled={!customIndustry.trim()}
+                className="intj-btn disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                确认
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        {!hasIndustry && (
+          <div className="px-6 py-3 bg-[#221A3A]/60 border-t border-[#3A2D54] text-center text-xs text-[#B8AEC8] font-handwriting">
+            选择行业后将自动保存，随时可切换
+          </div>
+        )}
       </div>
     </div>
   );
@@ -792,14 +950,14 @@ function MiniCalendar({
   }
 
   return (
-    <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-5 transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-[0_4px_16px_rgba(45,42,38,0.06)]">
+    <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
       {/* Header：年月选择器 + 导航 */}
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <select
             value={viewYear}
             onChange={e => setViewYear(Number(e.target.value))}
-            className="px-2 py-1 text-sm font-semibold text-[#2D2A26] bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369] cursor-pointer"
+            className="px-2 py-1 text-sm font-semibold text-[#F3EFE6] bg-[#0B0813]/60 border border-[#3A2D54] rounded-lg focus:outline-none focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7] cursor-pointer"
           >
             {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
               <option key={y} value={y}>{y}年</option>
@@ -808,7 +966,7 @@ function MiniCalendar({
           <select
             value={viewMonth}
             onChange={e => setViewMonth(Number(e.target.value))}
-            className="px-2 py-1 text-sm font-semibold text-[#2D2A26] bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369] cursor-pointer"
+            className="px-2 py-1 text-sm font-semibold text-[#F3EFE6] bg-[#0B0813]/60 border border-[#3A2D54] rounded-lg focus:outline-none focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7] cursor-pointer"
           >
             {Array.from({ length: 12 }, (_, i) => i).map(m => (
               <option key={m} value={m}>{m + 1}月</option>
@@ -816,13 +974,13 @@ function MiniCalendar({
           </select>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={prevMonth} className="p-1.5 text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-lg transition-colors" title="上一月">
+          <button onClick={prevMonth} className="p-1.5 text-[#8879A0] hover:text-[#F3EFE6] hover:bg-[#221A3A]/60 rounded-lg transition-colors" title="上一月">
             <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
           </button>
-          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-[#7BA369] hover:bg-[#FDF2F2] rounded-lg transition-colors" title="返回今天">
+          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-[#A855F7] hover:bg-[#3A2D54]/60 rounded-lg transition-colors" title="返回今天">
             今天
           </button>
-          <button onClick={nextMonth} className="p-1.5 text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-lg transition-colors" title="下一月">
+          <button onClick={nextMonth} className="p-1.5 text-[#8879A0] hover:text-[#F3EFE6] hover:bg-[#221A3A]/60 rounded-lg transition-colors" title="下一月">
             <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
           </button>
         </div>
@@ -831,7 +989,7 @@ function MiniCalendar({
       {/* 星期表头 */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {weekDays.map(d => (
-          <div key={d} className="text-center text-[11px] font-semibold text-[#78716C] py-1">{d}</div>
+          <div key={d} className="text-center text-[11px] font-semibold text-[#8879A0] py-1">{d}</div>
         ))}
       </div>
 
@@ -850,10 +1008,10 @@ function MiniCalendar({
               className={classNames(
                 'min-h-[56px] p-1 rounded-lg border cursor-pointer transition-all group relative',
                 isSelected
-                  ? 'border-[#7BA369] bg-[#7BA369]/10 ring-1 ring-[#7BA369]/30'
+                  ? 'border-[#A855F7] bg-[#A855F7]/10 ring-1 ring-[#A855F7]/30'
                   : isToday
-                    ? 'border-[#7BA369] bg-[#FDF2F2]'
-                    : 'border-transparent hover:border-dashed hover:border-[#524E48]/30 hover:bg-[#F2EBDC]',
+                    ? 'border-[#A855F7] bg-[#3A2D54]/40'
+                    : 'border-transparent hover:border-dashed hover:border-[#3A2D54]/60 hover:bg-[#221A3A]/40',
                 !cell.isCurrentMonth && 'opacity-40'
               )}
             >
@@ -862,16 +1020,16 @@ function MiniCalendar({
                 <span className={classNames(
                   'text-xs font-medium leading-none',
                   isSelected
-                    ? 'text-[#2D2A26] font-bold'
+                    ? 'text-[#F3EFE6] font-bold'
                     : isToday
-                      ? 'text-[#2D2A26] font-bold'
-                      : 'text-[#5C5246]'
+                      ? 'text-[#A855F7] font-bold'
+                      : 'text-[#B8AEC8]'
                 )}>
                   {cell.day}
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); openAddModal(cell.dateStr); }}
-                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-[#78716C] hover:text-[#7BA369] hover:bg-[#FDF2F2] rounded transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-[#8879A0] hover:text-[#A855F7] hover:bg-[#3A2D54]/60 rounded transition-all"
                   title="添加事项"
                 >
                   <Plus className="w-3 h-3" strokeWidth={1.75} />
@@ -898,7 +1056,7 @@ function MiniCalendar({
                   );
                 })}
                 {hiddenCount > 0 && (
-                  <div className="text-[9px] text-[#78716C] px-1 font-medium">
+                  <div className="text-[9px] text-[#8879A0] px-1 font-medium">
                     +{hiddenCount} 项
                   </div>
                 )}
@@ -909,20 +1067,20 @@ function MiniCalendar({
       </div>
 
       {/* 底部统计 */}
-      <div className="mt-3 pt-3 border-t border-dashed border-[#524E48]/25">
+      <div className="mt-3 pt-3 border-t border-dashed border-[#3A2D54]/60">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-[#78716C]">
+          <span className="text-[#8879A0]">
             {selectedDate === todayStr ? '今日任务' : `${selectedDate} 任务`}
           </span>
           <div className="flex items-center gap-2">
-            {loading && <RefreshCw className="w-3 h-3 text-[#78716C] animate-spin" strokeWidth={1.75} />}
-            <span className="font-semibold text-[#7BA369]">{doneCount}/{totalTodos}</span>
+            {loading && <RefreshCw className="w-3 h-3 text-[#8879A0] animate-spin" strokeWidth={1.75} />}
+            <span className="font-semibold text-[#A855F7]">{doneCount}/{totalTodos}</span>
           </div>
         </div>
         {/* 图例 */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2">
           {(Object.keys(eventTypeConfig) as CalendarEventType[]).slice(0, 5).map(t => (
-            <span key={t} className="flex items-center gap-1 text-[9px] text-[#78716C]">
+            <span key={t} className="flex items-center gap-1 text-[9px] text-[#8879A0]">
               <span className={classNames('w-1.5 h-1.5 rounded-full', eventTypeConfig[t].dot)} />
               {eventTypeConfig[t].label}
             </span>
@@ -941,167 +1099,6 @@ function MiniCalendar({
           onDelete={handleDelete}
         />
       )}
-    </div>
-  );
-}
-
-// ============ AI 写信 Modal ============
-function AILetterModal({ news, onClose }: { news: IndustryNews; onClose: () => void }) {
-  const letter = `Subject: Re: ${news.title} — Potential Cooperation Opportunity
-
-Dear Valued Client,
-
-We at KIKI TECH have been closely monitoring the latest development: "${news.title}". As reported by ${news.source}, ${news.summary}
-
-As a leading manufacturer in the wind energy equipment industry, KIKI TECH offers competitive solutions including:
-• High-efficiency wind turbines (4.5MW–16MW) with international certifications (DNV, IEC)
-• Complete supply chain support from manufacturing to after-sales service
-• Competitive pricing with flexible payment terms
-
-Given the current market dynamics described in the news, we believe this presents an excellent opportunity for collaboration. Our team is ready to provide detailed technical specifications and customized quotations upon your request.
-
-Would you be available for a brief call next week to discuss potential synergies?
-
-Best regards,
-KIKI TECH Team
-Email: sales@kiki-tech.com
-Tel: +86-xxx-xxxx-xxxx
-www.kiki-tech.com`;
-
-  const [copied, setCopied] = useState(false);
-
-  function copyLetter() {
-    navigator.clipboard.writeText(letter);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  return (
-    <div className="fixed inset-0 bg-[#3D3A36]/40 backdrop-blur-[1px] z-50 flex items-center justify-center p-4">
-      <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-xl shadow-paper-md w-full max-w-2xl max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-[#524E48]/25">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
-            <h2 className="text-lg font-serif font-bold text-[#2D2A26]">AI 提取商机写信</h2>
-          </div>
-          <button onClick={onClose} className="text-[#78716C] hover:bg-[#F2EBDC] rounded-lg"><X className="w-5 h-5" strokeWidth={1.75} /></button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="bg-[#EDF3E4] border border-[#C9D9B8] text-[#5F8A4D] rounded-lg p-3 mb-4 text-sm">
-            📰 基于新闻：{news.title}
-          </div>
-          <pre className="whitespace-pre-wrap text-sm text-[#3D3A36] leading-relaxed font-sans">{letter}</pre>
-        </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-dashed border-[#524E48]/25">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#78716C] hover:bg-[#F2EBDC] rounded-lg">关闭</button>
-          <button onClick={copyLetter} className="flex items-center gap-1.5 px-4 py-2 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927]">
-            {copied ? <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> : <Sparkles className="w-4 h-4" strokeWidth={1.75} />}
-            {copied ? '已复制' : '复制全文'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============ 行业选择 Modal ============
-function IndustrySelectModal({
-  current,
-  onSelect,
-  onClose,
-}: {
-  current: string;
-  onSelect: (industry: string) => void;
-  onClose: () => void;
-}) {
-  const [customIndustry, setCustomIndustry] = useState('');
-  const hasIndustry = !!current;
-
-  function handleConfirm() {
-    const trimmed = customIndustry.trim();
-    if (trimmed) onSelect(trimmed);
-  }
-
-  return (
-    <div className="fixed inset-0 bg-[#3D3A36]/40 backdrop-blur-[1px] z-50 flex items-center justify-center p-4">
-      <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper-md w-full max-w-lg overflow-hidden">
-        {/* Header */}
-        <div className="bg-[#FFFDF9] px-6 py-5 border-b border-dashed border-[#524E48]/25">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-serif font-bold text-[#2D2A26]">
-                {hasIndustry ? '切换主营行业' : '欢迎！请选择您的主营行业'}
-              </h2>
-              <p className="text-sm text-[#78716C] mt-1">
-                {hasIndustry ? '切换后首页数据将自动刷新' : 'AI 将根据您的行业定制首页内容'}
-              </p>
-            </div>
-            {hasIndustry && (
-              <button onClick={onClose} className="text-[#78716C] hover:text-[#2D2A26]">
-                <X className="w-5 h-5" strokeWidth={1.75} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-5">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            {industryOptions.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => onSelect(opt.value)}
-                className={classNames(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left',
-                  current === opt.value
-                    ? 'border-[#7BA369] bg-[#FDF2F2] ring-1 ring-[#7BA369]/30 text-[#2D2A26]'
-                    : 'border-[#E8E2D5] bg-[#F7F3EB] hover:border-[#7BA369] hover:bg-[#F2EBDC] text-[#5C5246]'
-                )}
-              >
-                <span className="text-2xl">{opt.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold">
-                    {opt.value}
-                  </p>
-                  {current === opt.value && (
-                    <p className="text-[10px] text-[#7BA369] font-handwriting">当前选择</p>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* 自定义输入 */}
-          <div className="border-t border-dashed border-[#524E48]/25 pt-4">
-            <label className="text-xs font-medium text-[#78716C] mb-2 block">
-              没有找到？输入您的行业名称：
-            </label>
-            <div className="flex gap-2">
-              <input
-                value={customIndustry}
-                onChange={e => setCustomIndustry(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && customIndustry.trim()) handleConfirm(); }}
-                placeholder="如：五金工具、食品机械..."
-                className="flex-1 px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
-              />
-              <button
-                onClick={handleConfirm}
-                disabled={!customIndustry.trim()}
-                className="px-4 py-2.5 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-              >
-                确认
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        {!hasIndustry && (
-          <div className="px-6 py-3 bg-[#F7F3EB] border-t border-[#E8E2D5] text-center text-xs text-[#78716C] font-handwriting">
-            选择行业后将自动保存，随时可切换
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -1297,20 +1294,23 @@ export function HomePage({ onNavigate }: HomeProps) {
   return (
     <div className="space-y-6">
       {/* 1. 顶部 Banner（问候 + 业务指标卡片） */}
-      <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-6 sm:p-8 overflow-hidden relative">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#A8C28E]/[0.06] blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#7BA369]/[0.05] blur-3xl pointer-events-none" />
+      <div className="relative z-10 overflow-hidden rounded-2xl border-2 border-[#3A2D54] bg-gradient-to-br from-[#1B142C]/95 via-[#221A3A]/90 to-[#0D0B18]/95 backdrop-blur-md shadow-[0_0_30px_rgba(168,85,247,0.22)] p-6 sm:p-8 intj-cut-corner">
+        {/* Grid overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:'linear-gradient(rgba(168,85,247,0.12) 1px, transparent 1px),linear-gradient(90deg, rgba(168,85,247,0.12) 1px, transparent 1px)',backgroundSize:'32px 32px'}} />
+        {/* Purple radial glow */}
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#A855F7]/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#06B6D4]/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-medium text-[#78716C] font-handwriting text-[13px] mb-2">
-              <Sparkles className="w-4 h-4 text-[#7BA369]" strokeWidth={1.75} />
+            <div className="flex items-center gap-2 text-xs font-medium text-[#B8AEC8] font-handwriting text-[13px] mb-2">
+              <Sparkles className="w-4 h-4 text-[#A855F7]" strokeWidth={1.75} />
               <span>AI 智能首页</span>
             </div>
             <div className="flex items-center gap-3 mb-1 flex-wrap">
-              <h1 className="text-3xl font-serif font-bold text-[#2D2A26]">早安，KIKI TECH</h1>
+              <h1 className="text-3xl font-serif font-bold text-[#F3EFE6] tracking-wide">早安，KIKI TECH</h1>
               <button
                 onClick={() => setShowIndustryModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EBDC] border border-[#E0D5C1] text-[#5C5246] hover:border-[#7BA369] hover:text-[#2D2A26] transition-all text-sm font-semibold"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#221A3A]/80 border border-[#3A2D54] text-[#B8AEC8] hover:border-[#A855F7] hover:text-[#F3EFE6] transition-all text-sm font-semibold"
                 title="点击切换行业"
               >
                 {selectedIndustry ? (
@@ -1328,44 +1328,44 @@ export function HomePage({ onNavigate }: HomeProps) {
                 )}
               </button>
             </div>
-            <p className="text-[#78716C] text-sm">{dateStr} · 今天也是开拓全球市场的一天 💪</p>
+            <p className="text-[#B8AEC8] text-sm">{dateStr} · 今天也是开拓全球市场的一天 💪</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <div className="bg-[#F7F3EB] border border-[#E8E2D5] rounded-xl px-4 py-3 min-w-[130px]">
-              <p className="text-[10px] text-[#78716C] font-medium">客户总数</p>
-              <p className="text-2xl font-serif font-bold text-[#2D2A26]"><span className="underline decoration-wavy decoration-[#7BA369]/60 decoration-2 underline-offset-4">{stats.customerCount}</span> <span className="text-sm font-normal text-[#78716C]">个</span></p>
+            <div className="bg-[#161228]/70 border border-[#3A2D54] rounded-xl px-4 py-3 min-w-[130px]">
+              <p className="text-[10px] text-[#8879A0] font-medium">客户总数</p>
+              <p className="text-2xl font-serif font-bold text-[#F3EFE6]"><span className="underline decoration-wavy decoration-[#A855F7]/60 decoration-2 underline-offset-4">{stats.customerCount}</span> <span className="text-sm font-normal text-[#8879A0]">个</span></p>
             </div>
-            <div className="bg-[#F7F3EB] border border-[#E8E2D5] rounded-xl px-4 py-3 min-w-[130px]">
-              <p className="text-[10px] text-[#78716C] font-medium">本月新增询盘</p>
-              <p className="text-2xl font-serif font-bold text-[#2D2A26]"><span className="underline decoration-wavy decoration-[#7BA369]/60 decoration-2 underline-offset-4">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-[#78716C]">个</span></p>
+            <div className="bg-[#161228]/70 border border-[#3A2D54] rounded-xl px-4 py-3 min-w-[130px]">
+              <p className="text-[10px] text-[#8879A0] font-medium">本月新增询盘</p>
+              <p className="text-2xl font-serif font-bold text-[#F3EFE6]"><span className="underline decoration-wavy decoration-[#A855F7]/60 decoration-2 underline-offset-4">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-[#8879A0]">个</span></p>
             </div>
-            <div className="bg-[#F7F3EB] border border-[#E8E2D5] rounded-xl px-4 py-3 min-w-[130px]">
-              <p className="text-[10px] text-[#78716C] font-medium flex items-center gap-1">
-                <AlertCircle className="w-3 h-3 text-[#9B2C2C]" strokeWidth={1.75} />待收尾款预警
+            <div className="bg-[#3A1F1F]/80 border-2 border-[#A855F7]/60 rounded-xl px-4 py-3 min-w-[130px]">
+              <p className="text-[10px] text-[#F87171] font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 text-[#F87171]" strokeWidth={1.75} />待收尾款预警
               </p>
-              <p className="text-2xl font-serif font-bold text-[#9B2C2C]"><span className="underline decoration-wavy decoration-[#9B2C2C]/60 decoration-2 underline-offset-4">${(stats.pendingPayment / 10000).toFixed(1)}M</span></p>
+              <p className="text-2xl font-serif font-bold text-[#F87171]"><span className="underline decoration-wavy decoration-[#F87171]/60 decoration-2 underline-offset-4">${(stats.pendingPayment / 10000).toFixed(1)}M</span></p>
             </div>
           </div>
         </div>
       </div>
 
       {/* 2. AI 快捷工具栏 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10">
         {quickTools.map((btn) => (
           <button
             key={btn.label}
             onClick={() => onNavigate(btn.page)}
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-[#E8E2D5] bg-[#FFFDF9] shadow-paper transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-paper-md hover:-translate-y-0.5"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 border-[#3A2D54] bg-[#1B142C]/80 shadow-[0_0_20px_rgba(168,85,247,0.18)] transition-all duration-200 hover:border-[#A855F7] hover:shadow-[0_0_28px_rgba(168,85,247,0.28)] hover:-translate-y-0.5 intj-cut-corner intj-gem"
           >
             <span className="text-2xl shrink-0">{btn.icon}</span>
-            <span className="text-sm font-semibold text-[#2D2A26] flex-1 text-left">{btn.label}</span>
-            <kbd className="bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1] rounded px-1.5 py-0.5 text-[10px] font-mono">{btn.kbd}</kbd>
+            <span className="text-sm font-semibold text-[#F3EFE6] flex-1 text-left">{btn.label}</span>
+            <kbd className="bg-[#0B0813]/60 text-[#B8AEC8] border border-[#3A2D54] rounded px-1.5 py-0.5 text-[10px] font-mono">{btn.kbd}</kbd>
           </button>
         ))}
       </div>
 
       {/* 3. 月历 + 每日任务（并排） */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
         {/* 左：月历 */}
         <div className="lg:col-span-1">
           <MiniCalendar
@@ -1377,15 +1377,15 @@ export function HomePage({ onNavigate }: HomeProps) {
         </div>
 
         {/* 右：每日任务 */}
-        <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-5 lg:col-span-2">
+        <div className="intj-card intj-cut-corner intj-gem p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#FDF2F2] flex items-center justify-center">
-                <ListTodo className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
+              <div className="w-9 h-9 rounded-lg bg-[#221A3A]/80 flex items-center justify-center">
+                <ListTodo className="w-5 h-5 text-[#A855F7]" strokeWidth={1.75} />
               </div>
               <div>
-                <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">每日任务</h2>
-                <p className="text-xs text-[#78716C]">
+                <h2 className="text-lg font-serif font-semibold text-[#F3EFE6]">每日任务</h2>
+                <p className="text-xs text-[#8879A0]">
                   {selectedDate === getTodayStr()
                     ? '今日待办一目了然，点击圆圈勾选完成'
                     : `${selectedDate} 的任务记录`}
@@ -1394,7 +1394,7 @@ export function HomePage({ onNavigate }: HomeProps) {
             </div>
             <button
               onClick={() => { setTodos(loadTodos()); }}
-              className="p-2 text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-lg transition-colors"
+              className="p-2 text-[#8879A0] hover:text-[#F3EFE6] hover:bg-[#221A3A]/60 rounded-lg transition-colors"
               title="重置为示例"
             >
               <RefreshCw className="w-4 h-4" strokeWidth={1.75} />
@@ -1408,11 +1408,11 @@ export function HomePage({ onNavigate }: HomeProps) {
               onChange={(e) => setTodoInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') addTodo(); }}
               placeholder={`添加 ${selectedDate} 的任务，如：给沙特客户发送报价...`}
-              className="flex-1 px-3 py-2.5 bg-[#F7F3EB] border border-dashed border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
+              className="flex-1 intj-input"
             />
             <button
               onClick={addTodo}
-              className="px-3 py-2.5 bg-[#7BA369] text-[#FAF7F2] rounded-lg hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] transition-shadow"
+              className="intj-btn px-3 py-2.5"
             >
               <Plus className="w-4 h-4" strokeWidth={1.75} />
             </button>
@@ -1431,14 +1431,14 @@ export function HomePage({ onNavigate }: HomeProps) {
                 className={classNames(
                   'px-2.5 py-1.5 rounded-md font-medium transition-colors',
                   filterPriority === f.key
-                    ? 'bg-[#7BA369] text-[#FAF7F2] shadow-[2px_2px_0px_0px_#2B2927]'
-                    : 'bg-[#F2EBDC] text-[#5C5246] hover:bg-[#E8DDD0] border border-[#E0D5C1]'
+                    ? 'bg-gradient-to-br from-[#A855F7] to-[#6B21A8] text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]'
+                    : 'bg-[#0B0813]/60 text-[#B8AEC8] hover:bg-[#221A3A]/60 border border-[#3A2D54]'
                 )}
               >
                 {f.label}
                 <span className={classNames(
                   'ml-1 px-1.5 rounded-full text-[10px]',
-                  filterPriority === f.key ? 'bg-[#FAF7F2]/25' : 'bg-[#FAF7F2] text-[#78716C]'
+                  filterPriority === f.key ? 'bg-white/25' : 'bg-[#221A3A]/60 text-[#8879A0]'
                 )}>{f.count}</span>
               </button>
             ))}
@@ -1447,8 +1447,8 @@ export function HomePage({ onNavigate }: HomeProps) {
           {/* 待办列表 */}
           <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
             {filteredTodos.length === 0 ? (
-              <div className="text-center py-10 text-[#78716C]">
-                <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-[#E0D5C1]" strokeWidth={1.75} />
+              <div className="text-center py-10 text-[#8879A0]">
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-[#3A2D54]" strokeWidth={1.75} />
                 <p className="text-sm">
                   {selectedDate === getTodayStr() ? '今日暂无任务' : `${selectedDate} 暂无任务`}
                 </p>
@@ -1457,16 +1457,16 @@ export function HomePage({ onNavigate }: HomeProps) {
             ) : (
               filteredTodos.map((todo) => {
                 const priorityColors = {
-                  high: { chip: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', label: '高' },
-                  medium: { chip: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]', label: '中' },
-                  low: { chip: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', label: '低' },
+                  high: { chip: 'bg-[#3A1F1F]/80 text-[#F87171] border-2 border-[#F87171]/50', label: '高' },
+                  medium: { chip: 'bg-[#221A3A]/80 text-[#A855F7] border-2 border-[#A855F7]/50', label: '中' },
+                  low: { chip: 'bg-[#161228]/70 text-[#B8AEC8] border border-[#3A2D54]', label: '低' },
                 };
                 const catColors: Record<string, string> = {
-                  '客户': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '报价': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
-                  '单据': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  '市场': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-                  '其他': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
+                  '客户': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '报价': 'bg-[#221A3A]/80 text-[#D8B4FE] border border-[#A855F7]/50',
+                  '单据': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '市场': 'bg-[#221A3A]/70 text-[#A855F7] border border-[#3A2D54]',
+                  '其他': 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70]',
                 };
                 return (
                   <div
@@ -1474,8 +1474,8 @@ export function HomePage({ onNavigate }: HomeProps) {
                     className={classNames(
                       'group flex items-start gap-3 p-3 rounded-xl border transition-all',
                       todo.done
-                        ? 'bg-[#F7F3EB] border-[#E8E2D5] opacity-60'
-                        : 'bg-[#F7F3EB] border-[#E8E2D5] hover:border-[#524E48]/40 hover:shadow-paper'
+                        ? 'bg-[#161228]/70 border-[#3A2D54] opacity-60'
+                        : 'bg-[#161228]/70 border-[#3A2D54] hover:border-[#A855F7]/60 hover:shadow-[0_0_20px_rgba(168,85,247,0.18)]'
                     )}
                   >
                     <button
@@ -1483,8 +1483,8 @@ export function HomePage({ onNavigate }: HomeProps) {
                       className={classNames(
                         'mt-0.5 shrink-0 w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-all',
                         todo.done
-                          ? 'bg-[#3D3A36] text-[#FAF7F2] border-[#3D3A36]'
-                          : 'border-[#3D3A36] hover:border-[#7BA369]'
+                          ? 'bg-[#A855F7] text-white border-[#A855F7]'
+                          : 'border-[#4A3A70] hover:border-[#A855F7]'
                       )}
                     >
                       {todo.done && <span className="text-[10px] leading-none font-bold">✓</span>}
@@ -1492,7 +1492,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                     <div className="flex-1 min-w-0">
                       <p className={classNames(
                         'text-sm font-medium leading-snug',
-                        todo.done ? 'text-[#78716C] line-through' : 'text-[#2D2A26]'
+                        todo.done ? 'text-[#8879A0] line-through' : 'text-[#F3EFE6]'
                       )}>
                         {todo.text}
                       </p>
@@ -1510,7 +1510,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                           {priorityColors[todo.priority].label}优先
                         </button>
                         {todo.dueTime && (
-                          <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]">
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[#221A3A]/60 text-[#B8AEC8] border border-[#3A2D54]">
                             <Clock className="w-3 h-3" strokeWidth={1.75} />{todo.dueTime}
                           </span>
                         )}
@@ -1518,7 +1518,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                     </div>
                     <button
                       onClick={() => removeTodo(todo.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 text-[#78716C] hover:text-[#9B2C2C] hover:bg-[#FDF2F2] rounded-lg transition-all shrink-0"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 text-[#8879A0] hover:text-[#F87171] hover:bg-[#3A1F1F]/60 rounded-lg transition-all shrink-0"
                     >
                       <Trash2 className="w-4 h-4" strokeWidth={1.75} />
                     </button>
@@ -1529,11 +1529,11 @@ export function HomePage({ onNavigate }: HomeProps) {
           </div>
 
           {pendingCount > 0 && (
-            <div className="mt-4 pt-4 border-t border-dashed border-[#524E48]/25 text-xs text-[#78716C] font-handwriting flex items-center justify-between">
+            <div className="mt-4 pt-4 border-t border-dashed border-[#3A2D54]/60 text-xs text-[#8879A0] font-handwriting flex items-center justify-between">
               <span>💡 提示：点击日历日期可跳转查看历史任务</span>
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="text-[#7BA369] font-medium hover:text-[#5F8A4D] flex items-center gap-1"
+                className="text-[#A855F7] font-medium hover:text-[#D8B4FE] flex items-center gap-1"
               >
                 查看业务数据 <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.75} />
               </button>
@@ -1543,20 +1543,20 @@ export function HomePage({ onNavigate }: HomeProps) {
       </div>
 
       {/* 4. 行业快讯 + 热销产品 + 热门目标市场（三列并排） */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
         {/* 列1：行业快讯 */}
-        <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-5 transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-paper-md">
+        <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#EDF3E4] flex items-center justify-center">
-                <Newspaper className="w-5 h-5 text-[#A8C28E]" strokeWidth={1.75} />
+              <div className="w-9 h-9 rounded-lg bg-[#221A3A]/80 flex items-center justify-center">
+                <Newspaper className="w-5 h-5 text-[#A855F7]" strokeWidth={1.75} />
               </div>
               <div>
-                <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">{selectedIndustry || '行业'}快讯</h2>
-                <p className="text-xs text-[#78716C]">全球动态实时更新</p>
+                <h2 className="text-lg font-serif font-semibold text-[#F3EFE6]">{selectedIndustry || '行业'}快讯</h2>
+                <p className="text-xs text-[#8879A0]">全球动态实时更新</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#78716C]">
+            <div className="flex items-center gap-1.5 text-xs text-[#8879A0]">
               <Calendar className="w-3.5 h-3.5" strokeWidth={1.75} />
               <span>{formatDate(today.toISOString()).slice(5)}</span>
             </div>
@@ -1565,23 +1565,23 @@ export function HomePage({ onNavigate }: HomeProps) {
           {industryLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 text-[#A8C28E] animate-spin" strokeWidth={1.75} />
-                <p className="text-xs text-[#78716C]">AI 正在获取{selectedIndustry}行业快讯...</p>
+                <Loader2 className="w-8 h-8 text-[#A855F7] animate-spin" strokeWidth={1.75} />
+                <p className="text-xs text-[#8879A0]">AI 正在获取{selectedIndustry}行业快讯...</p>
               </div>
             </div>
           ) : industryData?.news?.length ? (
             <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
               {industryData.news.map((n, idx) => {
                 const hotColors: Record<string, string> = {
-                  hot: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]',
-                  warm: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-                  normal: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
+                  hot: 'bg-[#3A1F1F]/80 text-[#F87171] border-2 border-[#F87171]/50',
+                  warm: 'bg-[#221A3A]/80 text-[#A855F7] border-2 border-[#A855F7]/50',
+                  normal: 'bg-[#161228]/70 text-[#B8AEC8] border border-[#3A2D54]',
                 };
                 const catColors: Record<string, string> = {
-                  '政策': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
-                  '市场': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '技术': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  '项目': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
+                  '政策': 'bg-[#221A3A]/80 text-[#D8B4FE] border border-[#A855F7]/50',
+                  '市场': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '技术': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '项目': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
                 };
                 const hotLabel: Record<string, string> = { hot: '🔥 热门', warm: '✨ 关注', normal: '📰 动态' };
                 const isPrimary = idx < 2;
@@ -1591,8 +1591,8 @@ export function HomePage({ onNavigate }: HomeProps) {
                     className={classNames(
                       'group p-3 rounded-xl border transition-all',
                       isPrimary
-                        ? 'border-[#7BA369]/30 bg-[#FDF2F2] hover:border-[#524E48]/40 hover:shadow-paper'
-                        : 'border-[#E8E2D5] bg-[#F7F3EB] hover:border-[#524E48]/40 hover:shadow-paper'
+                        ? 'border-[#A855F7]/30 bg-[#221A3A]/60 hover:border-[#A855F7]/60 hover:shadow-[0_0_20px_rgba(168,85,247,0.18)]'
+                        : 'border-[#3A2D54] bg-[#161228]/70 hover:border-[#A855F7]/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.18)]'
                     )}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -1604,32 +1604,32 @@ export function HomePage({ onNavigate }: HomeProps) {
                           {hotLabel[n.hotLevel]}
                         </span>
                       </div>
-                      <span className="text-[10px] text-[#78716C] shrink-0">{n.date.slice(5)}</span>
+                      <span className="text-[10px] text-[#8879A0] shrink-0">{n.date.slice(5)}</span>
                     </div>
                     <h3 className={classNames(
-                      'font-serif font-semibold text-[#2D2A26] leading-snug mb-1.5 group-hover:text-[#7BA369] transition-colors',
+                      'font-serif font-semibold text-[#F3EFE6] leading-snug mb-1.5 group-hover:text-[#A855F7] transition-colors',
                       isPrimary ? 'text-sm' : 'text-xs'
                     )}>
                       {n.title}
                     </h3>
                     <p className={classNames(
-                      'text-[#5C5246] leading-relaxed mb-2.5',
+                      'text-[#B8AEC8] leading-relaxed mb-2.5',
                       isPrimary ? 'text-xs' : 'text-[11px] line-clamp-2'
                     )}>
                       {n.summary}
                     </p>
                     <div className="flex items-center justify-between gap-2 text-[10px]">
-                      <span className="flex items-center gap-1 text-[#78716C] font-handwriting truncate">
+                      <span className="flex items-center gap-1 text-[#8879A0] font-handwriting truncate">
                         <Globe2 className="w-3 h-3 shrink-0" strokeWidth={1.75} />
                         <span className="truncate">{n.source}</span>
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button className="flex items-center gap-1 text-[#A8C28E] font-medium hover:text-[#5F8A4D]">
+                        <button className="flex items-center gap-1 text-[#06B6D4] font-medium hover:text-[#7DD3FC]">
                           原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
                         </button>
                         <button
                           onClick={() => setAiLetterNews(n)}
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#7BA369]/10 text-[#7BA369] font-medium hover:bg-[#7BA369]/20 border border-[#7BA369]/30"
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#A855F7]/15 text-[#D8B4FE] font-medium hover:bg-[#A855F7]/25 border border-[#A855F7]/50"
                           title="AI 提取商机写信"
                         >
                           <Sparkles className="w-3 h-3" strokeWidth={1.75} />AI 写信
@@ -1641,79 +1641,79 @@ export function HomePage({ onNavigate }: HomeProps) {
               })}
             </div>
           ) : (
-            <div className="flex items-center justify-center py-16 text-sm text-[#78716C]">
+            <div className="flex items-center justify-center py-16 text-sm text-[#8879A0]">
               暂无快讯数据
             </div>
           )}
           {industryData?.news && industryData.news.length > 2 && (
-            <div className="mt-2 text-center text-[10px] text-[#78716C] font-handwriting">
+            <div className="mt-2 text-center text-[10px] text-[#8879A0] font-handwriting">
               ↕ 滚动查看更多快讯
             </div>
           )}
         </div>
 
         {/* 列2：热销产品排行 */}
-        <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-5 transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-paper-md">
+        <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#F0F5F2] flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-[#2F5D50]" strokeWidth={1.75} />
+              <div className="w-9 h-9 rounded-lg bg-[#161228]/70 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-[#06B6D4]" strokeWidth={1.75} />
               </div>
               <div>
-                <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">热销产品排行</h2>
-                <p className="text-xs text-[#78716C]">本季度{selectedIndustry || '行业'}出口热销品类</p>
+                <h2 className="text-lg font-serif font-semibold text-[#F3EFE6]">热销产品排行</h2>
+                <p className="text-xs text-[#8879A0]">本季度{selectedIndustry || '行业'}出口热销品类</p>
               </div>
             </div>
-            <TrendingUp className="w-4 h-4 text-[#2F5D50]" strokeWidth={1.75} />
+            <TrendingUp className="w-4 h-4 text-[#06B6D4]" strokeWidth={1.75} />
           </div>
           {industryLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 text-[#2F5D50] animate-spin" strokeWidth={1.75} />
-                <p className="text-xs text-[#78716C]">加载热销产品数据...</p>
+                <Loader2 className="w-8 h-8 text-[#06B6D4] animate-spin" strokeWidth={1.75} />
+                <p className="text-xs text-[#8879A0]">加载热销产品数据...</p>
               </div>
             </div>
           ) : industryData?.hot_products?.length ? (
             <div className="space-y-2">
               {industryData.hot_products.map((p, idx) => {
                 const catColor: Record<string, string> = {
-                  '整机': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '塔筒': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-                  '叶片': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
-                  '电控': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  '配件': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
-                  '高端系列': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '标准系列': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-                  '定制系列': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
-                  '入门系列': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
-                  '组件': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '储能': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-                  '逆变器': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  '支架': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
-                  '耗材': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
+                  '整机': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '塔筒': 'bg-[#221A3A]/80 text-[#A855F7] border border-[#3A2D54]',
+                  '叶片': 'bg-[#221A3A]/80 text-[#D8B4FE] border border-[#A855F7]/50',
+                  '电控': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '配件': 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70]',
+                  '高端系列': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '标准系列': 'bg-[#221A3A]/80 text-[#A855F7] border border-[#3A2D54]',
+                  '定制系列': 'bg-[#221A3A]/80 text-[#D8B4FE] border border-[#A855F7]/50',
+                  '入门系列': 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70]',
+                  '组件': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '储能': 'bg-[#221A3A]/80 text-[#A855F7] border border-[#3A2D54]',
+                  '逆变器': 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  '支架': 'bg-[#221A3A]/80 text-[#D8B4FE] border border-[#A855F7]/50',
+                  '耗材': 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70]',
                 };
                 return (
-                  <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#F2EBDC] transition-colors group cursor-pointer" onClick={() => onNavigate('products')}>
+                  <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#221A3A]/60 transition-colors group cursor-pointer" onClick={() => onNavigate('products')}>
                     <div className={classNames(
                       'w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0',
-                      idx < 3 ? 'bg-[#7BA369] text-[#FAF7F2] shadow-[1px_1px_0px_0px_#2B2927]' : 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]'
+                      idx < 3 ? 'bg-gradient-to-br from-[#A855F7] to-[#6B21A8] text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]' : 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#3A2D54]'
                     )}>
                       {idx + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="text-sm font-serif font-semibold text-[#2D2A26] truncate">{p.name}</p>
-                        <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', catColor[p.category] || 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]')}>
+                        <p className="text-sm font-serif font-semibold text-[#F3EFE6] truncate">{p.name}</p>
+                        <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', catColor[p.category] || 'bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70]')}>
                           {p.category}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#78716C]">{p.model}</p>
+                      <p className="text-[11px] text-[#8879A0]">{p.model}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-[#2D2A26]">{p.revenue}</p>
+                      <p className="text-sm font-bold text-[#F3EFE6]">{p.revenue}</p>
                       <p className={classNames(
                         'text-[10px] font-medium flex items-center justify-end gap-0.5',
-                        p.trend === 'up' ? 'text-[#2F5D50]' : 'text-[#9B2C2C]'
+                        p.trend === 'up' ? 'text-[#06B6D4]' : 'text-[#F87171]'
                       )}>
                         <Zap className="w-3 h-3" strokeWidth={1.75} />{p.growth}
                       </p>
@@ -1723,46 +1723,46 @@ export function HomePage({ onNavigate }: HomeProps) {
               })}
             </div>
           ) : (
-            <div className="flex items-center justify-center py-16 text-sm text-[#78716C]">
+            <div className="flex items-center justify-center py-16 text-sm text-[#8879A0]">
               暂无热销产品数据
             </div>
           )}
           <button
             onClick={() => onNavigate('products')}
-            className="mt-4 w-full text-sm text-[#2F5D50] font-medium py-2 rounded-lg border border-[#C2D6C8] bg-[#F0F5F2] hover:bg-[#E0EBE5] transition-colors flex items-center justify-center gap-1"
+            className="mt-4 w-full text-sm text-[#06B6D4] font-medium py-2 rounded-lg border border-[#4A3A70] bg-[#161228]/70 hover:bg-[#221A3A]/60 transition-colors flex items-center justify-center gap-1"
           >
             进入产品库 <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
           </button>
         </div>
 
         {/* 列3：热门目标市场 */}
-        <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-5 transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-paper-md">
+        <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#EEF2F7] flex items-center justify-center">
-                <Target className="w-5 h-5 text-[#3B5A7A]" strokeWidth={1.75} />
+              <div className="w-9 h-9 rounded-lg bg-[#161228]/70 flex items-center justify-center">
+                <Target className="w-5 h-5 text-[#06B6D4]" strokeWidth={1.75} />
               </div>
               <div>
-                <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">热门目标市场</h2>
-                <p className="text-xs text-[#78716C]">近30天询盘热度与利润率</p>
+                <h2 className="text-lg font-serif font-semibold text-[#F3EFE6]">热门目标市场</h2>
+                <p className="text-xs text-[#8879A0]">近30天询盘热度与利润率</p>
               </div>
             </div>
-            <MapPin className="w-4 h-4 text-[#3B5A7A]" strokeWidth={1.75} />
+            <MapPin className="w-4 h-4 text-[#06B6D4]" strokeWidth={1.75} />
           </div>
           {industryLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 text-[#3B5A7A] animate-spin" strokeWidth={1.75} />
-                <p className="text-xs text-[#78716C]">加载热门市场数据...</p>
+                <Loader2 className="w-8 h-8 text-[#06B6D4] animate-spin" strokeWidth={1.75} />
+                <p className="text-xs text-[#8879A0]">加载热门市场数据...</p>
               </div>
             </div>
           ) : industryData?.hot_markets?.length ? (
             <div className="space-y-2">
               {industryData.hot_markets.map((m) => {
                 const riskColors: Record<string, string> = {
-                  low: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  medium: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-                  high: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]',
+                  low: 'bg-[#161228]/70 text-[#06B6D4] border border-[#4A3A70]',
+                  medium: 'bg-[#221A3A]/80 text-[#A855F7] border border-[#3A2D54]',
+                  high: 'bg-[#3A1F1F]/80 text-[#F87171] border-2 border-[#F87171]/50',
                 };
                 const riskLabels: Record<string, string> = {
                   low: '风险低',
@@ -1770,38 +1770,38 @@ export function HomePage({ onNavigate }: HomeProps) {
                   high: '风险高',
                 };
                 return (
-                  <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#F2EBDC] transition-colors group cursor-pointer" onClick={() => onNavigate('customers')}>
+                  <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#221A3A]/60 transition-colors group cursor-pointer" onClick={() => onNavigate('customers')}>
                     <div className="text-2xl shrink-0 w-9 text-center">{m.flag}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-serif font-semibold text-[#2D2A26] truncate">{m.country}</p>
+                        <p className="text-sm font-serif font-semibold text-[#F3EFE6] truncate">{m.country}</p>
                         <span className={classNames('px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0', riskColors[m.risk])}>
                           {riskLabels[m.risk]}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#78716C] flex items-center gap-1 truncate">
+                      <p className="text-[11px] text-[#8879A0] flex items-center gap-1 truncate">
                         <Briefcase className="w-3 h-3 shrink-0" strokeWidth={1.75} /><span className="truncate">{m.demand}</span>
                       </p>
                     </div>
                     <div className="text-right shrink-0 space-y-0.5">
-                      <div className="flex items-center justify-end gap-1 text-[11px] text-[#78716C]">
+                      <div className="flex items-center justify-end gap-1 text-[11px] text-[#8879A0]">
                         <AlertCircle className="w-3 h-3" strokeWidth={1.75} />
-                        询盘 <span className="font-semibold text-[#2D2A26]">{m.inquiries30d}</span>
+                        询盘 <span className="font-semibold text-[#F3EFE6]">{m.inquiries30d}</span>
                       </div>
-                      <p className="text-xs font-bold text-[#2F5D50]">利润 {m.avgMargin}</p>
+                      <p className="text-xs font-bold text-[#06B6D4]">利润 {m.avgMargin}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="flex items-center justify-center py-16 text-sm text-[#78716C]">
+            <div className="flex items-center justify-center py-16 text-sm text-[#8879A0]">
               暂无市场数据
             </div>
           )}
           <button
             onClick={() => onNavigate('customers')}
-            className="mt-4 w-full text-sm text-[#3B5A7A] font-medium py-2 rounded-lg border border-[#C7D5E6] bg-[#EEF2F7] hover:bg-[#DDE5F0] transition-colors flex items-center justify-center gap-1"
+            className="mt-4 w-full text-sm text-[#06B6D4] font-medium py-2 rounded-lg border border-[#4A3A70] bg-[#161228]/70 hover:bg-[#221A3A]/60 transition-colors flex items-center justify-center gap-1"
           >
             进入客户管理 <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
           </button>
@@ -1809,61 +1809,61 @@ export function HomePage({ onNavigate }: HomeProps) {
       </div>
 
       {/* 5. 收汇与物流风控预警卡片（AI 动态生成） */}
-      <div className="bg-[#FFFDF9] border-2 border-[#F5C6C6] rounded-2xl shadow-paper p-5">
+      <div className="intj-card intj-cut-corner intj-gem p-5 relative z-10 border-2 border-[#A855F7]/70">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-[#FDF2F2] flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-[#9B2C2C]" strokeWidth={1.75} />
+            <div className="w-9 h-9 rounded-lg bg-[#3A1F1F]/80 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-[#F87171]" strokeWidth={1.75} />
             </div>
             <div>
-              <h2 className="text-lg font-serif font-bold text-[#2D2A26] flex items-center gap-2">
+              <h2 className="text-lg font-serif font-bold text-[#F3EFE6] flex items-center gap-2">
                 收汇与物流风控预警
-                <span className="text-xs font-normal bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6] px-2 py-0.5 rounded-full">
+                <span className="text-xs font-normal bg-[#3A1F1F]/80 text-[#F87171] border-2 border-[#F87171]/50 px-2 py-0.5 rounded-full">
                   {alertsLoading ? 'AI 分析中...' : `AI 分析 · ${riskAlerts.length} 条预警`}
                 </span>
               </h2>
-              <p className="text-xs text-[#78716C] font-handwriting">AI 自动扫描订单+物流数据，智能识别风控异常</p>
+              <p className="text-xs text-[#8879A0] font-handwriting">AI 自动扫描订单+物流数据，智能识别风控异常</p>
             </div>
           </div>
           <button
             onClick={() => onNavigate('shipments')}
-            className="text-sm text-[#9B2C2C] font-medium hover:text-[#7A2222] flex items-center gap-1"
+            className="text-sm text-[#F87171] font-medium hover:text-[#FCA5A5] flex items-center gap-1"
           >
             查看详情 <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
           </button>
         </div>
 
         {alertsLoading ? (
-          <div className="flex items-center justify-center py-8 text-[#9B2C2C] text-sm">
+          <div className="flex items-center justify-center py-8 text-[#F87171] text-sm">
             <RefreshCw className="w-4 h-4 mr-2 animate-spin" strokeWidth={1.75} />
             <span className="font-handwriting">AI 正在扫描订单与物流数据...</span>
           </div>
         ) : riskAlerts.length === 0 ? (
-          <div className="text-center py-6 bg-[#F0F5F2] border border-[#C2D6C8] rounded-xl">
-            <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#2F5D50]" strokeWidth={1.75} />
-            <p className="text-sm text-[#5C5246] font-medium">暂无风控预警</p>
-            <p className="text-xs text-[#78716C] mt-1">AI 判定当前所有订单收汇与物流状态正常</p>
+          <div className="text-center py-6 bg-[#161228]/70 border border-[#4A3A70] rounded-xl">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#06B6D4]" strokeWidth={1.75} />
+            <p className="text-sm text-[#B8AEC8] font-medium">暂无风控预警</p>
+            <p className="text-xs text-[#8879A0] mt-1">AI 判定当前所有订单收汇与物流状态正常</p>
           </div>
         ) : (
           <div className="space-y-2">
             {riskAlerts.map((r) => {
               const isExpanded = expandedAlert === r.id;
               const levelStyles: Record<string, string> = {
-                critical: 'bg-[#FDF2F2] border-[#F5C6C6] text-[#9B2C2C]',
-                warning: 'bg-[#EDF3E4] border-[#C9D9B8] text-[#5F8A4D]',
-                info: 'bg-[#F0F5F2] border-[#C2D6C8] text-[#2F5D50]',
+                critical: 'bg-[#3A1F1F]/80 border-2 border-[#A855F7]/70 text-[#F87171]',
+                warning: 'bg-[#221A3A]/80 border-2 border-[#F5B77A]/60 text-[#F5B77A]',
+                info: 'bg-[#161228]/70 border-2 border-[#06B6D4]/60 text-[#06B6D4]',
               };
               const levelBar: Record<string, string> = {
-                critical: 'bg-[#9B2C2C]',
-                warning: 'bg-[#A8C28E]',
-                info: 'bg-[#2F5D50]',
+                critical: 'bg-[#A855F7]',
+                warning: 'bg-[#F5B77A]',
+                info: 'bg-[#06B6D4]',
               };
               const levelLabel: Record<string, string> = {
                 critical: '严重',
                 warning: '警告',
                 info: '关注',
               };
-              const wavy = r.level === 'critical' ? 'underline decoration-wavy decoration-[#9B2C2C]/50 decoration-2 underline-offset-2' : '';
+              const wavy = r.level === 'critical' ? 'underline decoration-wavy decoration-[#F87171]/50 decoration-2 underline-offset-2' : '';
               return (
                 <div
                   key={r.id}
@@ -1873,7 +1873,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                   )}
                 >
                   <div
-                    className="flex items-center gap-3 p-3 cursor-pointer hover:bg-[#FAF7F2]"
+                    className="flex items-center gap-3 p-3 cursor-pointer hover:bg-[#0B0813]/40"
                     onClick={() => setExpandedAlert(isExpanded ? null : r.id)}
                   >
                     <div className={classNames('w-1 h-10 rounded-full shrink-0', levelBar[r.level])} />
@@ -1881,11 +1881,11 @@ export function HomePage({ onNavigate }: HomeProps) {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={classNames('text-xs font-bold', wavy)}>{r.docNumber}</span>
                         <span className="text-xs">|</span>
-                        <span className="text-xs font-medium">{r.customer}</span>
+                        <span className="text-xs font-medium text-[#F3EFE6]">{r.customer}</span>
                         <span className={classNames('text-xs font-bold', wavy)}>{r.amount !== '—' ? r.amount : ''}</span>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px]">
-                        <span>{r.status}</span>
+                        <span className="text-[#B8AEC8]">{r.status}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -1895,7 +1895,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                       )}>
                         {levelLabel[r.level]}
                       </span>
-                      <span className="text-xs font-bold px-2 py-1 rounded bg-[#FFFDF9] text-[#2D2A26] border border-[#E8E2D5]">
+                      <span className="text-xs font-bold px-2 py-1 rounded bg-[#0B0813]/60 text-[#F3EFE6] border border-[#3A2D54]">
                         {r.action}
                       </span>
                       <ChevronRight className={classNames(
@@ -1906,12 +1906,12 @@ export function HomePage({ onNavigate }: HomeProps) {
                   </div>
                   {isExpanded && (
                     <div className="px-3 pb-3 pt-0">
-                      <div className="bg-[#F7F3EB] rounded-lg p-3 border border-dashed border-[#524E48]/25">
-                        <div className="flex items-center gap-1.5 text-[11px] text-[#78716C] mb-1">
-                          <Sparkles className="w-3 h-3 text-[#7BA369]" strokeWidth={1.75} />
-                          <span className="font-semibold text-[#7BA369] font-handwriting">AI 分析原因</span>
+                      <div className="bg-[#0B0813]/60 rounded-lg p-3 border border-dashed border-[#3A2D54]/60">
+                        <div className="flex items-center gap-1.5 text-[11px] text-[#8879A0] mb-1">
+                          <Sparkles className="w-3 h-3 text-[#A855F7]" strokeWidth={1.75} />
+                          <span className="font-semibold text-[#A855F7] font-handwriting">AI 分析原因</span>
                         </div>
-                        <p className="text-xs text-[#3D3A36] leading-relaxed">{r.reason}</p>
+                        <p className="text-xs text-[#F3EFE6] leading-relaxed">{r.reason}</p>
                       </div>
                     </div>
                   )}

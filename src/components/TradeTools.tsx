@@ -20,8 +20,8 @@ export function TradeTools() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">贸易工具</h1>
-        <p className="text-slate-500 mt-1">常用外贸工具：贸易术语、付款方式、汇率换算、集装箱计算</p>
+        <h1 className="text-2xl font-bold text-[#F3EFE6]">贸易工具</h1>
+        <p className="text-[#8879A0] mt-1">常用外贸工具：贸易术语、付款方式、汇率换算、集装箱计算</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -33,7 +33,7 @@ export function TradeTools() {
               onClick={() => setTab(t.id)}
               className={classNames(
                 'flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all',
-                tab === t.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                tab === t.id ? 'bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] shadow-lg shadow-[#A855F7]/30' : 'bg-[#1B142C]/90 text-[#B8AEC8] border border-[#3A2D54] hover:bg-[#221A3A]/70'
               )}
             >
               <Icon className="w-4 h-4" />
@@ -63,18 +63,18 @@ function IncotermsTool() {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="搜索术语代码或名称..."
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          className="w-full pl-10 pr-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {filtered.map(term => (
-          <div key={term.code} className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
+          <div key={term.code} className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 bg-blue-600 text-white rounded-lg font-bold text-sm">{term.code}</span>
-              <h3 className="font-semibold text-slate-900 text-sm">{term.name}</h3>
+              <span className="px-3 py-1 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg font-bold text-sm">{term.code}</span>
+              <h3 className="font-semibold text-[#F3EFE6] text-sm">{term.name}</h3>
             </div>
-            <p className="text-sm text-slate-600">{term.meaning}</p>
+            <p className="text-sm text-[#B8AEC8]">{term.meaning}</p>
           </div>
         ))}
       </div>
@@ -86,15 +86,15 @@ function PaymentTool() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {PAYMENT_TERMS.map(term => (
-        <div key={term.code} className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
+        <div key={term.code} className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3 mb-2">
-            <span className="px-3 py-1 bg-emerald-600 text-white rounded-lg font-bold text-xs">{term.code}</span>
+            <span className="px-3 py-1 bg-gradient-to-r from-[#A855F7] to-[#6B21A8] text-[#F3EFE6] rounded-lg font-bold text-xs">{term.code}</span>
           </div>
-          <h3 className="font-semibold text-slate-900 text-sm mb-1">{term.name}</h3>
-          <p className="text-sm text-slate-600">{term.meaning}</p>
-          <div className="mt-3 flex items-start gap-2 p-2 bg-amber-50 rounded-lg">
-            <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700">
+          <h3 className="font-semibold text-[#F3EFE6] text-sm mb-1">{term.name}</h3>
+          <p className="text-sm text-[#B8AEC8]">{term.meaning}</p>
+          <div className="mt-3 flex items-start gap-2 p-2 bg-[#3A2D54]/60 rounded-lg">
+            <Info className="w-4 h-4 text-[#D8B4FE] shrink-0 mt-0.5" />
+            <p className="text-xs text-[#D8B4FE]">
               {term.code.startsWith('T/T') ? '最常用方式。定金保护卖方，尾款发货前支付确保收款安全。' :
                term.code.startsWith('L/C') ? '银行信用担保，安全性高但手续复杂、费用较高。适合大额交易。' :
                term.code.startsWith('D/P') ? '付款后交单，买方不付款则无法提货。风险介于L/C和D/A之间。' :
@@ -117,40 +117,40 @@ function CurrencyTool() {
   const result = amount * rate;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 max-w-2xl">
-      <h3 className="text-lg font-semibold text-slate-900 mb-4">汇率换算器</h3>
+    <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-6 max-w-2xl">
+      <h3 className="text-lg font-semibold text-[#F3EFE6] mb-4">汇率换算器</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">金额</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">金额</label>
           <input type="number" step="0.01" value={amount} onChange={e => setAmount(parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full px-3 py-2.5 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">汇率 (1 {from} = ? {to})</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">汇率 (1 {from} = ? {to})</label>
           <input type="number" step="0.0001" value={rate} onChange={e => setRate(parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full px-3 py-2.5 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">从</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">从</label>
           <select value={from} onChange={e => setFrom(e.target.value)}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="w-full px-3 py-2.5 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
             {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} - {c.name}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">到</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">到</label>
           <select value={to} onChange={e => setTo(e.target.value)}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="w-full px-3 py-2.5 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
             {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} - {c.name}</option>)}
           </select>
         </div>
       </div>
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-5 text-center">
-        <p className="text-sm text-slate-500 mb-1">{formatCurrency(amount, from)} =</p>
-        <p className="text-3xl font-bold text-blue-600">{formatCurrency(result, to)}</p>
-        <p className="text-xs text-slate-400 mt-2">汇率仅供参考，请以实际银行汇率为准</p>
+        <p className="text-sm text-[#8879A0] mb-1">{formatCurrency(amount, from)} =</p>
+        <p className="text-3xl font-bold text-[#06B6D4]">{formatCurrency(result, to)}</p>
+        <p className="text-xs text-[#78716C] mt-2">汇率仅供参考，请以实际银行汇率为准</p>
       </div>
     </div>
   );
@@ -179,51 +179,51 @@ function ContainerTool() {
   const utilization = containerVolume > 0 ? ((totalBoxes * boxVolume) / containerVolume) * 100 : 0;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 max-w-2xl">
-      <h3 className="text-lg font-semibold text-slate-900 mb-4">集装箱装柜计算</h3>
+    <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-6 max-w-2xl">
+      <h3 className="text-lg font-semibold text-[#F3EFE6] mb-4">集装箱装柜计算</h3>
 
       <div className="mb-5">
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">集装箱类型</label>
+        <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">集装箱类型</label>
         <div className="flex gap-2">
           {(Object.keys(containers) as (keyof typeof containers)[]).map(k => (
             <button key={k} onClick={() => setContainerType(k)}
               className={classNames('px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                containerType === k ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>
+                containerType === k ? 'bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6]' : 'bg-[#161228]/70 text-[#8879A0] hover:bg-[#3A2D54]/40')}>
               {containers[k].name}
             </button>
           ))}
         </div>
-        <p className="text-xs text-slate-400 mt-2">内部尺寸 (cm): {c.l} × {c.w} × {c.h}</p>
+        <p className="text-xs text-[#78716C] mt-2">内部尺寸 (cm): {c.l} × {c.w} × {c.h}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-5">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">箱长 (cm)</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">箱长 (cm)</label>
           <input type="number" value={boxL} onChange={e => setBoxL(parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">箱宽 (cm)</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">箱宽 (cm)</label>
           <input type="number" value={boxW} onChange={e => setBoxW(parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">箱高 (cm)</label>
+          <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">箱高 (cm)</label>
           <input type="number" value={boxH} onChange={e => setBoxH(parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
         </div>
       </div>
 
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-5 space-y-3">
         <div className="grid grid-cols-3 gap-4 text-center">
-          <div><p className="text-2xl font-bold text-blue-600">{fitL}</p><p className="text-xs text-slate-500">长方向</p></div>
-          <div><p className="text-2xl font-bold text-blue-600">{fitW}</p><p className="text-xs text-slate-500">宽方向</p></div>
-          <div><p className="text-2xl font-bold text-blue-600">{fitH}</p><p className="text-xs text-slate-500">高方向</p></div>
+          <div><p className="text-2xl font-bold text-[#06B6D4]">{fitL}</p><p className="text-xs text-[#8879A0]">长方向</p></div>
+          <div><p className="text-2xl font-bold text-[#06B6D4]">{fitW}</p><p className="text-xs text-[#8879A0]">宽方向</p></div>
+          <div><p className="text-2xl font-bold text-[#06B6D4]">{fitH}</p><p className="text-xs text-[#8879A0]">高方向</p></div>
         </div>
-        <div className="border-t border-blue-200 pt-3 text-center">
-          <p className="text-sm text-slate-600">可装箱数</p>
-          <p className="text-3xl font-bold text-slate-900">{totalBoxes} 箱</p>
-          <p className="text-xs text-slate-500 mt-1">空间利用率: {utilization.toFixed(1)}%</p>
+        <div className="border-t border-b border-[#3A2D54]/50 pt-3 text-center">
+          <p className="text-sm text-[#B8AEC8]">可装箱数</p>
+          <p className="text-3xl font-bold text-[#F3EFE6]">{totalBoxes} 箱</p>
+          <p className="text-xs text-[#8879A0] mt-1">空间利用率: {utilization.toFixed(1)}%</p>
         </div>
       </div>
     </div>
@@ -254,35 +254,35 @@ function HsLookupTool() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
-        <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+      <div className="bg-[#161228]/70 border border-b border-[#3A2D54]/50lue-100 rounded-lg p-4 flex items-start gap-3">
+        <Info className="w-5 h-5 text-[#06B6D4] shrink-0 mt-0.5" />
         <div>
           <p className="text-sm text-blue-900 font-medium">HS编码 (海关编码) 查询</p>
-          <p className="text-xs text-blue-700 mt-1">以下为常见产品的HS编码参考。实际出口请以海关确认的编码为准，可通过中国海关总署官网或第三方平台查询完整编码。</p>
+          <p className="text-xs text-[#06B6D4] mt-1">以下为常见产品的HS编码参考。实际出口请以海关确认的编码为准，可通过中国海关总署官网或第三方平台查询完整编码。</p>
         </div>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="搜索产品名称或编码..."
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          className="w-full pl-10 pr-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 text-left text-slate-600">
+            <tr className="bg-[#161228]/60 border-b border-[#3A2D54]/50 text-left text-[#B8AEC8]">
               <th className="px-4 py-3 font-medium">HS编码</th>
               <th className="px-4 py-3 font-medium">产品描述</th>
               <th className="px-4 py-3 font-medium">分类</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-[#3A2D54]/50">
             {filtered.map(h => (
-              <tr key={h.code} className="hover:bg-slate-50 transition-colors">
-                <td className="px-4 py-3"><span className="font-mono font-medium text-blue-600">{h.code}</span></td>
-                <td className="px-4 py-3 text-slate-700">{h.desc}</td>
-                <td className="px-4 py-3"><span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">{h.category}</span></td>
+              <tr key={h.code} className="hover:bg-[#221A3A]/70 transition-colors">
+                <td className="px-4 py-3"><span className="font-mono font-medium text-[#06B6D4]">{h.code}</span></td>
+                <td className="px-4 py-3 text-[#F3EFE6]">{h.desc}</td>
+                <td className="px-4 py-3"><span className="px-2 py-0.5 bg-[#161228]/70 text-[#8879A0] rounded text-xs">{h.category}</span></td>
               </tr>
             ))}
           </tbody>

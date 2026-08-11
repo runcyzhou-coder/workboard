@@ -4,24 +4,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: {
-          bg: '#FAF7F2',      // 暖黄米白纸质底
-          card: '#FFFDF9',    // 微暖乳白卡片
-          sunken: '#F2EBDC',  // 凹陷/次级背景
-          input: '#F7F3EB',   // 输入框底
-          border: '#E8E2D5',  // 纸质切边边框
-          ink: '#2D2A26',     // 深炭木墨色
-          muted: '#78716C',   // 暖棕灰
-          graphite: '#3D3A36',// 石墨色
+        // ============ INTJ Dark Violet RPG Theme ============
+        arcane: {
+          bg: '#0B0813',          // 黑曜石深紫（最底）
+          bg2: '#130E20',         // 渐变次底
+          card: '#1B142C',        // 暗紫半透明卡片
+          card2: '#221A3A',       // 悬浮卡片
+          border: '#3A2D54',      // 暗银/灰紫金属边框
+          borderLight: '#4A3A70',
+          ink: '#F3EFE6',         // 白/淡金 主文字
+          muted: '#B8AEC8',       // 次要文字
+          dim: '#8879A0',
+          gold: '#E8D7A8',
         },
-        clay: {
-          DEFAULT: '#7BA369', // 抹茶绿(品牌主色)
-          dark: '#5F8A4D',    // 深抹茶绿
-          light: '#A8C28E',   // 浅抹茶绿
+        gem: {
+          violet: '#A855F7',     // 电光紫（主高亮）
+          violet2: '#8B5CF6',
+          cyan: '#06B6D4',        // 量子蓝
+          amber: '#F5B77A',
         },
-        stamp: {
-          red: { bg: '#FDF2F2', text: '#9B2C2C', border: '#F5C6C6' },
-          green: { bg: '#F0F5F2', text: '#2F5D50', border: '#C2D6C8' },
+        parchment: {
+          bg: '#F2ECE1',          // AI 终端羊皮纸
+          ink: '#2A2338',
         },
       },
       fontFamily: {
@@ -30,9 +34,31 @@ export default {
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       boxShadow: {
-        'paper': '0 2px 8px rgba(45,42,38,0.04)',
-        'paper-md': '0 4px 16px rgba(45,42,38,0.06)',
-        'pencil': '3px 3px 0px 0px #2B2927',
+        'arcane': '0_0_15px_rgba(168,85,247,0.15)',
+        'arcane-md': '0_0_30px_rgba(168,85,247,0.22)',
+        'arcane-glow': 'inset 0 0 18px rgba(168,85,247,0.15), 0 0 24px rgba(168,85,247,0.25)',
+      },
+      backgroundImage: {
+        'arcane-grid': "linear-gradient(rgba(168,85,247,0.22) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.22) 1px, transparent 1px)",
+      },
+      keyframes: {
+        'float-slow': {
+          '0%,100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+        'arcane-pulse': {
+          '0%,100%': { boxShadow: '0 0 12px rgba(168,85,247,0.3)' },
+          '50%': { boxShadow: '0 0 28px rgba(168,85,247,0.65)' },
+        },
+        'spin-slow': {
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        'float-slow': 'float-slow 6s ease-in-out infinite',
+        'arcane-pulse': 'arcane-pulse 3s ease-in-out infinite',
+        'spin-slow': 'spin-slow 18s linear infinite',
       },
     },
   },

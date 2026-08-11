@@ -60,10 +60,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   }, []);
 
   const cards: { id: Page; label: string; value: string; sub: string; icon: typeof Users; color: string }[] = [
-    { id: 'customers', label: '客户总数', value: String(stats.customers), sub: `${stats.activeCustomers} 活跃`, icon: Users, color: 'from-blue-500 to-blue-600' },
-    { id: 'products', label: '产品数量', value: String(stats.products), sub: '产品库', icon: Package, color: 'from-emerald-500 to-emerald-600' },
-    { id: 'document-center', label: '报价单', value: String(stats.quotations), sub: '已创建', icon: Quote, color: 'from-amber-500 to-amber-600' },
-    { id: 'document-center', label: '形式发票', value: String(stats.pis), sub: formatCurrency(stats.piTotal, 'USD'), icon: FileText, color: 'from-violet-500 to-violet-600' },
+    { id: 'customers', label: '客户总数', value: String(stats.customers), sub: `${stats.activeCustomers} 活跃`, icon: Users, color: 'bg-gradient-to-br from-[#06B6D4] to-[#0E7490]' },
+    { id: 'products', label: '产品数量', value: String(stats.products), sub: '产品库', icon: Package, color: 'bg-gradient-to-br from-[#A855F7] to-[#6B21A8]' },
+    { id: 'document-center', label: '报价单', value: String(stats.quotations), sub: '已创建', icon: Quote, color: 'bg-gradient-to-br from-[#D8B4FE] to-[#A855F7]' },
+    { id: 'document-center', label: '形式发票', value: String(stats.pis), sub: formatCurrency(stats.piTotal, 'USD'), icon: FileText, color: 'bg-gradient-to-br from-[#6B21A8] to-[#4C1D95]' },
   ];
 
   const statusLabels: Record<string, string> = {
@@ -72,17 +72,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   };
 
   const statusColors: Record<string, string> = {
-    draft: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', sent: 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]', accepted: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-    rejected: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', expired: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]', confirmed: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-    cancelled: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', prospect: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', negotiating: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
-    active: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]', inactive: 'bg-[#F2EBDC] text-[#78716C] border border-[#E0D5C1]',
+    draft: 'bg-[#161228] text-[#B8AEC8] border border-[#3A2D54]', sent: 'bg-[#221A3A] text-[#D8B4FE] border border-[#4A3A70]', accepted: 'bg-[#164A3A] text-[#7DD3FC] border border-[#06B6D4]/50',
+    rejected: 'bg-[#3A1F1F] text-[#F87171] border border-[#A855F7]/60', expired: 'bg-[#3A2D54] text-[#B8AEC8] border border-[#4A3A70]', confirmed: 'bg-[#164A3A] text-[#7DD3FC] border border-[#06B6D4]/50',
+    cancelled: 'bg-[#3A1F1F] text-[#F87171] border border-[#A855F7]/60', prospect: 'bg-[#1B142C] text-[#B8AEC8] border border-[#3A2D54]', negotiating: 'bg-[#221A3A] text-[#D8B4FE] border border-[#4A3A70]',
+    active: 'bg-[#164A3A] text-[#7DD3FC] border border-[#06B6D4]/50', inactive: 'bg-[#221A3A] text-[#8879A0] border border-[#3A2D54]',
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-serif font-bold text-[#2D2A26]">仪表盘</h1>
-        <p className="text-[#78716C] mt-1 font-handwriting text-[15px]">外贸业务总览与快捷入口</p>
+        <h1 className="text-2xl font-serif font-bold text-[#F3EFE6] tracking-wide">仪表盘</h1>
+        <p className="text-[#8879A0] mt-1 font-handwriting text-[15px]">外贸业务总览与快捷入口</p>
       </div>
 
       {/* Stats cards */}
@@ -93,25 +93,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <button
               key={card.id}
               onClick={() => onNavigate(card.id)}
-              className="group bg-[#FFFDF9] rounded-xl p-5 border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-[0_4px_16px_rgba(45,42,38,0.06)] hover:-translate-y-0.5 text-left"
+              className="group intj-card intj-cut-corner intj-gem backdrop-blur-md bg-[#1B142C]/90 rounded-xl p-5 border-2 border-[#3A2D54] shadow-[0_0_20px_rgba(168,85,247,0.18)] transition-all duration-200 hover:border-[#A855F7]/60 hover:shadow-[0_0_28px_rgba(168,85,247,0.28)] hover:-translate-y-0.5 text-left"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className={classNames('w-11 h-11 rounded-lg bg-gradient-to-br flex items-center justify-center', card.color)}>
                   <Icon className="w-5 h-5 text-white" strokeWidth={1.75} />
                 </div>
-                <ArrowRight className="w-4 h-4 text-[#78716C] group-hover:text-[#2D2A26] group-hover:translate-x-1 transition-all" strokeWidth={1.75} />
+                <ArrowRight className="w-4 h-4 text-[#8879A0] group-hover:text-[#D8B4FE] group-hover:translate-x-1 transition-all" strokeWidth={1.75} />
               </div>
-              <p className="text-2xl font-serif font-bold text-[#2D2A26]">{loading ? '—' : card.value}</p>
-              <p className="text-sm text-[#5C5246] mt-0.5">{card.label}</p>
-              <p className="text-xs text-[#78716C] mt-1">{card.sub}</p>
+              <p className="text-2xl font-serif font-bold text-[#F3EFE6]">{loading ? '—' : card.value}</p>
+              <p className="text-sm text-[#B8AEC8] mt-0.5">{card.label}</p>
+              <p className="text-xs text-[#8879A0] mt-1">{card.sub}</p>
             </button>
           );
         })}
       </div>
 
       {/* Quick actions */}
-      <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-5">
-        <h2 className="text-lg font-serif font-semibold text-[#2D2A26] mb-4">快捷操作</h2>
+      <div className="intj-card intj-cut-corner intj-gem backdrop-blur-md bg-[#1B142C]/90 rounded-xl border-2 border-[#3A2D54] shadow-[0_0_20px_rgba(168,85,247,0.18)] p-5">
+        <h2 className="text-lg font-serif font-semibold text-[#F3EFE6] mb-4">快捷操作</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: '新建客户', page: 'customers' as Page, icon: Users, kbd: '⌘1' },
@@ -129,11 +129,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <button
                 key={action.label}
                 onClick={() => onNavigate(action.page)}
-                className="group flex items-center gap-2.5 px-4 py-3 rounded-lg border border-dashed border-[#524E48]/25 bg-[#F7F3EB] font-medium text-sm text-[#5C5246] hover:bg-[#F2EBDC] hover:border-[#7BA369] hover:text-[#2D2A26] transition-all"
+                className="intj-btn-ghost group flex items-center gap-2.5 px-4 py-3 rounded-lg border border-dashed border-[#3A2D54]/60 bg-[#161228]/60 font-medium text-sm text-[#B8AEC8] hover:bg-[#221A3A]/60 hover:border-[#A855F7] hover:text-[#F3EFE6] transition-all"
               >
-                <Icon className="w-[18px] h-[18px] text-[#78716C] group-hover:text-[#7BA369]" strokeWidth={1.75} />
+                <Icon className="w-[18px] h-[18px] text-[#8879A0] group-hover:text-[#A855F7]" strokeWidth={1.75} />
                 <span className="flex-1 text-left">{action.label}</span>
-                <kbd className="bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1] rounded px-1.5 py-0.5 text-[10px] font-mono">
+                <kbd className="bg-[#221A3A]/60 text-[#B8AEC8] border border-[#4A3A70] rounded px-1.5 py-0.5 text-[10px] font-mono">
                   {action.kbd}
                 </kbd>
               </button>
@@ -144,33 +144,33 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Recent PIs and Quotations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-5">
+        <div className="intj-card intj-cut-corner intj-gem backdrop-blur-md bg-[#1B142C]/90 rounded-xl border-2 border-[#3A2D54] shadow-[0_0_20px_rgba(168,85,247,0.18)] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">最近形式发票</h2>
-            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#7BA369] hover:text-[#5F8A4D] font-medium">
+            <h2 className="text-lg font-serif font-semibold text-[#F3EFE6]">最近形式发票</h2>
+            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#A855F7] hover:text-[#D8B4FE] font-medium">
               查看全部
             </button>
           </div>
           {recentPIs.length === 0 ? (
-            <div className="text-center py-8 text-[#78716C]">
-              <FileText className="w-10 h-10 mx-auto mb-2 text-[#E0D5C1]" strokeWidth={1.75} />
+            <div className="text-center py-8 text-[#8879A0]">
+              <FileText className="w-10 h-10 mx-auto mb-2 text-[#4A3A70]" strokeWidth={1.75} />
               <p className="text-sm">暂无形式发票</p>
             </div>
           ) : (
             <div className="space-y-1">
               {recentPIs.map((pi) => (
-                <div key={pi.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#F2EBDC] transition-colors">
+                <div key={pi.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#221A3A]/60 transition-colors">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#2D2A26] truncate">{pi.pi_number}</p>
-                    <p className="text-xs text-[#78716C] truncate">
+                    <p className="text-sm font-medium text-[#F3EFE6] truncate">{pi.pi_number}</p>
+                    <p className="text-xs text-[#8879A0] truncate">
                       {pi.customer?.company_name || '未关联客户'} · {formatDate(pi.created_at)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={classNames('px-2 py-0.5 rounded-md text-xs font-medium', statusColors[pi.status] || 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]')}>
+                    <span className={classNames('px-2 py-0.5 rounded-md text-xs font-medium', statusColors[pi.status] || 'bg-[#161228] text-[#B8AEC8] border border-[#3A2D54]')}>
                       {statusLabels[pi.status] || pi.status}
                     </span>
-                    <span className="text-sm font-semibold text-[#2D2A26] whitespace-nowrap">{formatCurrency(pi.total_amount, pi.currency)}</span>
+                    <span className="text-sm font-semibold text-[#F3EFE6] whitespace-nowrap">{formatCurrency(pi.total_amount, pi.currency)}</span>
                   </div>
                 </div>
               ))}
@@ -178,33 +178,33 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           )}
         </div>
 
-        <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-5">
+        <div className="intj-card intj-cut-corner intj-gem backdrop-blur-md bg-[#1B142C]/90 rounded-xl border-2 border-[#3A2D54] shadow-[0_0_20px_rgba(168,85,247,0.18)] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">最近报价单</h2>
-            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#7BA369] hover:text-[#5F8A4D] font-medium">
+            <h2 className="text-lg font-serif font-semibold text-[#F3EFE6]">最近报价单</h2>
+            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#A855F7] hover:text-[#D8B4FE] font-medium">
               查看全部
             </button>
           </div>
           {recentQuotes.length === 0 ? (
-            <div className="text-center py-8 text-[#78716C]">
-              <Quote className="w-10 h-10 mx-auto mb-2 text-[#E0D5C1]" strokeWidth={1.75} />
+            <div className="text-center py-8 text-[#8879A0]">
+              <Quote className="w-10 h-10 mx-auto mb-2 text-[#4A3A70]" strokeWidth={1.75} />
               <p className="text-sm">暂无报价单</p>
             </div>
           ) : (
             <div className="space-y-1">
               {recentQuotes.map((q) => (
-                <div key={q.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#F2EBDC] transition-colors">
+                <div key={q.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#221A3A]/60 transition-colors">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#2D2A26] truncate">{q.quote_number}</p>
-                    <p className="text-xs text-[#78716C] truncate">
+                    <p className="text-sm font-medium text-[#F3EFE6] truncate">{q.quote_number}</p>
+                    <p className="text-xs text-[#8879A0] truncate">
                       {q.customer?.company_name || '未关联客户'} · {formatDate(q.created_at)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={classNames('px-2 py-0.5 rounded-md text-xs font-medium', statusColors[q.status] || 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]')}>
+                    <span className={classNames('px-2 py-0.5 rounded-md text-xs font-medium', statusColors[q.status] || 'bg-[#161228] text-[#B8AEC8] border border-[#3A2D54]')}>
                       {statusLabels[q.status] || q.status}
                     </span>
-                    <span className="text-sm font-semibold text-[#2D2A26] whitespace-nowrap">{formatCurrency(q.total_amount, q.currency)}</span>
+                    <span className="text-sm font-semibold text-[#F3EFE6] whitespace-nowrap">{formatCurrency(q.total_amount, q.currency)}</span>
                   </div>
                 </div>
               ))}
@@ -214,19 +214,19 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       </div>
 
       {/* Trade tips */}
-      <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-6 relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#A8C28E]/[0.08] blur-3xl pointer-events-none" />
+      <div className="intj-card intj-cut-corner intj-gem backdrop-blur-md bg-[#1B142C]/90 rounded-xl border-2 border-[#3A2D54] shadow-[0_0_20px_rgba(168,85,247,0.18)] p-6 relative overflow-hidden">
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#06B6D4]/30 blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-[#7BA369] flex items-center justify-center shadow-[2px_2px_0px_0px_#2B2927]">
-              <Globe2 className="w-5 h-5 text-[#FAF7F2]" strokeWidth={1.75} />
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#A855F7] to-[#6B21A8] flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.5)]">
+              <Globe2 className="w-5 h-5 text-[#F3EFE6]" strokeWidth={1.75} />
             </div>
-            <h2 className="text-lg font-serif font-bold text-[#2D2A26]">外贸每日一贴</h2>
+            <h2 className="text-lg font-serif font-bold text-[#F3EFE6]">外贸每日一贴</h2>
           </div>
-          <p className="text-[#5C5246] text-sm leading-relaxed">
+          <p className="text-[#B8AEC8] text-sm leading-relaxed">
             "FOB（船上交货）条件下，卖方负责将货物运到装运港船上并承担到此为止的费用和风险；买方负责租船订舱、支付海运费和保险。确认报价时务必明确贸易术语，避免费用归属产生争议。"
           </p>
-          <div className="flex items-center gap-2 mt-3 text-xs text-[#78716C]">
+          <div className="flex items-center gap-2 mt-3 text-xs text-[#8879A0]">
             <Clock className="w-3.5 h-3.5" strokeWidth={1.75} />
             <span className="font-mono">贸易术语 · Incoterms 2020</span>
           </div>
