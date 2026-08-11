@@ -57,34 +57,34 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose }: SidebarP
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-[#3D3A36]/40 backdrop-blur-[1px] z-30 lg:hidden"
           onClick={onClose}
         />
       )}
       <aside
         className={classNames(
-          'fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-[#0C0C0E] text-zinc-100 flex flex-col transition-transform duration-300 border-r border-white/[0.06]',
+          'fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-[#FFFDF9] text-[#2D2A26] flex flex-col transition-transform duration-300 border-r border-[#E8E2D5] shadow-[4px_0_12px_rgba(45,42,38,0.03)]',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-5 border-b border-dashed border-[#524E48]/25">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_18px_rgba(59,130,246,0.4)]">
-              <span className="text-white font-bold text-sm">K</span>
+            <div className="w-9 h-9 rounded-md bg-[#C25932] flex items-center justify-center shadow-[2px_2px_0px_0px_#2B2927]">
+              <span className="text-[#FAF7F2] font-serif font-bold text-sm">K</span>
             </div>
             <div>
-              <h1 className="text-base font-bold leading-tight tracking-wide text-zinc-100">KIKI TECH</h1>
-              <p className="text-[10px] text-zinc-500 leading-tight">外贸智能工作台</p>
+              <h1 className="text-base font-serif font-bold leading-tight tracking-wide text-[#2D2A26]">KIKI TECH</h1>
+              <p className="text-[11px] text-[#78716C] leading-tight font-handwriting">外贸智能工作台</p>
             </div>
           </div>
-          <button onClick={onClose} className="lg:hidden text-zinc-500 hover:text-white">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="lg:hidden text-[#78716C] hover:text-[#2D2A26]">
+            <X className="w-5 h-5" strokeWidth={1.75} />
           </button>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          <p className="px-3 pb-2 pt-1 text-[10px] font-mono uppercase tracking-wider text-zinc-600">
-            Navigation
+          <p className="px-3 pb-2 pt-1 text-[10px] font-mono uppercase tracking-[0.15em] text-[#78716C]/70">
+            — Navigation —
           </p>
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -99,19 +99,19 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose }: SidebarP
                 className={classNames(
                   'group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all',
                   isActive
-                    ? 'bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white shadow-[0_0_18px_rgba(59,130,246,0.3)]'
-                    : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100'
+                    ? 'bg-[#C25932] text-[#FAF7F2] shadow-[2px_2px_0px_0px_#2B2927]'
+                    : 'text-[#5C5246] hover:bg-[#F2EBDC] hover:text-[#2D2A26] border border-transparent hover:border-dashed hover:border-[#524E48]/25'
                 )}
               >
-                <Icon className={classNames('w-[16px] h-[16px] shrink-0', isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300')} />
+                <Icon className={classNames('w-[16px] h-[16px] shrink-0', isActive ? 'text-[#FAF7F2]' : 'text-[#78716C] group-hover:text-[#2D2A26]')} strokeWidth={1.75} />
                 <span className="flex-1 text-left">{item.label}</span>
                 {!isActive && (
-                  <kbd className="hidden lg:inline-flex items-center gap-0.5 bg-zinc-800/60 text-zinc-600 border border-zinc-700/40 rounded px-1 py-0.5 text-[10px] font-mono">
+                  <kbd className="hidden lg:inline-flex items-center gap-0.5 bg-[#F2EBDC] text-[#78716C] border border-[#E0D5C1] rounded px-1 py-0.5 text-[10px] font-mono">
                     {item.kbd}
                   </kbd>
                 )}
                 {isActive && (
-                  <kbd className="hidden lg:inline-flex items-center gap-0.5 bg-white/15 text-white/80 border border-white/20 rounded px-1 py-0.5 text-[10px] font-mono">
+                  <kbd className="hidden lg:inline-flex items-center gap-0.5 bg-[#FAF7F2]/20 text-[#FAF7F2]/90 border border-[#FAF7F2]/30 rounded px-1 py-0.5 text-[10px] font-mono">
                     {item.kbd}
                   </kbd>
                 )}
@@ -120,15 +120,15 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose }: SidebarP
           })}
         </nav>
 
-        <div className="px-4 py-4 border-t border-white/[0.06]">
+        <div className="px-4 py-4 border-t border-dashed border-[#524E48]/25">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <p className="text-[10px] text-zinc-500 font-mono">System Online</p>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2F5D50] animate-pulse" />
+              <p className="text-[10px] text-[#78716C] font-mono">System Online</p>
             </div>
-            <kbd className="bg-zinc-800/80 text-zinc-500 border border-zinc-700/60 rounded px-1.5 py-0.5 text-[10px] font-mono shadow-inner">⌘K</kbd>
+            <kbd className="bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1] rounded px-1.5 py-0.5 text-[10px] font-mono">⌘K</kbd>
           </div>
-          <p className="text-[10px] text-zinc-600 text-center mt-2">学会世界的语言，做成世界的生意</p>
+          <p className="text-[11px] text-[#78716C] text-center mt-2 font-handwriting">学会世界的语言，做成世界的生意</p>
         </div>
       </aside>
     </>

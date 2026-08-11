@@ -1,26 +1,38 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        raycast: {
-          bg: '#0C0C0E',
-          surface: '#131316',
-          surface2: '#1A1A1F',
+        paper: {
+          bg: '#FAF7F2',      // 暖黄米白纸质底
+          card: '#FFFDF9',    // 微暖乳白卡片
+          sunken: '#F2EBDC',  // 凹陷/次级背景
+          input: '#F7F3EB',   // 输入框底
+          border: '#E8E2D5',  // 纸质切边边框
+          ink: '#2D2A26',     // 深炭木墨色
+          muted: '#78716C',   // 暖棕灰
+          graphite: '#3D3A36',// 石墨色
         },
-        brand: {
-          DEFAULT: '#3B82F6',
-          light: '#60A5FA',
+        clay: {
+          DEFAULT: '#C25932', // 复古陶土红
+          dark: '#A94A26',    // 深陶土
+          amber: '#D97706',   // 琥珀黄
+        },
+        stamp: {
+          red: { bg: '#FDF2F2', text: '#9B2C2C', border: '#F5C6C6' },
+          green: { bg: '#F0F5F2', text: '#2F5D50', border: '#C2D6C8' },
         },
       },
       fontFamily: {
+        serif: ['Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
+        handwriting: ['"Caveat"', '"Kalam"', 'cursive'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       boxShadow: {
-        'raycast-card': '0 0 20px rgba(255,255,255,0.03)',
-        'raycast-glow': '0 0 24px rgba(59,130,246,0.25)',
+        'paper': '0 2px 8px rgba(45,42,38,0.04)',
+        'paper-md': '0 4px 16px rgba(45,42,38,0.06)',
+        'pencil': '3px 3px 0px 0px #2B2927',
       },
     },
   },
