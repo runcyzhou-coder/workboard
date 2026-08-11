@@ -131,7 +131,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 onClick={() => onNavigate(action.page)}
                 className="group flex items-center gap-2.5 px-4 py-3 rounded-lg border border-white/[0.08] bg-white/[0.02] font-medium text-sm text-zinc-300 hover:bg-white/[0.05] hover:border-zinc-700 hover:text-zinc-100 transition-all"
               >
-                <Icon className="w-[18px] h-[18px] text-zinc-400 group-hover:text-[#FF7A00]" />
+                <Icon className="w-[18px] h-[18px] text-zinc-400 group-hover:text-[#60A5FA]" />
                 <span className="flex-1 text-left">{action.label}</span>
                 <kbd className="bg-zinc-800/80 text-zinc-500 border border-zinc-700/60 rounded px-1.5 py-0.5 text-[10px] font-mono shadow-inner">
                   {action.kbd}
@@ -147,7 +147,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="bg-[#131316] rounded-xl border border-white/[0.08] backdrop-blur-md p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-zinc-100">最近形式发票</h2>
-            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#FF5232] hover:text-[#FF7A00] font-medium">
+            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#3B82F6] hover:text-[#60A5FA] font-medium">
               查看全部
             </button>
           </div>
@@ -181,7 +181,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="bg-[#131316] rounded-xl border border-white/[0.08] backdrop-blur-md p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-zinc-100">最近报价单</h2>
-            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#FF5232] hover:text-[#FF7A00] font-medium">
+            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#3B82F6] hover:text-[#60A5FA] font-medium">
               查看全部
             </button>
           </div>
@@ -215,10 +215,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Trade tips */}
       <div className="bg-[#131316] rounded-xl border border-white/[0.08] backdrop-blur-md p-6 relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#FF5232]/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#3B82F6]/10 blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#FF5232] to-[#FF7A00] flex items-center justify-center shadow-[0_0_18px_rgba(255,82,50,0.35)]">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_18px_rgba(59,130,246,0.35)]">
               <Globe2 className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-lg font-bold text-zinc-100">外贸每日一贴</h2>

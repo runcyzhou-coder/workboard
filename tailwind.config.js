@@ -11,8 +11,8 @@ export default {
           surface2: '#1A1A1F',
         },
         brand: {
-          DEFAULT: '#FF5232',
-          orange: '#FF7A00',
+          DEFAULT: '#3B82F6',
+          light: '#60A5FA',
         },
       },
       fontFamily: {
@@ -20,7 +20,7 @@ export default {
       },
       boxShadow: {
         'raycast-card': '0 0 20px rgba(255,255,255,0.03)',
-        'raycast-glow': '0 0 24px rgba(255,82,50,0.25)',
+        'raycast-glow': '0 0 24px rgba(59,130,246,0.25)',
       },
     },
   },

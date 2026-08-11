@@ -87,10 +87,10 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0C0C0E]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF5232] to-[#FF7A00] flex items-center justify-center shadow-[0_0_24px_rgba(255,82,50,0.45)]">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_24px_rgba(59,130,246,0.45)]">
             <span className="text-white font-bold text-lg">K</span>
           </div>
-          <div className="w-6 h-6 border-2 border-zinc-700 border-t-[#FF5232] rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-700 border-t-[#3B82F6] rounded-full animate-spin" />
           <p className="text-zinc-500 text-sm">加载中...</p>
         </div>
       </div>
@@ -117,7 +117,7 @@ function App() {
             <Menu className="w-6 h-6" />
           </button>
           <span className="font-semibold text-zinc-100">KIKI TECH</span>
-          <button onClick={handleLogout} className="ml-auto text-zinc-500 hover:text-[#FF5232]">
+          <button onClick={handleLogout} className="ml-auto text-zinc-500 hover:text-[#3B82F6]">
             <LogOut className="w-5 h-5" />
           </button>
         </header>
@@ -129,7 +129,7 @@ function App() {
             onClick={() => setPage('home')}
             className="group flex items-center gap-2 text-left"
           >
-            <span className="w-6 h-6 rounded-md bg-gradient-to-br from-[#FF5232] to-[#FF7A00] flex items-center justify-center text-white text-[11px] font-bold shadow-[0_0_16px_rgba(255,82,50,0.35)]">
+            <span className="w-6 h-6 rounded-md bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center text-white text-[11px] font-bold shadow-[0_0_16px_rgba(59,130,246,0.35)]">
               K
             </span>
             <span className="text-sm font-semibold text-zinc-100 tracking-wide">
@@ -154,7 +154,7 @@ function App() {
 
           <div className="flex items-center gap-3 shrink-0">
             <span className="text-xs text-zinc-500 font-mono hidden xl:inline">{userEmail}</span>
-            <button onClick={handleLogout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-400 hover:text-[#FF5232] hover:bg-[#FF5232]/10 border border-transparent hover:border-[#FF5232]/20 rounded-md transition-colors">
+            <button onClick={handleLogout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-zinc-400 hover:text-[#3B82F6] hover:bg-[#3B82F6]/10 border border-transparent hover:border-[#3B82F6]/20 rounded-md transition-colors">
               <LogOut className="w-3.5 h-3.5" />
               退出
             </button>

@@ -421,7 +421,7 @@ function EventModal({
       <div className="bg-[#131316] border border-white/[0.08] rounded-xl shadow-2xl w-full max-w-md flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[#FF5232]" />
+            <Calendar className="w-5 h-5 text-[#3B82F6]" />
             <h2 className="text-lg font-bold text-zinc-100">
               {mode === 'add' ? '添加重要事项' : '修改事项'}
             </h2>
@@ -439,7 +439,7 @@ function EventModal({
               onKeyDown={e => { if (e.key === 'Enter' && title.trim()) handleSave(); }}
               placeholder="如：给沙特客户发送报价..."
               autoFocus
-              className="w-full px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 focus:border-[#FF5232]/40"
+              className="w-full px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 focus:border-[#3B82F6]/40"
             />
           </div>
 
@@ -450,7 +450,7 @@ function EventModal({
               type="date"
               value={eventDate}
               onChange={e => setEventDate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 focus:border-[#FF5232]/40"
+              className="w-full px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 focus:border-[#3B82F6]/40"
             />
           </div>
 
@@ -510,7 +510,7 @@ function EventModal({
               onChange={e => setNotes(e.target.value)}
               placeholder="补充说明..."
               rows={2}
-              className="w-full px-3 py-2 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 focus:border-[#FF5232]/40 resize-none"
+              className="w-full px-3 py-2 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 focus:border-[#3B82F6]/40 resize-none"
             />
           </div>
 
@@ -521,7 +521,7 @@ function EventModal({
                 onClick={() => setDone(!done)}
                 className={classNames(
                   'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all',
-                  done ? 'bg-gradient-to-br from-[#FF5232] to-[#FF7A00] border-transparent' : 'border-zinc-600 hover:border-[#FF5232]'
+                  done ? 'bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] border-transparent' : 'border-zinc-600 hover:border-[#3B82F6]'
                 )}
               >
                 {done && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
@@ -546,7 +546,7 @@ function EventModal({
             <button
               onClick={handleSave}
               disabled={!title.trim() || saving}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#FF5232] to-[#FF7A00] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               {mode === 'add' ? '添加' : '保存'}
@@ -799,7 +799,7 @@ function MiniCalendar({
           <select
             value={viewYear}
             onChange={e => setViewYear(Number(e.target.value))}
-            className="px-2 py-1 text-sm font-semibold text-zinc-100 bg-zinc-900/80 border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 cursor-pointer"
+            className="px-2 py-1 text-sm font-semibold text-zinc-100 bg-zinc-900/80 border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 cursor-pointer"
           >
             {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
               <option key={y} value={y}>{y}年</option>
@@ -808,7 +808,7 @@ function MiniCalendar({
           <select
             value={viewMonth}
             onChange={e => setViewMonth(Number(e.target.value))}
-            className="px-2 py-1 text-sm font-semibold text-zinc-100 bg-zinc-900/80 border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 cursor-pointer"
+            className="px-2 py-1 text-sm font-semibold text-zinc-100 bg-zinc-900/80 border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 cursor-pointer"
           >
             {Array.from({ length: 12 }, (_, i) => i).map(m => (
               <option key={m} value={m}>{m + 1}月</option>
@@ -819,7 +819,7 @@ function MiniCalendar({
           <button onClick={prevMonth} className="p-1.5 text-zinc-500 hover:text-zinc-100 hover:bg-white/[0.04] rounded-lg transition-colors" title="上一月">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-[#FF5232] hover:bg-[#FF5232]/10 rounded-lg transition-colors" title="返回今天">
+          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-[#3B82F6] hover:bg-[#3B82F6]/10 rounded-lg transition-colors" title="返回今天">
             今天
           </button>
           <button onClick={nextMonth} className="p-1.5 text-zinc-500 hover:text-zinc-100 hover:bg-white/[0.04] rounded-lg transition-colors" title="下一月">
@@ -850,9 +850,9 @@ function MiniCalendar({
               className={classNames(
                 'min-h-[56px] p-1 rounded-lg border cursor-pointer transition-all group relative',
                 isSelected
-                  ? 'border-[#FF5232] bg-[#FF5232]/[0.12] ring-1 ring-[#FF5232]/30'
+                  ? 'border-[#3B82F6] bg-[#3B82F6]/[0.12] ring-1 ring-[#3B82F6]/30'
                   : isToday
-                    ? 'border-[#FF5232]/30 bg-[#FF5232]/[0.06]'
+                    ? 'border-[#3B82F6]/30 bg-[#3B82F6]/[0.06]'
                     : 'border-transparent hover:border-white/[0.08] hover:bg-white/[0.04]',
                 !cell.isCurrentMonth && 'opacity-30'
               )}
@@ -871,7 +871,7 @@ function MiniCalendar({
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); openAddModal(cell.dateStr); }}
-                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-zinc-500 hover:text-[#FF5232] hover:bg-[#FF5232]/10 rounded transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-zinc-500 hover:text-[#3B82F6] hover:bg-[#3B82F6]/10 rounded transition-all"
                   title="添加事项"
                 >
                   <Plus className="w-3 h-3" />
@@ -916,7 +916,7 @@ function MiniCalendar({
           </span>
           <div className="flex items-center gap-2">
             {loading && <RefreshCw className="w-3 h-3 text-zinc-600 animate-spin" />}
-            <span className="font-semibold text-[#FF5232]">{doneCount}/{totalTodos}</span>
+            <span className="font-semibold text-[#3B82F6]">{doneCount}/{totalTodos}</span>
           </div>
         </div>
         {/* 图例 */}
@@ -981,7 +981,7 @@ www.kiki-tech.com`;
       <div className="bg-[#131316] border border-white/[0.08] rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#FF5232]" />
+            <Sparkles className="w-5 h-5 text-[#3B82F6]" />
             <h2 className="text-lg font-bold text-zinc-100">AI 提取商机写信</h2>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:bg-white/[0.04] rounded-lg"><X className="w-5 h-5" /></button>
@@ -994,7 +994,7 @@ www.kiki-tech.com`;
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.06]">
           <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-400 hover:bg-white/[0.04] rounded-lg">关闭</button>
-          <button onClick={copyLetter} className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#FF5232] to-[#FF7A00] text-white rounded-lg text-sm font-medium hover:opacity-90">
+          <button onClick={copyLetter} className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white rounded-lg text-sm font-medium hover:opacity-90">
             {copied ? <CheckCircle2 className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
             {copied ? '已复制' : '复制全文'}
           </button>
@@ -1054,8 +1054,8 @@ function IndustrySelectModal({
                 className={classNames(
                   'flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left',
                   current === opt.value
-                    ? 'border-[#FF5232] bg-[#FF5232]/[0.08] ring-1 ring-[#FF5232]/30 text-zinc-100'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:border-[#FF5232]/40 hover:bg-white/[0.04] text-zinc-300'
+                    ? 'border-[#3B82F6] bg-[#3B82F6]/[0.08] ring-1 ring-[#3B82F6]/30 text-zinc-100'
+                    : 'border-white/[0.08] bg-white/[0.02] hover:border-[#3B82F6]/40 hover:bg-white/[0.04] text-zinc-300'
                 )}
               >
                 <span className="text-2xl">{opt.icon}</span>
@@ -1064,7 +1064,7 @@ function IndustrySelectModal({
                     {opt.value}
                   </p>
                   {current === opt.value && (
-                    <p className="text-[10px] text-[#FF5232] font-medium">当前选择</p>
+                    <p className="text-[10px] text-[#3B82F6] font-medium">当前选择</p>
                   )}
                 </div>
               </button>
@@ -1082,12 +1082,12 @@ function IndustrySelectModal({
                 onChange={e => setCustomIndustry(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && customIndustry.trim()) handleConfirm(); }}
                 placeholder="如：五金工具、食品机械..."
-                className="flex-1 px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 focus:border-[#FF5232]/40"
+                className="flex-1 px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 focus:border-[#3B82F6]/40"
               />
               <button
                 onClick={handleConfirm}
                 disabled={!customIndustry.trim()}
-                className="px-4 py-2.5 bg-gradient-to-r from-[#FF5232] to-[#FF7A00] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 确认
               </button>
@@ -1298,19 +1298,19 @@ export function HomePage({ onNavigate }: HomeProps) {
     <div className="space-y-6">
       {/* 1. 顶部 Banner（问候 + 业务指标卡片） */}
       <div className="bg-[#131316] border border-white/[0.08] rounded-2xl backdrop-blur-md p-6 sm:p-8 overflow-hidden relative">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#FF5232]/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#FF7A00]/[0.06] blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#3B82F6]/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#60A5FA]/[0.06] blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 mb-2">
-              <Sparkles className="w-4 h-4 text-[#FF5232]" />
+              <Sparkles className="w-4 h-4 text-[#3B82F6]" />
               <span>AI 智能首页</span>
             </div>
             <div className="flex items-center gap-3 mb-1 flex-wrap">
               <h1 className="text-3xl font-bold text-zinc-100">早安，KIKI TECH</h1>
               <button
                 onClick={() => setShowIndustryModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:border-[#FF5232]/40 hover:text-white transition-all text-zinc-200 text-sm font-semibold border border-white/[0.08]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:border-[#3B82F6]/40 hover:text-white transition-all text-zinc-200 text-sm font-semibold border border-white/[0.08]"
                 title="点击切换行业"
               >
                 {selectedIndustry ? (
@@ -1380,8 +1380,8 @@ export function HomePage({ onNavigate }: HomeProps) {
         <div className="bg-[#131316] border border-white/[0.08] rounded-2xl backdrop-blur-md p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#FF5232]/10 flex items-center justify-center">
-                <ListTodo className="w-5 h-5 text-[#FF5232]" />
+              <div className="w-9 h-9 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
+                <ListTodo className="w-5 h-5 text-[#3B82F6]" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-zinc-100">每日任务</h2>
@@ -1408,11 +1408,11 @@ export function HomePage({ onNavigate }: HomeProps) {
               onChange={(e) => setTodoInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') addTodo(); }}
               placeholder={`添加 ${selectedDate} 的任务，如：给沙特客户发送报价...`}
-              className="flex-1 px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#FF5232]/40 focus:border-[#FF5232]/40"
+              className="flex-1 px-3 py-2.5 bg-zinc-900/80 border border-white/[0.08] rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 focus:border-[#3B82F6]/40"
             />
             <button
               onClick={addTodo}
-              className="px-3 py-2.5 bg-gradient-to-r from-[#FF5232] to-[#FF7A00] text-white rounded-lg hover:opacity-90 transition-opacity"
+              className="px-3 py-2.5 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white rounded-lg hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -1431,7 +1431,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                 className={classNames(
                   'px-2.5 py-1.5 rounded-md font-medium transition-colors',
                   filterPriority === f.key
-                    ? 'bg-gradient-to-r from-[#FF5232] to-[#FF7A00] text-white'
+                    ? 'bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white'
                     : 'bg-white/[0.03] text-zinc-400 hover:bg-white/[0.06]'
                 )}
               >
@@ -1485,7 +1485,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                       {todo.done ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                       ) : (
-                        <Circle className="w-5 h-5 text-zinc-600 group-hover:text-[#FF5232] transition-colors" />
+                        <Circle className="w-5 h-5 text-zinc-600 group-hover:text-[#3B82F6] transition-colors" />
                       )}
                     </button>
                     <div className="flex-1 min-w-0">
@@ -1532,7 +1532,7 @@ export function HomePage({ onNavigate }: HomeProps) {
               <span>💡 提示：点击日历日期可跳转查看历史任务</span>
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="text-[#FF5232] font-medium hover:text-[#FF7A00] flex items-center gap-1"
+                className="text-[#3B82F6] font-medium hover:text-[#60A5FA] flex items-center gap-1"
               >
                 查看业务数据 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -1590,7 +1590,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                     className={classNames(
                       'group p-3 rounded-xl border transition-all',
                       isPrimary
-                        ? 'border-[#FF5232]/20 bg-[#FF5232]/[0.04] hover:border-zinc-700 hover:bg-white/[0.04]'
+                        ? 'border-[#3B82F6]/20 bg-[#3B82F6]/[0.04] hover:border-zinc-700 hover:bg-white/[0.04]'
                         : 'border-white/[0.06] bg-white/[0.02] hover:border-zinc-700 hover:bg-white/[0.04]'
                     )}
                   >
@@ -1606,7 +1606,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                       <span className="text-[10px] text-zinc-500 shrink-0">{n.date.slice(5)}</span>
                     </div>
                     <h3 className={classNames(
-                      'font-semibold text-zinc-100 leading-snug mb-1.5 group-hover:text-[#FF7A00] transition-colors',
+                      'font-semibold text-zinc-100 leading-snug mb-1.5 group-hover:text-[#60A5FA] transition-colors',
                       isPrimary ? 'text-sm' : 'text-xs'
                     )}>
                       {n.title}
@@ -1628,7 +1628,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                         </button>
                         <button
                           onClick={() => setAiLetterNews(n)}
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#FF5232]/10 text-[#FF5232] font-medium hover:bg-[#FF5232]/20 border border-[#FF5232]/20"
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#3B82F6]/10 text-[#3B82F6] font-medium hover:bg-[#3B82F6]/20 border border-[#3B82F6]/20"
                           title="AI 提取商机写信"
                         >
                           <Sparkles className="w-3 h-3" />AI 写信
@@ -1695,7 +1695,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                   <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group cursor-pointer" onClick={() => onNavigate('products')}>
                     <div className={classNames(
                       'w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0',
-                      idx < 3 ? 'bg-gradient-to-br from-[#FF5232] to-[#FF7A00] text-white' : 'bg-white/[0.06] text-zinc-400'
+                      idx < 3 ? 'bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] text-white' : 'bg-white/[0.06] text-zinc-400'
                     )}>
                       {idx + 1}
                     </div>
@@ -1728,7 +1728,7 @@ export function HomePage({ onNavigate }: HomeProps) {
           )}
           <button
             onClick={() => onNavigate('products')}
-            className="mt-4 w-full text-sm text-[#FF5232] font-medium py-2 rounded-lg border border-[#FF5232]/20 bg-[#FF5232]/[0.06] hover:bg-[#FF5232]/10 transition-colors flex items-center justify-center gap-1"
+            className="mt-4 w-full text-sm text-[#3B82F6] font-medium py-2 rounded-lg border border-[#3B82F6]/20 bg-[#3B82F6]/[0.06] hover:bg-[#3B82F6]/10 transition-colors flex items-center justify-center gap-1"
           >
             进入产品库 <ChevronRight className="w-4 h-4" />
           </button>
@@ -1906,8 +1906,8 @@ export function HomePage({ onNavigate }: HomeProps) {
                     <div className="px-3 pb-3 pt-0">
                       <div className="bg-black/30 rounded-lg p-3 border border-white/[0.06]">
                         <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 mb-1">
-                          <Sparkles className="w-3 h-3 text-[#FF5232]" />
-                          <span className="font-semibold text-[#FF5232]">AI 分析原因</span>
+                          <Sparkles className="w-3 h-3 text-[#3B82F6]" />
+                          <span className="font-semibold text-[#3B82F6]">AI 分析原因</span>
                         </div>
                         <p className="text-xs text-zinc-300 leading-relaxed">{r.reason}</p>
                       </div>

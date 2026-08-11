@@ -69,7 +69,7 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose }: SidebarP
       >
         <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06]">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#FF5232] to-[#FF7A00] flex items-center justify-center shadow-[0_0_18px_rgba(255,82,50,0.4)]">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_18px_rgba(59,130,246,0.4)]">
               <span className="text-white font-bold text-sm">K</span>
             </div>
             <div>
@@ -99,7 +99,7 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose }: SidebarP
                 className={classNames(
                   'group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all',
                   isActive
-                    ? 'bg-gradient-to-r from-[#FF5232] to-[#FF7A00] text-white shadow-[0_0_18px_rgba(255,82,50,0.3)]'
+                    ? 'bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white shadow-[0_0_18px_rgba(59,130,246,0.3)]'
                     : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100'
                 )}
               >
