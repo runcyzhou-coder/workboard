@@ -74,18 +74,32 @@ export function ProfitCalculator() {
     }
     setRateCache(prev => ({ ...prev, loading: true, error: null }));
     try {
-      // Frankfurter API: open-source, no key needed (EUR-based), supports USD base via latest?from=
-      // Try frankfurter first
       let data: RateData | null = null;
+
+      // API 1: open.er-api.com (free, no key, CORS-enabled, reliable)
       try {
-        const symbols = Object.keys(FALLBACK_RATES).filter(s => s !== base).join(',');
-        const res = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${symbols}`);
+        const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
         if (res.ok) {
           const json = await res.json();
-          data = { base: json.base || base, date: json.date || new Date().toISOString().slice(0, 10), rates: json.rates || {} };
+          if (json.rates) {
+            data = { base: json.base_code || base, date: (json.time_last_update_utc || new Date().toISOString()).slice(0, 10), rates: json.rates };
+          }
         }
-      } catch { /* ignore, try next API */ }
-      // Backup: exchangerate.host (free tier, no key for EUR-based)
+      } catch { /* ignore, try next */ }
+
+      // API 2: frankfurter.app (free, no key, ECB data)
+      if (!data) {
+        try {
+          const symbols = Object.keys(FALLBACK_RATES).filter(s => s !== base).join(',');
+          const res = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${symbols}`);
+          if (res.ok) {
+            const json = await res.json();
+            data = { base: json.base || base, date: json.date || new Date().toISOString().slice(0, 10), rates: json.rates || {} };
+          }
+        } catch { /* ignore, try next */ }
+      }
+
+      // API 3: exchangerate.host
       if (!data) {
         try {
           const res2 = await fetch(`https://api.exchangerate.host/latest?base=${base}`);
@@ -97,6 +111,7 @@ export function ProfitCalculator() {
           }
         } catch { /* ignore */ }
       }
+
       // Fallback: build synthetic data using baseline normalized to requested base
       if (!data) {
         const usdToBase = 1 / (FALLBACK_RATES[base] || 1);
@@ -106,7 +121,7 @@ export function ProfitCalculator() {
           else rates[code] = (FALLBACK_RATES[code] || 1) * usdToBase;
         });
         data = { base, date: new Date().toISOString().slice(0, 10), rates };
-        setRateCache(prev => ({ ...prev, data, fetchedAt: now, loading: false, error: 'API暂不可用，使用参考基准汇率（非实时）' }));
+        setRateCache(prev => ({ ...prev, data, fetchedAt: now, loading: false, error: '当前使用参考基准汇率（非实时）' }));
         return;
       }
       setRateCache({ data, fetchedAt: now, loading: false, error: null });
@@ -122,7 +137,7 @@ export function ProfitCalculator() {
       setRateCache({
         data: { base, date: new Date().toISOString().slice(0, 10), rates },
         fetchedAt: now, loading: false,
-        error: `${msg}，已使用参考汇率`,
+        error: `当前使用参考汇率`,
       });
     }
   }, [rateCache.data, rateCache.fetchedAt]);
@@ -241,7 +256,7 @@ export function ProfitCalculator() {
                 )}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                数据来源: {rateCache.error ? '本地参考基准' : 'Frankfurter 公开 API'}
+                数据来源: {rateCache.error ? '本地参考基准' : '实时汇率 API'}
                 {rateCache.data?.date && ` · 数据日期 ${rateCache.data.date}`}
                 {rateCache.fetchedAt && ` · 更新于 ${new Date(rateCache.fetchedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`}
               </p>
