@@ -259,26 +259,13 @@ export function Quotations() {
 
             <div className="p-8 print:p-10" id="pi-document">
               <DocHeader title="QUOTATION" docNumber={viewing.quote_number} />
-              <table className="w-full text-sm mb-6 border-collapse">
-                <thead>
-                  <tr className="bg-slate-100 border-2 border-slate-300">
-                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Cont.Pers</th>
-                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Company</th>
-                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Address</th>
-                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Tel. No.</th>
-                    <th className="px-3 py-2 text-center font-semibold text-slate-700">E-mail</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-x border-b border-slate-300">
-                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.contact_name || '—'}</td>
-                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.company_name || '—'}</td>
-                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.address || '—'}</td>
-                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.phone || '—'}</td>
-                    <td className="px-3 py-2 text-slate-700">{viewing.customer?.email || '—'}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
+                <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{viewing.customer?.contact_name || '—'}</span></div>
+                <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{viewing.customer?.company_name || '—'}</span></div>
+                <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{viewing.customer?.address || '—'}</span></div>
+                <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{viewing.customer?.phone || '—'}</span></div>
+                <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{viewing.customer?.email || '—'}</span></div>
+              </div>
               <table className="w-full text-sm mb-6">
                 <thead>
                   <tr className="bg-slate-900 text-white">

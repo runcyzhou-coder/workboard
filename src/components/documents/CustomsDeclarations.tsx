@@ -153,26 +153,13 @@ function CdViewModal({ cd, onClose }: { cd: CustomsDeclaration & { customer?: Cu
         <div className="p-8 print:p-10" id="pi-document">
           <DocHeader title="CUSTOMS DECLARATION" docNumber={cd.declaration_number} />
           <div className="grid grid-cols-2 gap-6 mb-6">
-            <table className="w-full text-sm mb-6 border-collapse">
-            <thead>
-              <tr className="bg-slate-100 border-2 border-slate-300">
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Cont.Pers</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Company</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Address</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Tel. No.</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700">E-mail</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-x border-b border-slate-300">
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{cd.customer?.contact_name || '—'}</td>
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{cd.customer?.company_name || '—'}</td>
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{cd.customer?.address || '—'}</td>
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{cd.customer?.phone || '—'}</td>
-                <td className="px-3 py-2 text-slate-700">{cd.customer?.email || '—'}</td>
-              </tr>
-            </tbody>
-          </table>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
+              <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{cd.customer?.contact_name || '—'}</span></div>
+              <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{cd.customer?.company_name || '—'}</span></div>
+              <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{cd.customer?.address || '—'}</span></div>
+              <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{cd.customer?.phone || '—'}</span></div>
+              <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{cd.customer?.email || '—'}</span></div>
+            </div>
             <div className="bg-slate-50 rounded-lg p-4"><p className="text-xs font-semibold text-slate-400 uppercase mb-2">Declaration Details</p><div className="space-y-1 text-sm"><div className="flex justify-between"><span className="text-slate-500">Date:</span><span className="text-slate-900">{formatDate(cd.created_at)}</span></div><div className="flex justify-between"><span className="text-slate-500">Trade Mode:</span><span className="text-slate-900">{cd.trade_mode || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Declaration Type:</span><span className="text-slate-900">{cd.declaration_type || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Port of Departure:</span><span className="text-slate-900">{cd.port_of_departure || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Port of Destination:</span><span className="text-slate-900">{cd.port_of_destination || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Transport Method:</span><span className="text-slate-900">{cd.transport_method || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Container No.:</span><span className="text-slate-900">{cd.container_number || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Customs Broker:</span><span className="text-slate-900">{cd.customs_broker || '—'}</span></div></div></div>
           </div>
           <div className="grid grid-cols-4 gap-4 mb-6"><div className="bg-slate-50 rounded-lg p-3 text-center"><p className="text-xs text-slate-500">Gross Weight</p><p className="text-sm font-semibold text-slate-900">{cd.gross_weight || 0} kg</p></div><div className="bg-slate-50 rounded-lg p-3 text-center"><p className="text-xs text-slate-500">Net Weight</p><p className="text-sm font-semibold text-slate-900">{cd.net_weight || 0} kg</p></div><div className="bg-slate-50 rounded-lg p-3 text-center"><p className="text-xs text-slate-500">Packages</p><p className="text-sm font-semibold text-slate-900">{cd.package_count || 0}</p></div><div className="bg-slate-50 rounded-lg p-3 text-center"><p className="text-xs text-slate-500">Package Type</p><p className="text-sm font-semibold text-slate-900">{cd.package_type || '—'}</p></div></div>

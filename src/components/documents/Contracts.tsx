@@ -155,26 +155,13 @@ function ContractViewModal({ contract, onClose }: { contract: Contract & { custo
         <div className="p-8 print:p-10" id="pi-document">
           <DocHeader title="SALES CONTRACT" docNumber={contract.contract_number} />
           <div className="grid grid-cols-2 gap-6 mb-6">
-            <table className="w-full text-sm mb-6 border-collapse">
-            <thead>
-              <tr className="bg-slate-100 border-2 border-slate-300">
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Cont.Pers</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Company</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Address</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Tel. No.</th>
-                <th className="px-3 py-2 text-center font-semibold text-slate-700">E-mail</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-x border-b border-slate-300">
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{contract.customer?.contact_name || '—'}</td>
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{contract.customer?.company_name || '—'}</td>
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{contract.customer?.address || '—'}</td>
-                <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{contract.customer?.phone || '—'}</td>
-                <td className="px-3 py-2 text-slate-700">{contract.customer?.email || '—'}</td>
-              </tr>
-            </tbody>
-          </table>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
+              <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{contract.customer?.contact_name || '—'}</span></div>
+              <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{contract.customer?.company_name || '—'}</span></div>
+              <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{contract.customer?.address || '—'}</span></div>
+              <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{contract.customer?.phone || '—'}</span></div>
+              <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{contract.customer?.email || '—'}</span></div>
+            </div>
             <div className="bg-slate-50 rounded-lg p-4"><p className="text-xs font-semibold text-slate-400 uppercase mb-2">Contract Details</p><div className="space-y-1 text-sm"><div className="flex justify-between"><span className="text-slate-500">Date:</span><span className="text-slate-900">{formatDate(contract.created_at)}</span></div><div className="flex justify-between"><span className="text-slate-500">Delivery Date:</span><span className="text-slate-900">{contract.delivery_date || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Trade Terms:</span><span className="text-slate-900">{contract.delivery_terms || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Payment Terms:</span><span className="text-slate-900">{contract.payment_terms || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Port of Loading:</span><span className="text-slate-900">{contract.port_of_loading || '—'}</span></div><div className="flex justify-between"><span className="text-slate-500">Port of Discharge:</span><span className="text-slate-900">{contract.port_of_discharge || '—'}</span></div></div></div>
           </div>
           <table className="w-full text-sm mb-6"><thead><tr className="bg-slate-900 text-white"><th className="px-3 py-2 text-center font-medium rounded-l">#</th><th className="px-3 py-2 text-center font-medium">Description</th><th className="px-3 py-2 text-center font-medium">Qty</th><th className="px-3 py-2 text-center font-medium">Unit Price</th><th className="px-3 py-2 text-center font-medium rounded-r">Amount</th></tr></thead><tbody>{contract.items.length === 0 ? <tr><td colSpan={5} className="text-center py-6 text-slate-400">No items</td></tr> : contract.items.map((item, idx) => <tr key={item.id} className="border-b border-slate-100"><td className="px-3 py-2.5 text-slate-500">{idx + 1}</td><td className="px-3 py-2.5 text-slate-900">{item.description}</td><td className="px-3 py-2.5 text-right text-slate-600">{item.quantity}</td><td className="px-3 py-2.5 text-right text-slate-600">{formatCurrency(item.unit_price, contract.currency)}</td><td className="px-3 py-2.5 text-right font-medium text-slate-900">{formatCurrency(item.total, contract.currency)}</td></tr>)}</tbody></table>

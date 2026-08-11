@@ -344,26 +344,13 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
           <DocHeader title="PROFORMA INVOICE" docNumber={pi.pi_number} />
 
           <div className="grid grid-cols-2 gap-6 mb-6">
-            <table className="w-full text-sm mb-6 border-collapse">
-              <thead>
-                <tr className="bg-slate-100 border-2 border-slate-300">
-                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Cont.Pers</th>
-                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Company</th>
-                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Address</th>
-                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Tel. No.</th>
-                  <th className="px-3 py-2 text-center font-semibold text-slate-700">E-mail</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-x border-b border-slate-300">
-                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.contact_name || '—'}</td>
-                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.company_name || '—'}</td>
-                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.address || '—'}</td>
-                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.phone || '—'}</td>
-                  <td className="px-3 py-2 text-slate-700">{pi.customer?.email || '—'}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-sm pb-3 border-b border-slate-200">
+              <div><span className="text-slate-400">Cont.Pers: </span><span className="text-slate-700">{pi.customer?.contact_name || '—'}</span></div>
+              <div><span className="text-slate-400">Company: </span><span className="text-slate-700">{pi.customer?.company_name || '—'}</span></div>
+              <div><span className="text-slate-400">Address: </span><span className="text-slate-700">{pi.customer?.address || '—'}</span></div>
+              <div><span className="text-slate-400">Tel. No.: </span><span className="text-slate-700">{pi.customer?.phone || '—'}</span></div>
+              <div><span className="text-slate-400">E-mail: </span><span className="text-slate-700">{pi.customer?.email || '—'}</span></div>
+            </div>
             <div className="bg-slate-50 rounded-lg p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Invoice Details</p>
               <div className="space-y-1 text-sm">
