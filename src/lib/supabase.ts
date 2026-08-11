@@ -33,6 +33,9 @@ export interface BackgroundReport {
   tags: string[];
   match_level: 'high' | 'medium' | 'low';
   risk_level: 'low' | 'medium' | 'high';
+  decision_makers: { title: string; department: string }[];
+  pitch_hook: string;
+  matching_point: string;
   generated_at: string;
 }
 

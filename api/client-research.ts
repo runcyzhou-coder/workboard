@@ -20,6 +20,9 @@ interface BackgroundReport {
   tags: string[];
   match_level: 'high' | 'medium' | 'low';
   risk_level: 'low' | 'medium' | 'high';
+  decision_makers: { title: string; department: string }[];
+  pitch_hook: string;
+  matching_point: string;
   generated_at: string;
 }
 
@@ -65,7 +68,14 @@ Based on your knowledge of this company and the industry, provide a comprehensiv
   "ai_pitch_strategy": "Detailed strategy on how to approach this client, what pain points to address, and key selling points to emphasize",
   "tags": ["e.g., Middle East Giant", "High Match", "Low Risk"],
   "match_level": "high | medium | low",
-  "risk_level": "low | medium | high"
+  "risk_level": "low | medium | high",
+  "decision_makers": [
+    {"title": "Procurement Director", "department": "Procurement"},
+    {"title": "Supply Chain Manager", "department": "Supply Chain"},
+    {"title": "CTO", "department": "Engineering"}
+  ],
+  "pitch_hook": "A concise one-sentence icebreaker for the first cold email, referencing a specific pain point or market opportunity",
+  "matching_point": "Analysis of how the client's main products/needs match with our wind turbine products"
 }`;
 
   try {
@@ -125,6 +135,9 @@ Based on your knowledge of this company and the industry, provide a comprehensiv
       tags: Array.isArray(parsed.tags) ? parsed.tags : [],
       match_level: parsed.match_level || 'medium',
       risk_level: parsed.risk_level || 'medium',
+      decision_makers: Array.isArray(parsed.decision_makers) ? parsed.decision_makers : [],
+      pitch_hook: parsed.pitch_hook || '',
+      matching_point: parsed.matching_point || '',
       generated_at: new Date().toISOString(),
     };
 
@@ -205,6 +218,31 @@ function generateLocalReport(
     ? `Strategy: Position KIKI TECH as a strategic wind turbine supplier. 1) Highlight our 1.5MW-16MW product range matching their project needs. 2) Reference successful projects in similar markets. 3) Offer technical consultation and site assessment support. 4) Propose a pilot order with favorable payment terms to build trust. 5) Emphasize our certifications (DNV, CE, IEC) and after-sales service network. Key contact approach: Send a personalized technical proposal to ${contact_name || 'the procurement team'} referencing their recent projects.`
     : `Strategy: Build awareness and nurture the relationship. 1) Start with a company introduction and product catalog. 2) Offer market insights relevant to their region. 3) Propose a sample or trial order to establish trade history. 4) Follow up with competitive pricing and flexible terms. Key approach: Connect with ${contact_name || 'the decision maker'} on LinkedIn, then follow up with a tailored email.`;
 
+  // 决策人线索
+  const decision_makers: { title: string; department: string }[] = [];
+  if (match_level === 'high') {
+    decision_makers.push(
+      { title: 'Procurement Director', department: 'Procurement' },
+      { title: 'Chief Technology Officer', department: 'Engineering' },
+      { title: 'Project Manager', department: 'Project Management' },
+    );
+  } else {
+    decision_makers.push(
+      { title: 'Supply Chain Manager', department: 'Supply Chain' },
+      { title: 'Import/Export Manager', department: 'Trade' },
+    );
+  }
+
+  // 破冰切入点
+  const pitch_hook = match_level === 'high'
+    ? `Noticed ${company_name}'s recent expansion in renewable energy projects — our 16MW turbine series could cut your LCOE by 15% while meeting ${country || 'your market'}'s grid requirements.`
+    : `Saw ${company_name}'s growing presence in ${country || 'your region'} — we supply certified industrial components with flexible MOQ and competitive lead times for distributors like you.`;
+
+  // 匹配分析
+  const matching_point = match_level === 'high'
+    ? `${company_name}'s core business in renewable energy development directly aligns with KIKI TECH's wind turbine product line (1.5MW-16MW). Their project pipeline requires reliable turbine supply with strong after-sales support — our key competitive edge. Additional match on tower sections and blade sets for their EPC needs.`
+    : `${company_name} operates as a ${company_type.toLowerCase()} with potential demand for industrial components. While not a direct wind energy player, their trade activities in ${country || 'their market'} could benefit from our competitively priced electrical equipment and components. Suggest starting with a catalog review and trial order.`;
+
   return {
     company_type,
     scale,
@@ -215,6 +253,9 @@ function generateLocalReport(
     tags,
     match_level,
     risk_level,
+    decision_makers,
+    pitch_hook,
+    matching_point,
     generated_at: new Date().toISOString(),
   };
 }
