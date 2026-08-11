@@ -15,9 +15,9 @@ export default {
           graphite: '#3D3A36',// 石墨色
         },
         clay: {
-          DEFAULT: '#C25932', // 复古陶土红
-          dark: '#A94A26',    // 深陶土
-          amber: '#D97706',   // 琥珀黄
+          DEFAULT: '#7BA369', // 抹茶绿(品牌主色)
+          dark: '#5F8A4D',    // 深抹茶绿
+          light: '#A8C28E',   // 浅抹茶绿
         },
         stamp: {
           red: { bg: '#FDF2F2', text: '#9B2C2C', border: '#F5C6C6' },

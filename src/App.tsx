@@ -61,14 +61,11 @@ function App() {
             onClick={() => setPage('home')}
             className="group flex items-center gap-2 text-left"
           >
-            <span className="w-7 h-7 rounded-md bg-[#C25932] flex items-center justify-center text-[#FAF7F2] text-[12px] font-serif font-bold shadow-[2px_2px_0px_0px_#2B2927]">
-              K
-            </span>
             <span className="text-sm font-serif font-bold tracking-wide text-[#2D2A26]">
               KIKI TECH
             </span>
-            <span className="text-[10px] text-[#78716C]/70 font-mono uppercase tracking-[0.15em] ml-1 hidden xl:inline">
-              · CRM
+            <span className="text-[10px] text-[#78716C]/70 font-mono uppercase tracking-[0.15em] hidden xl:inline">
+              CRM
             </span>
           </button>
 
@@ -77,9 +74,9 @@ function App() {
             <button
               type="button"
               onClick={() => setPaletteOpen(true)}
-              className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg bg-[#F7F3EB] border border-dashed border-[#524E48]/25 hover:border-[#C25932] hover:bg-[#F2EBDC] transition-colors cursor-text text-left"
+              className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg bg-[#F7F3EB] border border-dashed border-[#524E48]/25 hover:border-[#7BA369] hover:bg-[#F2EBDC] transition-colors cursor-text text-left"
             >
-              <Search className="w-3.5 h-3.5 text-[#78716C] shrink-0 group-hover:text-[#C25932]" strokeWidth={1.75} />
+              <Search className="w-3.5 h-3.5 text-[#78716C] shrink-0 group-hover:text-[#7BA369]" strokeWidth={1.75} />
               <span className="text-xs text-[#78716C] flex-1 font-handwriting text-[13px] group-hover:text-[#5C5246]">搜索或运行命令…</span>
               <span className="inline-flex items-center gap-0.5">
                 <kbd className="bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1] rounded px-1.5 py-0.5 text-[10px] font-mono">⌘</kbd>

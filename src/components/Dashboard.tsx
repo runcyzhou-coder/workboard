@@ -73,8 +73,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const statusColors: Record<string, string> = {
     draft: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', sent: 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]', accepted: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-    rejected: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', expired: 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]', confirmed: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-    cancelled: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', prospect: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', negotiating: 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+    rejected: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', expired: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]', confirmed: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
+    cancelled: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', prospect: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', negotiating: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
     active: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]', inactive: 'bg-[#F2EBDC] text-[#78716C] border border-[#E0D5C1]',
   };
 
@@ -129,9 +129,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <button
                 key={action.label}
                 onClick={() => onNavigate(action.page)}
-                className="group flex items-center gap-2.5 px-4 py-3 rounded-lg border border-dashed border-[#524E48]/25 bg-[#F7F3EB] font-medium text-sm text-[#5C5246] hover:bg-[#F2EBDC] hover:border-[#C25932] hover:text-[#2D2A26] transition-all"
+                className="group flex items-center gap-2.5 px-4 py-3 rounded-lg border border-dashed border-[#524E48]/25 bg-[#F7F3EB] font-medium text-sm text-[#5C5246] hover:bg-[#F2EBDC] hover:border-[#7BA369] hover:text-[#2D2A26] transition-all"
               >
-                <Icon className="w-[18px] h-[18px] text-[#78716C] group-hover:text-[#C25932]" strokeWidth={1.75} />
+                <Icon className="w-[18px] h-[18px] text-[#78716C] group-hover:text-[#7BA369]" strokeWidth={1.75} />
                 <span className="flex-1 text-left">{action.label}</span>
                 <kbd className="bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1] rounded px-1.5 py-0.5 text-[10px] font-mono">
                   {action.kbd}
@@ -147,7 +147,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">最近形式发票</h2>
-            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#C25932] hover:text-[#A94A26] font-medium">
+            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#7BA369] hover:text-[#5F8A4D] font-medium">
               查看全部
             </button>
           </div>
@@ -181,7 +181,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">最近报价单</h2>
-            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#C25932] hover:text-[#A94A26] font-medium">
+            <button onClick={() => onNavigate('document-center')} className="text-sm text-[#7BA369] hover:text-[#5F8A4D] font-medium">
               查看全部
             </button>
           </div>
@@ -215,10 +215,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Trade tips */}
       <div className="bg-[#FFFDF9] rounded-xl border border-[#E8E2D5] shadow-[0_2px_8px_rgba(45,42,38,0.04)] p-6 relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#D97706]/[0.08] blur-3xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#A8C28E]/[0.08] blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-[#C25932] flex items-center justify-center shadow-[2px_2px_0px_0px_#2B2927]">
+            <div className="w-9 h-9 rounded-lg bg-[#7BA369] flex items-center justify-center shadow-[2px_2px_0px_0px_#2B2927]">
               <Globe2 className="w-5 h-5 text-[#FAF7F2]" strokeWidth={1.75} />
             </div>
             <h2 className="text-lg font-serif font-bold text-[#2D2A26]">外贸每日一贴</h2>

@@ -179,13 +179,13 @@ export function CommandPalette({ open, onClose, onNavigate }: CommandPaletteProp
                       className={classNames(
                         'w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-all',
                         isActive
-                          ? 'bg-[#C25932]/10 border border-dashed border-[#C25932]/40 text-[#2D2A26]'
+                          ? 'bg-[#7BA369]/10 border border-dashed border-[#7BA369]/40 text-[#2D2A26]'
                           : 'text-[#5C5246] hover:bg-[#F7F3EB] border border-transparent'
                       )}
                     >
                       <div className={classNames(
                         'w-8 h-8 rounded-md flex items-center justify-center shrink-0',
-                        isActive ? 'bg-[#C25932] text-[#FAF7F2] shadow-[1px_1px_0px_0px_#2B2927]' : 'bg-[#F2EBDC] text-[#78716C]'
+                        isActive ? 'bg-[#7BA369] text-[#FAF7F2] shadow-[1px_1px_0px_0px_#2B2927]' : 'bg-[#F2EBDC] text-[#78716C]'
                       )}>
                         <Icon className="w-4 h-4" strokeWidth={1.75} />
                       </div>
@@ -203,7 +203,7 @@ export function CommandPalette({ open, onClose, onNavigate }: CommandPaletteProp
                         )}
                         <ChevronRight className={classNames(
                           'w-4 h-4 transition-colors',
-                          isActive ? 'text-[#C25932]' : 'text-[#E0D5C1]'
+                          isActive ? 'text-[#7BA369]' : 'text-[#E0D5C1]'
                         )} strokeWidth={1.75} />
                       </div>
                     </button>

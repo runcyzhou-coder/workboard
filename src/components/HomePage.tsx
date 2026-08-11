@@ -371,14 +371,14 @@ const eventTypeConfig: Record<CalendarEventType, { label: string; color: string;
   follow_up: { label: '跟进', color: 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]', dot: 'bg-blue-600' },
   quote:     { label: '报价', color: 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]', dot: 'bg-violet-600' },
   sample:    { label: '寄样', color: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]', dot: 'bg-emerald-600' },
-  shipping:  { label: '发货', color: 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]', dot: 'bg-amber-600' },
+  shipping:  { label: '发货', color: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]', dot: 'bg-teal-600' },
   visit:     { label: '拜访', color: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]', dot: 'bg-emerald-600' },
   other:     { label: '其他', color: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', dot: 'bg-[#78716C]' },
 };
 
 const priorityConfig: Record<CalendarEventPriority, { label: string; color: string; bar: string }> = {
   high:   { label: '高', color: 'text-[#9B2C2C]', bar: 'border-l-[#9B2C2C]' },
-  medium: { label: '中', color: 'text-[#92660A]', bar: 'border-l-[#D97706]' },
+  medium: { label: '中', color: 'text-[#5F8A4D]', bar: 'border-l-[#A8C28E]' },
   low:    { label: '低', color: 'text-[#78716C]', bar: 'border-l-[#524E48]/40' },
 };
 
@@ -421,7 +421,7 @@ function EventModal({
       <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-xl shadow-[0_4px_16px_rgba(45,42,38,0.06)] w-full max-w-md flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-[#524E48]/25">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[#C25932]" strokeWidth={1.75} />
+            <Calendar className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
             <h2 className="text-lg font-serif font-bold text-[#2D2A26]">
               {mode === 'add' ? '添加重要事项' : '修改事项'}
             </h2>
@@ -439,7 +439,7 @@ function EventModal({
               onKeyDown={e => { if (e.key === 'Enter' && title.trim()) handleSave(); }}
               placeholder="如：给沙特客户发送报价..."
               autoFocus
-              className="w-full px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932]"
+              className="w-full px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
             />
           </div>
 
@@ -450,7 +450,7 @@ function EventModal({
               type="date"
               value={eventDate}
               onChange={e => setEventDate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932]"
+              className="w-full px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
             />
           </div>
 
@@ -491,7 +491,7 @@ function EventModal({
                     'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1',
                     priority === p
                       ? p === 'high' ? 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6] ring-1 ring-[#9B2C2C]/30'
-                        : p === 'medium' ? 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8] ring-1 ring-[#D97706]/30'
+                        : p === 'medium' ? 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8] ring-1 ring-[#A8C28E]/30'
                         : 'bg-[#F7F3EB] text-[#78716C] border border-[#E0D5C1] ring-1 ring-[#524E48]/20'
                       : 'bg-[#F7F3EB] text-[#78716C] border border-dashed border-[#524E48]/20 hover:bg-[#F2EBDC]'
                   )}
@@ -510,7 +510,7 @@ function EventModal({
               onChange={e => setNotes(e.target.value)}
               placeholder="补充说明..."
               rows={2}
-              className="w-full px-3 py-2 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932] resize-none"
+              className="w-full px-3 py-2 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369] resize-none"
             />
           </div>
 
@@ -521,7 +521,7 @@ function EventModal({
                 onClick={() => setDone(!done)}
                 className={classNames(
                   'w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-all',
-                  done ? 'bg-[#3D3A36] text-[#FAF7F2] border-[#3D3A36]' : 'border-[#3D3A36] hover:border-[#C25932]'
+                  done ? 'bg-[#3D3A36] text-[#FAF7F2] border-[#3D3A36]' : 'border-[#3D3A36] hover:border-[#7BA369]'
                 )}
               >
                 {done && <span className="text-[10px] leading-none">✓</span>}
@@ -546,7 +546,7 @@ function EventModal({
             <button
               onClick={handleSave}
               disabled={!title.trim() || saving}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#C25932] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#A94A26] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
             >
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={1.75} /> : <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />}
               {mode === 'add' ? '添加' : '保存'}
@@ -799,7 +799,7 @@ function MiniCalendar({
           <select
             value={viewYear}
             onChange={e => setViewYear(Number(e.target.value))}
-            className="px-2 py-1 text-sm font-semibold text-[#2D2A26] bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932] cursor-pointer"
+            className="px-2 py-1 text-sm font-semibold text-[#2D2A26] bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369] cursor-pointer"
           >
             {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
               <option key={y} value={y}>{y}年</option>
@@ -808,7 +808,7 @@ function MiniCalendar({
           <select
             value={viewMonth}
             onChange={e => setViewMonth(Number(e.target.value))}
-            className="px-2 py-1 text-sm font-semibold text-[#2D2A26] bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932] cursor-pointer"
+            className="px-2 py-1 text-sm font-semibold text-[#2D2A26] bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369] cursor-pointer"
           >
             {Array.from({ length: 12 }, (_, i) => i).map(m => (
               <option key={m} value={m}>{m + 1}月</option>
@@ -819,7 +819,7 @@ function MiniCalendar({
           <button onClick={prevMonth} className="p-1.5 text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-lg transition-colors" title="上一月">
             <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
           </button>
-          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-[#C25932] hover:bg-[#FDF2F2] rounded-lg transition-colors" title="返回今天">
+          <button onClick={goToday} className="px-2.5 py-1 text-xs font-medium text-[#7BA369] hover:bg-[#FDF2F2] rounded-lg transition-colors" title="返回今天">
             今天
           </button>
           <button onClick={nextMonth} className="p-1.5 text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-lg transition-colors" title="下一月">
@@ -850,9 +850,9 @@ function MiniCalendar({
               className={classNames(
                 'min-h-[56px] p-1 rounded-lg border cursor-pointer transition-all group relative',
                 isSelected
-                  ? 'border-[#C25932] bg-[#C25932]/10 ring-1 ring-[#C25932]/30'
+                  ? 'border-[#7BA369] bg-[#7BA369]/10 ring-1 ring-[#7BA369]/30'
                   : isToday
-                    ? 'border-[#C25932] bg-[#FDF2F2]'
+                    ? 'border-[#7BA369] bg-[#FDF2F2]'
                     : 'border-transparent hover:border-dashed hover:border-[#524E48]/30 hover:bg-[#F2EBDC]',
                 !cell.isCurrentMonth && 'opacity-40'
               )}
@@ -871,7 +871,7 @@ function MiniCalendar({
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); openAddModal(cell.dateStr); }}
-                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-[#78716C] hover:text-[#C25932] hover:bg-[#FDF2F2] rounded transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-[#78716C] hover:text-[#7BA369] hover:bg-[#FDF2F2] rounded transition-all"
                   title="添加事项"
                 >
                   <Plus className="w-3 h-3" strokeWidth={1.75} />
@@ -916,7 +916,7 @@ function MiniCalendar({
           </span>
           <div className="flex items-center gap-2">
             {loading && <RefreshCw className="w-3 h-3 text-[#78716C] animate-spin" strokeWidth={1.75} />}
-            <span className="font-semibold text-[#C25932]">{doneCount}/{totalTodos}</span>
+            <span className="font-semibold text-[#7BA369]">{doneCount}/{totalTodos}</span>
           </div>
         </div>
         {/* 图例 */}
@@ -981,20 +981,20 @@ www.kiki-tech.com`;
       <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-xl shadow-paper-md w-full max-w-2xl max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-[#524E48]/25">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#C25932]" strokeWidth={1.75} />
+            <Sparkles className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
             <h2 className="text-lg font-serif font-bold text-[#2D2A26]">AI 提取商机写信</h2>
           </div>
           <button onClick={onClose} className="text-[#78716C] hover:bg-[#F2EBDC] rounded-lg"><X className="w-5 h-5" strokeWidth={1.75} /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="bg-[#FDF6E3] border border-[#E8D9A8] text-[#92660A] rounded-lg p-3 mb-4 text-sm">
+          <div className="bg-[#EDF3E4] border border-[#C9D9B8] text-[#5F8A4D] rounded-lg p-3 mb-4 text-sm">
             📰 基于新闻：{news.title}
           </div>
           <pre className="whitespace-pre-wrap text-sm text-[#3D3A36] leading-relaxed font-sans">{letter}</pre>
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-dashed border-[#524E48]/25">
           <button onClick={onClose} className="px-4 py-2 text-sm text-[#78716C] hover:bg-[#F2EBDC] rounded-lg">关闭</button>
-          <button onClick={copyLetter} className="flex items-center gap-1.5 px-4 py-2 bg-[#C25932] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#A94A26] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927]">
+          <button onClick={copyLetter} className="flex items-center gap-1.5 px-4 py-2 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927]">
             {copied ? <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> : <Sparkles className="w-4 h-4" strokeWidth={1.75} />}
             {copied ? '已复制' : '复制全文'}
           </button>
@@ -1054,8 +1054,8 @@ function IndustrySelectModal({
                 className={classNames(
                   'flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left',
                   current === opt.value
-                    ? 'border-[#C25932] bg-[#FDF2F2] ring-1 ring-[#C25932]/30 text-[#2D2A26]'
-                    : 'border-[#E8E2D5] bg-[#F7F3EB] hover:border-[#C25932] hover:bg-[#F2EBDC] text-[#5C5246]'
+                    ? 'border-[#7BA369] bg-[#FDF2F2] ring-1 ring-[#7BA369]/30 text-[#2D2A26]'
+                    : 'border-[#E8E2D5] bg-[#F7F3EB] hover:border-[#7BA369] hover:bg-[#F2EBDC] text-[#5C5246]'
                 )}
               >
                 <span className="text-2xl">{opt.icon}</span>
@@ -1064,7 +1064,7 @@ function IndustrySelectModal({
                     {opt.value}
                   </p>
                   {current === opt.value && (
-                    <p className="text-[10px] text-[#C25932] font-handwriting">当前选择</p>
+                    <p className="text-[10px] text-[#7BA369] font-handwriting">当前选择</p>
                   )}
                 </div>
               </button>
@@ -1082,12 +1082,12 @@ function IndustrySelectModal({
                 onChange={e => setCustomIndustry(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && customIndustry.trim()) handleConfirm(); }}
                 placeholder="如：五金工具、食品机械..."
-                className="flex-1 px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932]"
+                className="flex-1 px-3 py-2.5 bg-[#F7F3EB] border border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
               />
               <button
                 onClick={handleConfirm}
                 disabled={!customIndustry.trim()}
-                className="px-4 py-2.5 bg-[#C25932] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#A94A26] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                className="px-4 py-2.5 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
               >
                 确认
               </button>
@@ -1298,19 +1298,19 @@ export function HomePage({ onNavigate }: HomeProps) {
     <div className="space-y-6">
       {/* 1. 顶部 Banner（问候 + 业务指标卡片） */}
       <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-6 sm:p-8 overflow-hidden relative">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#D97706]/[0.06] blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#C25932]/[0.05] blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#A8C28E]/[0.06] blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#7BA369]/[0.05] blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-[#78716C] font-handwriting text-[13px] mb-2">
-              <Sparkles className="w-4 h-4 text-[#C25932]" strokeWidth={1.75} />
+              <Sparkles className="w-4 h-4 text-[#7BA369]" strokeWidth={1.75} />
               <span>AI 智能首页</span>
             </div>
             <div className="flex items-center gap-3 mb-1 flex-wrap">
               <h1 className="text-3xl font-serif font-bold text-[#2D2A26]">早安，KIKI TECH</h1>
               <button
                 onClick={() => setShowIndustryModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EBDC] border border-[#E0D5C1] text-[#5C5246] hover:border-[#C25932] hover:text-[#2D2A26] transition-all text-sm font-semibold"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EBDC] border border-[#E0D5C1] text-[#5C5246] hover:border-[#7BA369] hover:text-[#2D2A26] transition-all text-sm font-semibold"
                 title="点击切换行业"
               >
                 {selectedIndustry ? (
@@ -1333,11 +1333,11 @@ export function HomePage({ onNavigate }: HomeProps) {
           <div className="flex flex-wrap gap-3">
             <div className="bg-[#F7F3EB] border border-[#E8E2D5] rounded-xl px-4 py-3 min-w-[130px]">
               <p className="text-[10px] text-[#78716C] font-medium">客户总数</p>
-              <p className="text-2xl font-serif font-bold text-[#2D2A26]"><span className="underline decoration-wavy decoration-[#C25932]/60 decoration-2 underline-offset-4">{stats.customerCount}</span> <span className="text-sm font-normal text-[#78716C]">个</span></p>
+              <p className="text-2xl font-serif font-bold text-[#2D2A26]"><span className="underline decoration-wavy decoration-[#7BA369]/60 decoration-2 underline-offset-4">{stats.customerCount}</span> <span className="text-sm font-normal text-[#78716C]">个</span></p>
             </div>
             <div className="bg-[#F7F3EB] border border-[#E8E2D5] rounded-xl px-4 py-3 min-w-[130px]">
               <p className="text-[10px] text-[#78716C] font-medium">本月新增询盘</p>
-              <p className="text-2xl font-serif font-bold text-[#2D2A26]"><span className="underline decoration-wavy decoration-[#C25932]/60 decoration-2 underline-offset-4">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-[#78716C]">个</span></p>
+              <p className="text-2xl font-serif font-bold text-[#2D2A26]"><span className="underline decoration-wavy decoration-[#7BA369]/60 decoration-2 underline-offset-4">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-[#78716C]">个</span></p>
             </div>
             <div className="bg-[#F7F3EB] border border-[#E8E2D5] rounded-xl px-4 py-3 min-w-[130px]">
               <p className="text-[10px] text-[#78716C] font-medium flex items-center gap-1">
@@ -1381,7 +1381,7 @@ export function HomePage({ onNavigate }: HomeProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-[#FDF2F2] flex items-center justify-center">
-                <ListTodo className="w-5 h-5 text-[#C25932]" strokeWidth={1.75} />
+                <ListTodo className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
               </div>
               <div>
                 <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">每日任务</h2>
@@ -1408,11 +1408,11 @@ export function HomePage({ onNavigate }: HomeProps) {
               onChange={(e) => setTodoInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') addTodo(); }}
               placeholder={`添加 ${selectedDate} 的任务，如：给沙特客户发送报价...`}
-              className="flex-1 px-3 py-2.5 bg-[#F7F3EB] border border-dashed border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#C25932] focus:ring-1 focus:ring-[#C25932]"
+              className="flex-1 px-3 py-2.5 bg-[#F7F3EB] border border-dashed border-[#524E48]/25 rounded-lg text-sm text-[#2D2A26] placeholder-[#78716C]/60 focus:outline-none focus:border-[#7BA369] focus:ring-1 focus:ring-[#7BA369]"
             />
             <button
               onClick={addTodo}
-              className="px-3 py-2.5 bg-[#C25932] text-[#FAF7F2] rounded-lg hover:bg-[#A94A26] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] transition-shadow"
+              className="px-3 py-2.5 bg-[#7BA369] text-[#FAF7F2] rounded-lg hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] transition-shadow"
             >
               <Plus className="w-4 h-4" strokeWidth={1.75} />
             </button>
@@ -1431,7 +1431,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                 className={classNames(
                   'px-2.5 py-1.5 rounded-md font-medium transition-colors',
                   filterPriority === f.key
-                    ? 'bg-[#C25932] text-[#FAF7F2] shadow-[2px_2px_0px_0px_#2B2927]'
+                    ? 'bg-[#7BA369] text-[#FAF7F2] shadow-[2px_2px_0px_0px_#2B2927]'
                     : 'bg-[#F2EBDC] text-[#5C5246] hover:bg-[#E8DDD0] border border-[#E0D5C1]'
                 )}
               >
@@ -1458,14 +1458,14 @@ export function HomePage({ onNavigate }: HomeProps) {
               filteredTodos.map((todo) => {
                 const priorityColors = {
                   high: { chip: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]', label: '高' },
-                  medium: { chip: 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]', label: '中' },
+                  medium: { chip: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]', label: '中' },
                   low: { chip: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]', label: '低' },
                 };
                 const catColors: Record<string, string> = {
                   '客户': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
                   '报价': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
                   '单据': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  '市场': 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+                  '市场': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
                   '其他': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
                 };
                 return (
@@ -1484,7 +1484,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                         'mt-0.5 shrink-0 w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-all',
                         todo.done
                           ? 'bg-[#3D3A36] text-[#FAF7F2] border-[#3D3A36]'
-                          : 'border-[#3D3A36] hover:border-[#C25932]'
+                          : 'border-[#3D3A36] hover:border-[#7BA369]'
                       )}
                     >
                       {todo.done && <span className="text-[10px] leading-none font-bold">✓</span>}
@@ -1533,7 +1533,7 @@ export function HomePage({ onNavigate }: HomeProps) {
               <span>💡 提示：点击日历日期可跳转查看历史任务</span>
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="text-[#C25932] font-medium hover:text-[#A94A26] flex items-center gap-1"
+                className="text-[#7BA369] font-medium hover:text-[#5F8A4D] flex items-center gap-1"
               >
                 查看业务数据 <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.75} />
               </button>
@@ -1548,8 +1548,8 @@ export function HomePage({ onNavigate }: HomeProps) {
         <div className="bg-[#FFFDF9] border border-[#E8E2D5] rounded-2xl shadow-paper p-5 transition-all duration-200 hover:border-[#524E48]/40 hover:shadow-paper-md">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#FDF6E3] flex items-center justify-center">
-                <Newspaper className="w-5 h-5 text-[#D97706]" strokeWidth={1.75} />
+              <div className="w-9 h-9 rounded-lg bg-[#EDF3E4] flex items-center justify-center">
+                <Newspaper className="w-5 h-5 text-[#A8C28E]" strokeWidth={1.75} />
               </div>
               <div>
                 <h2 className="text-lg font-serif font-semibold text-[#2D2A26]">{selectedIndustry || '行业'}快讯</h2>
@@ -1565,7 +1565,7 @@ export function HomePage({ onNavigate }: HomeProps) {
           {industryLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 text-[#D97706] animate-spin" strokeWidth={1.75} />
+                <Loader2 className="w-8 h-8 text-[#A8C28E] animate-spin" strokeWidth={1.75} />
                 <p className="text-xs text-[#78716C]">AI 正在获取{selectedIndustry}行业快讯...</p>
               </div>
             </div>
@@ -1574,7 +1574,7 @@ export function HomePage({ onNavigate }: HomeProps) {
               {industryData.news.map((n, idx) => {
                 const hotColors: Record<string, string> = {
                   hot: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]',
-                  warm: 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+                  warm: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
                   normal: 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
                 };
                 const catColors: Record<string, string> = {
@@ -1591,7 +1591,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                     className={classNames(
                       'group p-3 rounded-xl border transition-all',
                       isPrimary
-                        ? 'border-[#C25932]/30 bg-[#FDF2F2] hover:border-[#524E48]/40 hover:shadow-paper'
+                        ? 'border-[#7BA369]/30 bg-[#FDF2F2] hover:border-[#524E48]/40 hover:shadow-paper'
                         : 'border-[#E8E2D5] bg-[#F7F3EB] hover:border-[#524E48]/40 hover:shadow-paper'
                     )}
                   >
@@ -1607,7 +1607,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                       <span className="text-[10px] text-[#78716C] shrink-0">{n.date.slice(5)}</span>
                     </div>
                     <h3 className={classNames(
-                      'font-serif font-semibold text-[#2D2A26] leading-snug mb-1.5 group-hover:text-[#C25932] transition-colors',
+                      'font-serif font-semibold text-[#2D2A26] leading-snug mb-1.5 group-hover:text-[#7BA369] transition-colors',
                       isPrimary ? 'text-sm' : 'text-xs'
                     )}>
                       {n.title}
@@ -1624,12 +1624,12 @@ export function HomePage({ onNavigate }: HomeProps) {
                         <span className="truncate">{n.source}</span>
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button className="flex items-center gap-1 text-[#D97706] font-medium hover:text-[#92660A]">
+                        <button className="flex items-center gap-1 text-[#A8C28E] font-medium hover:text-[#5F8A4D]">
                           原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
                         </button>
                         <button
                           onClick={() => setAiLetterNews(n)}
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#C25932]/10 text-[#C25932] font-medium hover:bg-[#C25932]/20 border border-[#C25932]/30"
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#7BA369]/10 text-[#7BA369] font-medium hover:bg-[#7BA369]/20 border border-[#7BA369]/30"
                           title="AI 提取商机写信"
                         >
                           <Sparkles className="w-3 h-3" strokeWidth={1.75} />AI 写信
@@ -1678,16 +1678,16 @@ export function HomePage({ onNavigate }: HomeProps) {
               {industryData.hot_products.map((p, idx) => {
                 const catColor: Record<string, string> = {
                   '整机': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '塔筒': 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+                  '塔筒': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
                   '叶片': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
                   '电控': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
                   '配件': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
                   '高端系列': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '标准系列': 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+                  '标准系列': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
                   '定制系列': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
                   '入门系列': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
                   '组件': 'bg-[#EEF2F7] text-[#3B5A7A] border border-[#C7D5E6]',
-                  '储能': 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+                  '储能': 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
                   '逆变器': 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
                   '支架': 'bg-[#F3EFF7] text-[#5B4A78] border border-[#D9CEE6]',
                   '耗材': 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]',
@@ -1696,7 +1696,7 @@ export function HomePage({ onNavigate }: HomeProps) {
                   <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#F2EBDC] transition-colors group cursor-pointer" onClick={() => onNavigate('products')}>
                     <div className={classNames(
                       'w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0',
-                      idx < 3 ? 'bg-[#C25932] text-[#FAF7F2] shadow-[1px_1px_0px_0px_#2B2927]' : 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]'
+                      idx < 3 ? 'bg-[#7BA369] text-[#FAF7F2] shadow-[1px_1px_0px_0px_#2B2927]' : 'bg-[#F2EBDC] text-[#5C5246] border border-[#E0D5C1]'
                     )}>
                       {idx + 1}
                     </div>
@@ -1761,7 +1761,7 @@ export function HomePage({ onNavigate }: HomeProps) {
               {industryData.hot_markets.map((m) => {
                 const riskColors: Record<string, string> = {
                   low: 'bg-[#F0F5F2] text-[#2F5D50] border border-[#C2D6C8]',
-                  medium: 'bg-[#FDF6E3] text-[#92660A] border border-[#E8D9A8]',
+                  medium: 'bg-[#EDF3E4] text-[#5F8A4D] border border-[#C9D9B8]',
                   high: 'bg-[#FDF2F2] text-[#9B2C2C] border border-[#F5C6C6]',
                 };
                 const riskLabels: Record<string, string> = {
@@ -1850,12 +1850,12 @@ export function HomePage({ onNavigate }: HomeProps) {
               const isExpanded = expandedAlert === r.id;
               const levelStyles: Record<string, string> = {
                 critical: 'bg-[#FDF2F2] border-[#F5C6C6] text-[#9B2C2C]',
-                warning: 'bg-[#FDF6E3] border-[#E8D9A8] text-[#92660A]',
+                warning: 'bg-[#EDF3E4] border-[#C9D9B8] text-[#5F8A4D]',
                 info: 'bg-[#F0F5F2] border-[#C2D6C8] text-[#2F5D50]',
               };
               const levelBar: Record<string, string> = {
                 critical: 'bg-[#9B2C2C]',
-                warning: 'bg-[#D97706]',
+                warning: 'bg-[#A8C28E]',
                 info: 'bg-[#2F5D50]',
               };
               const levelLabel: Record<string, string> = {
@@ -1908,8 +1908,8 @@ export function HomePage({ onNavigate }: HomeProps) {
                     <div className="px-3 pb-3 pt-0">
                       <div className="bg-[#F7F3EB] rounded-lg p-3 border border-dashed border-[#524E48]/25">
                         <div className="flex items-center gap-1.5 text-[11px] text-[#78716C] mb-1">
-                          <Sparkles className="w-3 h-3 text-[#C25932]" strokeWidth={1.75} />
-                          <span className="font-semibold text-[#C25932] font-handwriting">AI 分析原因</span>
+                          <Sparkles className="w-3 h-3 text-[#7BA369]" strokeWidth={1.75} />
+                          <span className="font-semibold text-[#7BA369] font-handwriting">AI 分析原因</span>
                         </div>
                         <p className="text-xs text-[#3D3A36] leading-relaxed">{r.reason}</p>
                       </div>
