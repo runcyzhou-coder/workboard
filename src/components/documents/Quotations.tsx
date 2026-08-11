@@ -134,14 +134,14 @@ export function Quotations() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-left text-slate-600">
-                  <th className="px-4 py-3 font-medium">Quote Number</th>
-                  <th className="px-4 py-3 font-medium">Customer</th>
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Valid Until</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium text-right">Amount</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-center text-slate-600">
+                  <th className="px-4 py-3 font-medium text-center">Quote Number</th>
+                  <th className="px-4 py-3 font-medium text-center">Customer</th>
+                  <th className="px-4 py-3 font-medium text-center">Date</th>
+                  <th className="px-4 py-3 font-medium text-center">Valid Until</th>
+                  <th className="px-4 py-3 font-medium text-center">Status</th>
+                  <th className="px-4 py-3 font-medium text-center">Amount</th>
+                  <th className="px-4 py-3 font-medium text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -259,21 +259,34 @@ export function Quotations() {
 
             <div className="p-8 print:p-10" id="pi-document">
               <DocHeader title="QUOTATION" docNumber={viewing.quote_number} />
-              <div className="bg-slate-50 rounded-lg p-4 mb-6">
-                <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Quoted To</p>
-                <p className="text-sm font-medium text-slate-900">{viewing.customer?.company_name || '—'}</p>
-                {viewing.customer?.contact_name && <p className="text-sm text-slate-600">{viewing.customer.contact_name}</p>}
-                <p className="text-sm text-slate-600">{viewing.customer?.country || ''}</p>
-                {viewing.customer?.email && <p className="text-sm text-slate-600">{viewing.customer.email}</p>}
-              </div>
+              <table className="w-full text-sm mb-6 border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 border-2 border-slate-300">
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Cont.Pers</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Company</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Address</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Tel. No.</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700">E-mail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-x border-b border-slate-300">
+                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.contact_name || '—'}</td>
+                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.company_name || '—'}</td>
+                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.address || '—'}</td>
+                    <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{viewing.customer?.phone || '—'}</td>
+                    <td className="px-3 py-2 text-slate-700">{viewing.customer?.email || '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
               <table className="w-full text-sm mb-6">
                 <thead>
                   <tr className="bg-slate-900 text-white">
-                    <th className="px-3 py-2 text-left font-medium rounded-l">#</th>
-                    <th className="px-3 py-2 text-left font-medium">Description</th>
-                    <th className="px-3 py-2 text-right font-medium">Qty</th>
-                    <th className="px-3 py-2 text-right font-medium">Unit Price</th>
-                    <th className="px-3 py-2 text-right font-medium rounded-r">Amount</th>
+                    <th className="px-3 py-2 text-center font-medium rounded-l">#</th>
+                    <th className="px-3 py-2 text-center font-medium">Description</th>
+                    <th className="px-3 py-2 text-center font-medium">Qty</th>
+                    <th className="px-3 py-2 text-center font-medium">Unit Price</th>
+                    <th className="px-3 py-2 text-center font-medium rounded-r">Amount</th>
                   </tr>
                 </thead>
                 <tbody>

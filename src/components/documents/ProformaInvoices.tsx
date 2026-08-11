@@ -161,14 +161,14 @@ export function ProformaInvoices() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-left text-slate-600">
-                  <th className="px-4 py-3 font-medium">PI Number</th>
-                  <th className="px-4 py-3 font-medium">Customer</th>
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Valid Until</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium text-right">Amount</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-center text-slate-600">
+                  <th className="px-4 py-3 font-medium text-center">PI Number</th>
+                  <th className="px-4 py-3 font-medium text-center">Customer</th>
+                  <th className="px-4 py-3 font-medium text-center">Date</th>
+                  <th className="px-4 py-3 font-medium text-center">Valid Until</th>
+                  <th className="px-4 py-3 font-medium text-center">Status</th>
+                  <th className="px-4 py-3 font-medium text-center">Amount</th>
+                  <th className="px-4 py-3 font-medium text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -344,14 +344,26 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
           <DocHeader title="PROFORMA INVOICE" docNumber={pi.pi_number} />
 
           <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="bg-slate-50 rounded-lg p-4">
-              <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Sold To (Buyer)</p>
-              <p className="text-sm font-medium text-slate-900">{pi.customer?.company_name || '—'}</p>
-              {pi.customer?.contact_name && <p className="text-sm text-slate-600">{pi.customer.contact_name}</p>}
-              {pi.customer?.address && <p className="text-sm text-slate-600">{pi.customer.address}</p>}
-              <p className="text-sm text-slate-600">{pi.customer?.country || ''}</p>
-              {pi.customer?.email && <p className="text-sm text-slate-600">{pi.customer.email}</p>}
-            </div>
+            <table className="w-full text-sm mb-6 border-collapse">
+              <thead>
+                <tr className="bg-slate-100 border-2 border-slate-300">
+                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Cont.Pers</th>
+                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Company</th>
+                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Address</th>
+                  <th className="px-3 py-2 text-center font-semibold text-slate-700 border-r border-slate-300">Tel. No.</th>
+                  <th className="px-3 py-2 text-center font-semibold text-slate-700">E-mail</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-x border-b border-slate-300">
+                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.contact_name || '—'}</td>
+                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.company_name || '—'}</td>
+                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.address || '—'}</td>
+                  <td className="px-3 py-2 text-slate-700 border-r border-slate-300">{pi.customer?.phone || '—'}</td>
+                  <td className="px-3 py-2 text-slate-700">{pi.customer?.email || '—'}</td>
+                </tr>
+              </tbody>
+            </table>
             <div className="bg-slate-50 rounded-lg p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Invoice Details</p>
               <div className="space-y-1 text-sm">
@@ -369,11 +381,11 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
           <table className="w-full text-sm mb-6">
             <thead>
               <tr className="bg-slate-900 text-white">
-                <th className="px-3 py-2 text-left font-medium rounded-l">#</th>
-                <th className="px-3 py-2 text-left font-medium">Description</th>
-                <th className="px-3 py-2 text-right font-medium">Qty</th>
-                <th className="px-3 py-2 text-right font-medium">Unit Price</th>
-                <th className="px-3 py-2 text-right font-medium rounded-r">Amount</th>
+                <th className="px-3 py-2 text-center font-medium rounded-l">#</th>
+                <th className="px-3 py-2 text-center font-medium">Description</th>
+                <th className="px-3 py-2 text-center font-medium">Qty</th>
+                <th className="px-3 py-2 text-center font-medium">Unit Price</th>
+                <th className="px-3 py-2 text-center font-medium rounded-r">Amount</th>
               </tr>
             </thead>
             <tbody>
