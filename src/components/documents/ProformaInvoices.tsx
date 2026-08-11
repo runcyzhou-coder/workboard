@@ -370,14 +370,15 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
             </div>
           </div>
 
+          <div className="border-t border-slate-200 mb-4" />
           <table className="w-full text-sm mb-6">
             <thead>
               <tr className="bg-slate-900 text-white">
                 <th className="px-3 py-2 text-center font-medium rounded-l">#</th>
-                <th className="px-3 py-2 text-center font-medium">Description</th>
-                <th className="px-3 py-2 text-center font-medium">Qty</th>
-                <th className="px-3 py-2 text-center font-medium">Unit Price</th>
-                <th className="px-3 py-2 text-center font-medium rounded-r">Amount</th>
+                <th className="px-3 py-2 text-left font-medium">Description</th>
+                <th className="px-3 py-2 text-right font-medium">Qty</th>
+                <th className="px-3 py-2 text-right font-medium">Unit Price</th>
+                <th className="px-3 py-2 text-right font-medium rounded-r">Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -385,8 +386,8 @@ function PIViewModal({ pi, onClose }: { pi: ProformaInvoice & { customer?: Custo
                 <tr><td colSpan={5} className="text-center py-6 text-slate-400">No items</td></tr>
               ) : pi.items.map((item, idx) => (
                 <tr key={item.id} className="border-b border-slate-100">
-                  <td className="px-3 py-2.5 text-slate-500">{idx + 1}</td>
-                  <td className="px-3 py-2.5 text-slate-900">{item.description}</td>
+                  <td className="px-3 py-2.5 text-center text-slate-500">{idx + 1}</td>
+                  <td className="px-3 py-2.5 text-left text-slate-900">{item.description}</td>
                   <td className="px-3 py-2.5 text-right text-slate-600">{item.quantity}</td>
                   <td className="px-3 py-2.5 text-right text-slate-600">{formatCurrency(item.unit_price, pi.currency)}</td>
                   <td className="px-3 py-2.5 text-right font-medium text-slate-900">{formatCurrency(item.total, pi.currency)}</td>
