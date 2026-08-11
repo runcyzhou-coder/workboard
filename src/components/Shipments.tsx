@@ -142,25 +142,61 @@ export function Shipments() {
   }
 
   async function save() {
-    if (!form.shipment_number?.trim()) return;
-    const { id, created_at, updated_at, inquiry, customer, ...rest } = form as any;
-    if (editing) {
-      await supabase.from('shipments').update(rest).eq('id', editing.id);
-    } else {
-      await supabase.from('shipments').insert(rest);
+    if (!form.shipment_number?.trim()) {
+      alert('请填写运单号');
+      return;
     }
-    setShowForm(false);
-    load();
+    try {
+      const { id, created_at, updated_at, inquiry, customer, ...rest } = form as any;
+      if (editing) {
+        const { error } = await supabase.from('shipments').update(rest).eq('id', editing.id);
+        if (error) {
+          alert('更新失败: ' + error.message);
+          return;
+        }
+        alert('物流记录更新成功！');
+      } else {
+        const { error } = await supabase.from('shipments').insert(rest);
+        if (error) {
+          alert('保存失败: ' + error.message);
+          return;
+        }
+        alert('物流创建成功！');
+      }
+      setShowForm(false);
+      setForm({});
+      load();
+    } catch (err: any) {
+      alert('保存出错: ' + (err?.message || '未知错误'));
+    }
   }
 
   async function remove(id: string) {
-    await supabase.from('shipments').delete().eq('id', id);
-    load();
+    if (!confirm('确定要删除这条物流记录吗？')) return;
+    try {
+      const { error } = await supabase.from('shipments').delete().eq('id', id);
+      if (error) {
+        alert('删除失败: ' + error.message);
+        return;
+      }
+      alert('删除成功');
+      load();
+    } catch (err: any) {
+      alert('删除出错: ' + (err?.message || '未知错误'));
+    }
   }
 
   async function updateStatus(id: string, status: ShipmentStatus) {
-    await supabase.from('shipments').update({ status }).eq('id', id);
-    load();
+    try {
+      const { error } = await supabase.from('shipments').update({ status }).eq('id', id);
+      if (error) {
+        alert('状态更新失败: ' + error.message);
+        return;
+      }
+      load();
+    } catch (err: any) {
+      alert('状态更新出错: ' + (err?.message || '未知错误'));
+    }
   }
 
   return (
