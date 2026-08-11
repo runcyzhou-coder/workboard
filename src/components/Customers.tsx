@@ -189,6 +189,160 @@ function analyzeCustomer(customer: Customer): AIAnalysis {
   };
 }
 
+// ============== 智能识别引擎 ==============
+// 从一段非结构化文本（邮件签名、名片 OCR、聊天记录、网页复制内容）中提取客户字段
+// 启发式规则 + 正则匹配，支持中英文，离线运行无依赖
+const COUNTRY_KEYWORDS: { keys: string[]; name: string }[] = [
+  { keys: ['USA', 'United States', 'America', '美国'], name: 'United States' },
+  { keys: ['UK', 'United Kingdom', 'England', '英国'], name: 'United Kingdom' },
+  { keys: ['Germany', '德国'], name: 'Germany' },
+  { keys: ['France', '法国'], name: 'France' },
+  { keys: ['Italy', '意大利'], name: 'Italy' },
+  { keys: ['Spain', '西班牙'], name: 'Spain' },
+  { keys: ['Netherlands', 'Holland', '荷兰'], name: 'Netherlands' },
+  { keys: ['Russia', '俄罗斯'], name: 'Russia' },
+  { keys: ['Japan', '日本'], name: 'Japan' },
+  { keys: ['South Korea', 'Korea', '韩国'], name: 'South Korea' },
+  { keys: ['Australia', '澳洲', '澳大利亚'], name: 'Australia' },
+  { keys: ['New Zealand', '新西兰'], name: 'New Zealand' },
+  { keys: ['Canada', '加拿大'], name: 'Canada' },
+  { keys: ['Brazil', '巴西'], name: 'Brazil' },
+  { keys: ['Mexico', '墨西哥'], name: 'Mexico' },
+  { keys: ['India', '印度'], name: 'India' },
+  { keys: ['Vietnam', '越南'], name: 'Vietnam' },
+  { keys: ['Thailand', '泰国'], name: 'Thailand' },
+  { keys: ['Indonesia', '印尼'], name: 'Indonesia' },
+  { keys: ['Malaysia', '马来西亚'], name: 'Malaysia' },
+  { keys: ['Singapore', '新加坡'], name: 'Singapore' },
+  { keys: ['Philippines', '菲律宾'], name: 'Philippines' },
+  { keys: ['Saudi Arabia', '沙特'], name: 'Saudi Arabia' },
+  { keys: ['UAE', 'United Arab Emirates', '阿联酋', 'Dubai', '迪拜'], name: 'United Arab Emirates' },
+  { keys: ['Turkey', '土耳其'], name: 'Turkey' },
+  { keys: ['Egypt', '埃及'], name: 'Egypt' },
+  { keys: ['South Africa', '南非'], name: 'South Africa' },
+  { keys: ['Nigeria', '尼日利亚'], name: 'Nigeria' },
+  { keys: ['Poland', '波兰'], name: 'Poland' },
+  { keys: ['Sweden', '瑞典'], name: 'Sweden' },
+  { keys: ['Norway', '挪威'], name: 'Norway' },
+  { keys: ['Finland', '芬兰'], name: 'Finland' },
+  { keys: ['Denmark', '丹麦'], name: 'Denmark' },
+  { keys: ['Belgium', '比利时'], name: 'Belgium' },
+  { keys: ['Switzerland', '瑞士'], name: 'Switzerland' },
+  { keys: ['Austria', '奥地利'], name: 'Austria' },
+  { keys: ['Portugal', '葡萄牙'], name: 'Portugal' },
+  { keys: ['Greece', '希腊'], name: 'Greece' },
+  { keys: ['Czech', '捷克'], name: 'Czech Republic' },
+  { keys: ['Argentina', '阿根廷'], name: 'Argentina' },
+  { keys: ['Chile', '智利'], name: 'Chile' },
+  { keys: ['Colombia', '哥伦比亚'], name: 'Colombia' },
+  { keys: ['Peru', '秘鲁'], name: 'Peru' },
+  { keys: ['Pakistan', '巴基斯坦'], name: 'Pakistan' },
+  { keys: ['Bangladesh', '孟加拉'], name: 'Bangladesh' },
+  { keys: ['Iran', '伊朗'], name: 'Iran' },
+  { keys: ['Israel', '以色列'], name: 'Israel' },
+  { keys: ['Kenya', '肯尼亚'], name: 'Kenya' },
+  { keys: ['Morocco', '摩洛哥'], name: 'Morocco' },
+  { keys: ['Kazakhstan', '哈萨克斯坦'], name: 'Kazakhstan' },
+  { keys: ['Ukraine', '乌克兰'], name: 'Ukraine' },
+  { keys: ['中国', 'China', 'PRC'], name: 'China' },
+];
+
+function parseCustomerText(text: string): Partial<Customer> {
+  const result: Partial<Customer> = {};
+  if (!text || !text.trim()) return result;
+
+  const original = text;
+  const lines = original.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+  // 1. 邮箱（用负向前瞻避免吃进 TLD 后紧跟的字母，如 "comTel"）
+  const emailMatch = original.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![A-Za-z0-9])/);
+  if (emailMatch) result.email = emailMatch[0];
+
+  // 2. 网站（用常见 TLD 白名单，避免 "fans.Best" 误匹配）
+  const COMMON_TLDS = 'com|net|org|io|co|edu|gov|info|biz|cn|de|fr|it|es|nl|ru|jp|kr|au|nz|ca|br|mx|in|vn|th|id|my|sg|ph|sa|ae|tr|eg|za|ng|pl|se|no|fi|dk|be|ch|at|pt|gr|cz|ar|cl|pe|pk|bd|ir|il|ke|ma|kz|ua|uk|me|tv|cc|xyz|tech|store|shop|online|site|cloud|dev|app|com\\.cn|com\\.au|co\\.uk|co\\.jp';
+  const urlRegex = new RegExp('\\b(?:https?://)?(?:www\\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:' + COMMON_TLDS + ')(?:/[^\\s]*)?\\b', 'gi');
+  const urls = original.match(urlRegex) || [];
+  // 排除邮箱中的域名部分
+  const urlWithoutEmail = urls.find(u => !u.includes('@') && !/@/.test(u));
+  if (urlWithoutEmail) {
+    let url = urlWithoutEmail;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^www\./i, '');
+    result.website = url;
+  }
+
+  // 3. 电话/手机/WhatsApp/微信（优先匹配带标签的）
+  const labelPhoneMatch = original.match(/(?:Tel|Phone|Mobile|Telephone|Cell|WhatsApp|WeChat|Skype|电话|手机|微信)\s*[:：]?\s*([+0-9][0-9\s\-()]{6,20})/i);
+  if (labelPhoneMatch) {
+    result.phone = labelPhoneMatch[1].trim();
+  } else {
+    const intlMatch = original.match(/\+\d{1,4}[\s-]?\(?\d{1,4}\)?[\s-]?\d{6,12}/);
+    if (intlMatch) {
+      result.phone = intlMatch[0].trim();
+    } else {
+      const phoneMatch = original.match(/\b\d{3,4}[\s-]?\d{7,8}\b/);
+      if (phoneMatch) result.phone = phoneMatch[0];
+    }
+  }
+
+  // 4. 联系人（优先带标签的，不跨行避免越界）
+  const labelContactMatch = original.match(/(?:Contact|Attn|Attention|联系人|姓名|Name)\s*[:：]\s*([A-Za-z\u4e00-\u9fa5][A-Za-z\u4e00-\u9fa5 \t.\-]{1,30})/i);
+  if (labelContactMatch) {
+    result.contact_name = labelContactMatch[1].trim();
+  } else {
+    // Mr./Ms./Mrs./Dr. + 1~4 个首字母大写的词（仅用连字符或空格/制表符分隔，不跨行，避免越界到职位词）
+    const titleMatch = original.match(/\b(?:Mr|Mrs|Ms|Miss|Dr|Sir)\.?[ \t]+([A-Z][a-z]+(?:[- \t][A-Z][a-z]+){0,3})/);
+    if (titleMatch) {
+      result.contact_name = titleMatch[0].replace(/[ \t]+/g, ' ').trim();
+    }
+  }
+
+  // 5. 公司名（优先带标签的；其次按职位词切分文本，在切出的块里找公司后缀，避免越界）
+  const labelCompanyMatch = original.match(/(?:Company\s*Name|Company|公司名称|公司|客户名称)\s*[:：]\s*([^\n\r,;|]{2,60})/i);
+  if (labelCompanyMatch) {
+    result.company_name = labelCompanyMatch[1].trim();
+  } else {
+    const JOB_TITLES = 'Manager|Director|Officer|Executive|President|CEO|CTO|CFO|COO|Procurement|Sales|Marketing|Engineer|Consultant|Specialist|Representative|Head|Chief|Supervisor|Coordinator|Assistant|先生|女士|经理|主管|总监|主任|负责人|采购|销售';
+    const segments = original.split(new RegExp('(?:' + JOB_TITLES + ')', 'i'));
+    let found = false;
+    for (const seg of segments) {
+      const m = seg.match(/([A-Za-z\u4e00-\u9fa5][A-Za-z0-9\u4e00-\u9fa5\s,&.'\-]{2,40}?(?:Co\.,?\s*Ltd\.?|Inc\.?|Corp(?:oration)?|GmbH|LLC|Limited|S\.A\.|S\.p\.A\.|B\.V\.|Pte\.?\s*Ltd|有限公司|股份有限公司|集团有限公司|公司))/i);
+      if (m) {
+        result.company_name = m[0].replace(/\s+/g, ' ').trim();
+        found = true;
+        break;
+      }
+    }
+    if (!found && lines.length > 0 && lines[0].length >= 2 && lines[0].length <= 60 && !/^[\d\s\-()+]+$/.test(lines[0])) {
+      result.company_name = lines[0];
+    }
+  }
+
+  // 6. 地址（优先带标签的；遇到下一个字段标签时截断，避免越界）
+  const labelAddressMatch = original.match(/(?:Address|Addr|地址|Add)\s*[:：]\s*([^\n\r]{5,150})/i);
+  if (labelAddressMatch) {
+    let addr = labelAddressMatch[1].trim();
+    // 截断遇到的下一个字段标签
+    addr = addr.split(/(?:Website|Email|Tel|Phone|Mobile|Fax|Skype|WhatsApp|WeChat|Contact|Mr\.|Mrs\.|Ms\.|网址|邮箱|电话|手机|传真|联系人)\s*[:：]/i)[0].trim();
+    result.address = addr;
+  } else {
+    const addrLine = lines.find(l =>
+      /(?:street|st\.?|road|rd\.?|avenue|ave\.?|blvd|drive|dr\.?|lane|ln\.?|suite|号|路|街|道|大厦|工业|building|floor|no\.\s?\d)/i.test(l) && l.length >= 8
+    );
+    if (addrLine) result.address = addrLine;
+  }
+
+  // 7. 国家（关键词匹配）
+  const lowerText = original.toLowerCase();
+  for (const c of COUNTRY_KEYWORDS) {
+    if (c.keys.some(k => lowerText.includes(k.toLowerCase()))) {
+      result.country = c.name;
+      break;
+    }
+  }
+
+  return result;
+}
+
 export function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -205,6 +359,10 @@ export function Customers() {
   const currentAnalysis = useMemo(() => analyzingCustomer ? analyzeCustomer(analyzingCustomer) : null, [analyzingCustomer]);
   // 图表面板展开/收起
   const [showCharts, setShowCharts] = useState(false);
+  // 智能识别 state
+  const [rawText, setRawText] = useState('');
+  const [recognizing, setRecognizing] = useState(false);
+  const [recognizedFields, setRecognizedFields] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -237,6 +395,8 @@ export function Customers() {
     setEditing(null);
     setForm({});
     setTagInput('');
+    setRawText('');
+    setRecognizedFields([]);
     load();
   }
 
@@ -249,13 +409,57 @@ export function Customers() {
   function startEdit(c: Customer) {
     setEditing(c);
     setForm(c);
+    setRawText('');
+    setRecognizedFields([]);
     setShowForm(true);
   }
 
   function startAdd() {
     setEditing(null);
     setForm({ status: 'prospect' });
+    setRawText('');
+    setRecognizedFields([]);
     setShowForm(true);
+  }
+
+  // 智能识别：把 rawText 解析后填入表单空字段
+  function recognizeText() {
+    if (!rawText.trim()) return;
+    setRecognizing(true);
+    setRecognizedFields([]);
+    // 用 setTimeout 让 UI 显示"识别中"状态
+    setTimeout(() => {
+      const parsed = parseCustomerText(rawText);
+      const fieldLabels: { key: keyof Customer; label: string }[] = [
+        { key: 'company_name', label: '公司名' },
+        { key: 'contact_name', label: '联系人' },
+        { key: 'email', label: '邮箱' },
+        { key: 'phone', label: '电话' },
+        { key: 'country', label: '国家' },
+        { key: 'address', label: '地址' },
+        { key: 'website', label: '网站' },
+      ];
+      const newForm = { ...form };
+      const filled: string[] = [];
+      fieldLabels.forEach(({ key, label }) => {
+        const value = parsed[key];
+        if (value !== undefined && value !== null && String(value).trim() !== '') {
+          // 只填充空字段，不覆盖用户已填的
+          const existing = newForm[key];
+          if (existing === undefined || existing === null || String(existing).trim() === '') {
+            (newForm as any)[key] = value;
+            filled.push(label);
+          }
+        }
+      });
+      setForm(newForm);
+      setRecognizedFields(filled);
+      setRecognizing(false);
+    }, 450);
+  }
+
+  function clearRecognized() {
+    setRecognizedFields([]);
   }
 
   function addTag() {
@@ -404,6 +608,56 @@ export function Customers() {
               </button>
             </div>
             <div className="p-6 space-y-4">
+              {/* 智能识别区域（仅新建时显示） */}
+              {!editing && (
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-semibold text-indigo-900">智能识别</span>
+                    <span className="text-xs text-indigo-500">粘贴邮件签名 / 名片 / 聊天记录，自动填表</span>
+                  </div>
+                  <textarea
+                    value={rawText}
+                    onChange={e => { setRawText(e.target.value); if (recognizedFields.length) clearRecognized(); }}
+                    placeholder={`示例：\nJohn Smith\nACME Trading Co., Ltd\nEmail: john@acme.com\nTel: +1 234 567 8900\nAddress: 123 Main Street, New York, USA\nwww.acme.com`}
+                    rows={5}
+                    className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-indigo-300/70 resize-y font-mono"
+                  />
+                  <div className="flex items-center justify-between mt-2.5 gap-3">
+                    <div className="min-w-0 flex-1">
+                      {recognizedFields.length > 0 ? (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="text-xs text-emerald-700 font-medium">已填入:</span>
+                          {recognizedFields.map(f => (
+                            <span key={f} className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[11px] font-medium">{f}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-indigo-500/80">支持识别：公司名 · 联系人 · 邮箱 · 电话 · 国家 · 地址 · 网站</span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={recognizeText}
+                      disabled={!rawText.trim() || recognizing}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium transition-colors shrink-0"
+                    >
+                      {recognizing ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          识别中...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          自动识别并填入
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
               <Field label="公司名称 *">
                 <input value={form.company_name || ''} onChange={e => setForm({ ...form, company_name: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
