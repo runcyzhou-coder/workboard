@@ -41,12 +41,15 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       ]);
 
       const custData = customers.data as Customer[] | null;
+      const prodCount = products.count ?? (products.data as any[] | null)?.length ?? 0;
+      const quoteCount = quotations.count ?? (quotations.data as any[] | null)?.length ?? 0;
+      const piCount = pis.count ?? (pis.data as any[] | null)?.length ?? 0;
       setStats({
-        customers: customers.count || 0,
+        customers: custData?.length || 0,
         activeCustomers: custData?.filter(c => c.status === 'active').length || 0,
-        products: products.count || 0,
-        quotations: quotations.count || 0,
-        pis: pis.count || 0,
+        products: prodCount,
+        quotations: quoteCount,
+        pis: piCount,
         piTotal: (piData.data as (ProformaInvoice & { customer?: Customer })[])?.reduce((s, pi) => s + (pi.total_amount || 0), 0) || 0,
       });
       setRecentPIs((piData.data as (ProformaInvoice & { customer?: Customer })[]) || []);
