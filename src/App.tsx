@@ -6,6 +6,7 @@ import { HomePage } from '@/components/HomePage';
 import { Dashboard } from '@/components/Dashboard';
 import { Customers } from '@/components/Customers';
 import { Inquiries } from '@/components/Inquiries';
+import { Shipments } from '@/components/Shipments';
 import { Products } from '@/components/Products';
 import { DocumentCenter, type DocType } from '@/components/DocumentCenter';
 import { ProfitCalculator } from '@/components/ProfitCalculator';
@@ -135,6 +136,7 @@ function App() {
           {page === 'dashboard' && <Dashboard onNavigate={setPage} />}
           {page === 'customers' && <Customers />}
           {page === 'inquiries' && <Inquiries onNavigateDoc={(t) => { setPendingDocType(t as DocType); setPage('document-center'); }} />}
+          {page === 'shipments' && <Shipments />}
           {page === 'products' && <Products />}
           {page === 'document-center' && <DocumentCenter initialDocType={pendingDocType ?? undefined} onConsumed={() => setPendingDocType(null)} />}
           {page === 'profit-calculator' && <ProfitCalculator />}

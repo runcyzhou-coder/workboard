@@ -382,6 +382,51 @@ export interface Inquiry {
   updated_at: string;
 }
 
+// ============== 物流管理 ==============
+export type ShipmentStatus =
+  | 'pending_booking'
+  | 'booked'
+  | 'customs_cleared'
+  | 'in_transit'
+  | 'arrived'
+  | 'delivered';
+
+export interface Shipment {
+  id: string;
+  shipment_number: string;
+  inquiry_id: string | null;
+  customer_id: string | null;
+  status: ShipmentStatus;
+  // 货代信息
+  forwarder_name: string | null;
+  forwarder_contact: string | null;
+  // 订舱号
+  so_number: string | null;
+  // 柜号
+  container_number: string | null;
+  // 提单号
+  bl_number: string | null;
+  // 船公司/航空公司
+  carrier: string | null;
+  // 船名航次
+  vessel_voyage: string | null;
+  // 时间节点
+  cy_cutoff: string | null;       // 截关时间
+  si_cutoff: string | null;       // 截单时间
+  etd: string | null;             // 预计开船
+  atd: string | null;             // 实际开船
+  eta: string | null;             // 预计到港
+  ata: string | null;             // 实际到港
+  // 港口
+  port_of_loading: string | null;
+  port_of_discharge: string | null;
+  // 运输方式
+  shipping_method: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============== 售后处理 ==============
 export interface AfterSale {
   id: string;

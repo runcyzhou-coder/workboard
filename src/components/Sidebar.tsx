@@ -10,6 +10,7 @@ import {
   X,
   Inbox,
   Headphones,
+  Truck,
 } from 'lucide-react';
 import { classNames } from '@/lib/utils';
 
@@ -18,6 +19,7 @@ export type Page =
   | 'dashboard'
   | 'customers'
   | 'inquiries'
+  | 'shipments'
   | 'products'
   | 'document-center'
   | 'profit-calculator'
@@ -36,6 +38,7 @@ const navItems: { id: Page; label: string; icon: typeof Home }[] = [
   { id: 'dashboard', label: '仪表盘', icon: LayoutDashboard },
   { id: 'customers', label: '客户管理', icon: Users },
   { id: 'inquiries', label: '询盘管理', icon: Inbox },
+  { id: 'shipments', label: '物流管理', icon: Truck },
   { id: 'products', label: '产品管理', icon: Package },
   { id: 'document-center', label: '单据中心', icon: FolderOpen },
   { id: 'profit-calculator', label: '防亏核算', icon: Calculator },
