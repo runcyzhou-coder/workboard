@@ -468,10 +468,14 @@ function EventModal({
   const [notes, setNotes] = useState(event?.notes || '');
   const [saving, setSaving] = useState(false);
 
-  function handleSave() {
+  async function handleSave() {
     if (!title.trim()) return;
     setSaving(true);
-    onSave({ id: event?.id, title: title.trim(), event_date: eventDate, type, priority, done, notes: notes.trim() || null });
+    try {
+      await onSave({ id: event?.id, title: title.trim(), event_date: eventDate, type, priority, done, notes: notes.trim() || null });
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -669,21 +673,63 @@ function MiniCalendar({
     cells.push({ day: d, dateStr: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, isCurrentMonth: false });
   }
 
+  // localStorage 回退存储
+  const LOCAL_EVENTS_KEY = 'wb_calendar_events_local';
+
+  function loadLocalEvents(monthStart: string, monthEnd: string): CalendarEvent[] {
+    try {
+      const raw = localStorage.getItem(LOCAL_EVENTS_KEY);
+      if (!raw) return [];
+      const all: CalendarEvent[] = JSON.parse(raw);
+      return all.filter(e => e.event_date >= monthStart && e.event_date <= monthEnd)
+                .sort((a, b) => a.event_date < b.event_date ? -1 : 1);
+    } catch {
+      return [];
+    }
+  }
+
+  function saveLocalEvent(event: CalendarEvent) {
+    try {
+      const raw = localStorage.getItem(LOCAL_EVENTS_KEY);
+      const all: CalendarEvent[] = raw ? JSON.parse(raw) : [];
+      const idx = all.findIndex(e => e.id === event.id);
+      if (idx >= 0) all[idx] = event;
+      else all.push(event);
+      localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(all));
+    } catch {}
+  }
+
+  function deleteLocalEvent(id: string) {
+    try {
+      const raw = localStorage.getItem(LOCAL_EVENTS_KEY);
+      if (!raw) return;
+      const all: CalendarEvent[] = JSON.parse(raw);
+      const remaining = all.filter(e => e.id !== id);
+      localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(remaining));
+    } catch {}
+  }
+
   // 加载事项
   const loadEvents = useCallback(async () => {
     setLoading(true);
-    try {
-      const monthStart = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-01`;
+    const monthStart = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-01`;
     const monthEnd = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+    let loaded = false;
+    try {
       const res = await supabase
         .from('calendar_events')
         .select('*')
         .gte('event_date', monthStart)
         .lte('event_date', monthEnd)
         .order('event_date', { ascending: true });
-      setEvents(res.data || []);
-    } catch {
-      setEvents([]);
+      if (!res.error) {
+        setEvents(res.data || []);
+        loaded = true;
+      }
+    } catch {}
+    if (!loaded) {
+      // Supabase 失败或表不存在，回退 localStorage
+      setEvents(loadLocalEvents(monthStart, monthEnd));
     }
     setLoading(false);
   }, [viewYear, viewMonth, daysInMonth]);
@@ -741,46 +787,70 @@ function MiniCalendar({
 
   // 保存事项（新增/更新）
   async function handleSave(data: Partial<CalendarEvent>) {
+    const now = new Date().toISOString();
+    let saved = false;
     try {
       if (data.id) {
-        // 更新
-        await supabase.from('calendar_events').update({
+        const res = await supabase.from('calendar_events').update({
           title: data.title,
           event_date: data.event_date,
           type: data.type,
           priority: data.priority,
           done: data.done,
           notes: data.notes,
-        }).eq('id', data.id);
+          updated_at: now,
+        }).eq('id', data.id).select('*');
+        if (!res.error) saved = true;
       } else {
-        // 新增
-        await supabase.from('calendar_events').insert({
+        const newId = crypto.randomUUID ? crypto.randomUUID() : 'evt-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+        const res = await supabase.from('calendar_events').insert({
+          id: newId,
           title: data.title,
           event_date: data.event_date,
           type: data.type,
           priority: data.priority,
           done: data.done || false,
           notes: data.notes,
+          created_at: now,
+          updated_at: now,
         }).select('*');
+        if (!res.error) saved = true;
       }
-      setModalMode(null);
-      setEditingEvent(null);
-      await loadEvents();
-    } catch {
-      setModalMode(null);
+    } catch {}
+
+    // Supabase 失败或不可用，回退 localStorage
+    if (!saved) {
+      const evtId = data.id || (crypto.randomUUID ? crypto.randomUUID() : 'evt-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9));
+      saveLocalEvent({
+        id: evtId,
+        title: data.title!,
+        event_date: data.event_date!,
+        type: data.type!,
+        priority: data.priority!,
+        done: data.done || false,
+        notes: data.notes || null,
+        created_at: now,
+        updated_at: now,
+      });
     }
+    setModalMode(null);
+    setEditingEvent(null);
+    await loadEvents();
   }
 
   // 删除事项
   async function handleDelete(id: string) {
+    let deleted = false;
     try {
-      await supabase.from('calendar_events').delete().eq('id', id);
-      setModalMode(null);
-      setEditingEvent(null);
-      await loadEvents();
-    } catch {
-      setModalMode(null);
+      const res = await supabase.from('calendar_events').delete().eq('id', id);
+      if (!res.error) deleted = true;
+    } catch {}
+    if (!deleted) {
+      deleteLocalEvent(id);
     }
+    setModalMode(null);
+    setEditingEvent(null);
+    await loadEvents();
   }
 
   return (
