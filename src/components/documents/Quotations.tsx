@@ -220,8 +220,8 @@ export function Quotations() {
                         {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
                       <input value={item.description || ''} onChange={e => updateItem(idx, 'description', e.target.value)} placeholder="Description" className="flex-1 w-full px-2 py-1.5 border border-slate-200 rounded text-xs" />
-                      <input type="number" value={item.quantity || 0} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} placeholder="Qty" className="w-20 px-2 py-1.5 border border-slate-200 rounded text-xs" />
-                      <input type="number" step="0.01" value={item.unit_price || 0} onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value) || 0)} placeholder="Unit Price" className="w-24 px-2 py-1.5 border border-slate-200 rounded text-xs" />
+                      <input type="number" value={item.quantity || ''} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} placeholder="Qty" className="w-20 px-2 py-1.5 border border-slate-200 rounded text-xs" />
+                      <input type="number" step="0.01" value={item.unit_price || ''} onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value) || 0)} placeholder="Unit Price" className="w-24 px-2 py-1.5 border border-slate-200 rounded text-xs" />
                       <span className="text-xs font-medium text-slate-600 w-24 text-right">{formatCurrency((item.quantity || 0) * (item.unit_price || 0), form.currency || 'USD')}</span>
                       <button onClick={() => removeItem(idx)} className="p-1 text-slate-400 hover:text-red-500"><X className="w-4 h-4" /></button>
                     </div>

@@ -274,9 +274,9 @@ export function ProformaInvoices() {
                       </select>
                       <input value={item.description || ''} onChange={e => updateItem(idx, 'description', e.target.value)} placeholder="Description"
                         className="flex-1 w-full px-2 py-1.5 border border-slate-200 rounded text-xs" />
-                      <input type="number" value={item.quantity || 0} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} placeholder="Qty"
+                      <input type="number" value={item.quantity || ''} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} placeholder="Qty"
                         className="w-20 px-2 py-1.5 border border-slate-200 rounded text-xs" />
-                      <input type="number" step="0.01" value={item.unit_price || 0} onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value) || 0)} placeholder="Unit Price"
+                      <input type="number" step="0.01" value={item.unit_price || ''} onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value) || 0)} placeholder="Unit Price"
                         className="w-24 px-2 py-1.5 border border-slate-200 rounded text-xs" />
                       <span className="text-xs font-medium text-slate-600 w-24 text-right">{formatCurrency((item.quantity || 0) * (item.unit_price || 0), form.currency || 'USD')}</span>
                       <button onClick={() => removeItem(idx)} className="p-1 text-slate-400 hover:text-red-500"><X className="w-4 h-4" /></button>
@@ -287,10 +287,10 @@ export function ProformaInvoices() {
 
               {/* Charges */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-100 pt-4">
-                <Field label="Discount"><input type="number" step="0.01" value={form.discount ?? 0} onChange={e => setForm({ ...form, discount: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
-                <Field label="Freight"><input type="number" step="0.01" value={form.freight ?? 0} onChange={e => setForm({ ...form, freight: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
-                <Field label="Insurance"><input type="number" step="0.01" value={form.insurance ?? 0} onChange={e => setForm({ ...form, insurance: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
-                <Field label="Other Charges"><input type="number" step="0.01" value={form.other_charges ?? 0} onChange={e => setForm({ ...form, other_charges: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
+                <Field label="Discount"><input type="number" step="0.01" value={form.discount || ''} onChange={e => setForm({ ...form, discount: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
+                <Field label="Freight"><input type="number" step="0.01" value={form.freight || ''} onChange={e => setForm({ ...form, freight: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
+                <Field label="Insurance"><input type="number" step="0.01" value={form.insurance || ''} onChange={e => setForm({ ...form, insurance: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
+                <Field label="Other Charges"><input type="number" step="0.01" value={form.other_charges || ''} onChange={e => setForm({ ...form, other_charges: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" /></Field>
               </div>
 
               <Field label="Notes">

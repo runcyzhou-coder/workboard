@@ -149,11 +149,11 @@ export function Products() {
               </Field>
               <div className="grid grid-cols-3 gap-4">
                 <Field label="成本价">
-                  <input type="number" step="0.01" value={form.cost_price ?? 0} onChange={e => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
+                  <input type="number" step="0.01" value={form.cost_price || ''} onChange={e => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </Field>
                 <Field label="售价">
-                  <input type="number" step="0.01" value={form.selling_price ?? 0} onChange={e => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
+                  <input type="number" step="0.01" value={form.selling_price || ''} onChange={e => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </Field>
                 <Field label="单位">
@@ -163,11 +163,11 @@ export function Products() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <Field label="起订量">
-                  <input type="number" value={form.moq ?? 1} onChange={e => setForm({ ...form, moq: parseInt(e.target.value) || 1 })}
+                  <input type="number" value={form.moq || ''} onChange={e => setForm({ ...form, moq: parseInt(e.target.value) || 1 })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </Field>
                 <Field label="库存">
-                  <input type="number" value={form.stock ?? 0} onChange={e => setForm({ ...form, stock: parseInt(e.target.value) || 0 })}
+                  <input type="number" value={form.stock || ''} onChange={e => setForm({ ...form, stock: parseInt(e.target.value) || 0 })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </Field>
                 <Field label="HS编码">

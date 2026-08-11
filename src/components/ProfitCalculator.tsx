@@ -374,15 +374,15 @@ export function ProfitCalculator() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Field label="数量">
-              <input type="number" value={input.quantity} onChange={e => setInput({ ...input, quantity: parseInt(e.target.value) || 0 })}
+              <input type="number" value={input.quantity || ''} onChange={e => setInput({ ...input, quantity: parseInt(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="成本单价">
-              <input type="number" step="0.01" value={input.cost_price} onChange={e => setInput({ ...input, cost_price: num(e.target.value) })}
+              <input type="number" step="0.01" value={input.cost_price || ''} onChange={e => setInput({ ...input, cost_price: num(e.target.value) })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="售价单价">
-              <input type="number" step="0.01" value={input.selling_price} onChange={e => setInput({ ...input, selling_price: num(e.target.value) })}
+              <input type="number" step="0.01" value={input.selling_price || ''} onChange={e => setInput({ ...input, selling_price: num(e.target.value) })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="币种">
@@ -397,28 +397,28 @@ export function ProfitCalculator() {
             <h3 className="text-sm font-semibold text-slate-700 mb-3">额外成本</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Field label="运费 (总计)">
-                <input type="number" step="0.01" value={input.freight_cost} onChange={e => setInput({ ...input, freight_cost: num(e.target.value) })}
+                <input type="number" step="0.01" value={input.freight_cost || ''} onChange={e => setInput({ ...input, freight_cost: num(e.target.value) })}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="其他费用">
-                <input type="number" step="0.01" value={input.other_costs} onChange={e => setInput({ ...input, other_costs: num(e.target.value) })}
+                <input type="number" step="0.01" value={input.other_costs || ''} onChange={e => setInput({ ...input, other_costs: num(e.target.value) })}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="平台固定费用">
-                <input type="number" step="0.01" value={input.platform_fee_fixed} onChange={e => setInput({ ...input, platform_fee_fixed: num(e.target.value) })}
+                <input type="number" step="0.01" value={input.platform_fee_fixed || ''} onChange={e => setInput({ ...input, platform_fee_fixed: num(e.target.value) })}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="平台扣点 (%)">
-                <input type="number" step="0.01" value={input.platform_fee_pct} onChange={e => setInput({ ...input, platform_fee_pct: num(e.target.value) })}
+                <input type="number" step="0.01" value={input.platform_fee_pct || ''} onChange={e => setInput({ ...input, platform_fee_pct: num(e.target.value) })}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="关税 (%)">
-                <input type="number" step="0.01" value={input.tariff_pct} onChange={e => setInput({ ...input, tariff_pct: num(e.target.value) })}
+                <input type="number" step="0.01" value={input.tariff_pct || ''} onChange={e => setInput({ ...input, tariff_pct: num(e.target.value) })}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="汇率 (参考)">
                 <div className="flex gap-2">
-                  <input type="number" step="0.0001" value={input.exchange_rate} onChange={e => setInput({ ...input, exchange_rate: num(e.target.value) })}
+                  <input type="number" step="0.0001" value={input.exchange_rate || ''} onChange={e => setInput({ ...input, exchange_rate: num(e.target.value) })}
                     className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   <button
                     onClick={() => {

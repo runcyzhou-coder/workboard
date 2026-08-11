@@ -369,11 +369,11 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
                   <input value={it.description} onChange={e => setItems(items.map((x, i) => i === idx ? { ...x, description: e.target.value } : x))}
                     placeholder="规格描述"
                     className="col-span-3 px-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                  <input type="number" value={it.quantity} onChange={e => setItems(items.map((x, i) => i === idx ? { ...x, quantity: Number(e.target.value), total: Number(e.target.value) * (x.unit_price || 0) } : x))}
+                  <input type="number" value={it.quantity || ''} onChange={e => setItems(items.map((x, i) => i === idx ? { ...x, quantity: Number(e.target.value), total: Number(e.target.value) * (x.unit_price || 0) } : x))}
                     placeholder="数量" className="col-span-1 px-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
                   <input value={it.unit} onChange={e => setItems(items.map((x, i) => i === idx ? { ...x, unit: e.target.value } : x))}
                     placeholder="单位" className="col-span-1 px-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                  <input type="number" value={it.unit_price} onChange={e => setItems(items.map((x, i) => i === idx ? { ...x, unit_price: Number(e.target.value), total: (x.quantity || 0) * Number(e.target.value) } : x))}
+                  <input type="number" value={it.unit_price || ''} onChange={e => setItems(items.map((x, i) => i === idx ? { ...x, unit_price: Number(e.target.value), total: (x.quantity || 0) * Number(e.target.value) } : x))}
                     placeholder="单价" className="col-span-2 px-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
                   <div className="col-span-1 px-2 py-1.5 text-sm text-slate-700 text-right">{((it.quantity || 0) * (it.unit_price || 0)).toLocaleString()}</div>
                   <button onClick={() => items.length > 1 && setItems(items.filter((_, i) => i !== idx))} className="col-span-1 p-1.5 text-slate-400 hover:text-red-500">
