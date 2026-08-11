@@ -351,3 +351,51 @@ export interface PlItem {
   volume: number;
   created_at: string;
 }
+
+// ============== 询盘 ==============
+export interface InquiryItem {
+  product_name: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unit_price: number;
+  total: number;
+}
+
+export interface Inquiry {
+  id: string;
+  inquiry_number: string;
+  customer_id: string | null;
+  subject: string;
+  status: 'new' | 'quoted' | 'in_progress' | 'closed' | 'lost';
+  source: string | null;
+  currency: string;
+  expected_quantity: number;
+  expected_amount: number;
+  delivery_country: string | null;
+  delivery_terms: string | null;
+  payment_terms: string | null;
+  valid_until: string | null;
+  notes: string | null;
+  items: InquiryItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+// ============== 售后处理 ==============
+export interface AfterSale {
+  id: string;
+  ticket_number: string;
+  inquiry_id: string | null;
+  customer_id: string | null;
+  type: 'complaint' | 'quality' | 'shipping' | 'payment' | 'technical' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'open' | 'processing' | 'resolved' | 'closed';
+  subject: string;
+  description: string;
+  resolution: string | null;
+  handler: string | null;
+  resolved_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

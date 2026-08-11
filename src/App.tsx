@@ -5,10 +5,11 @@ import { Login } from '@/components/Login';
 import { HomePage } from '@/components/HomePage';
 import { Dashboard } from '@/components/Dashboard';
 import { Customers } from '@/components/Customers';
+import { Inquiries } from '@/components/Inquiries';
 import { Products } from '@/components/Products';
 import { DocumentCenter } from '@/components/DocumentCenter';
 import { ProfitCalculator } from '@/components/ProfitCalculator';
-import { Learning } from '@/components/Learning';
+import { AfterSales } from '@/components/AfterSales';
 import { TradeTools } from '@/components/TradeTools';
 import { supabase } from '@/lib/supabase';
 
@@ -132,10 +133,11 @@ function App() {
           {page === 'home' && <HomePage onNavigate={setPage} />}
           {page === 'dashboard' && <Dashboard onNavigate={setPage} />}
           {page === 'customers' && <Customers />}
+          {page === 'inquiries' && <Inquiries />}
           {page === 'products' && <Products />}
           {page === 'document-center' && <DocumentCenter />}
           {page === 'profit-calculator' && <ProfitCalculator />}
-          {page === 'learning' && <Learning />}
+          {page === 'after-sales' && <AfterSales />}
           {page === 'tools' && <TradeTools />}
         </main>
       </div>

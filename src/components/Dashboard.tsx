@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Users, Package, FileText, Quote, Calculator, TrendingUp,
-  ArrowRight, Briefcase, Globe2, Clock,
+  ArrowRight, Briefcase, Globe2, Clock, Headphones,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency, formatDate, classNames } from '@/lib/utils';
@@ -116,7 +116,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             { label: '创建报价', page: 'document-center' as Page, icon: Quote, color: 'bg-amber-50 text-amber-600 border-amber-200' },
             { label: '生成PI', page: 'document-center' as Page, icon: FileText, color: 'bg-violet-50 text-violet-600 border-violet-200' },
             { label: '防亏核算', page: 'profit-calculator' as Page, icon: Calculator, color: 'bg-rose-50 text-rose-600 border-rose-200' },
-            { label: '学习英语', page: 'learning' as Page, icon: Briefcase, color: 'bg-cyan-50 text-cyan-600 border-cyan-200' },
+            { label: '新建询盘', page: 'inquiries' as Page, icon: Briefcase, color: 'bg-cyan-50 text-cyan-600 border-cyan-200' },
+            { label: '售后处理', page: 'after-sales' as Page, icon: Headphones, color: 'bg-rose-50 text-rose-600 border-rose-200' },
             { label: '贸易工具', page: 'tools' as Page, icon: Globe2, color: 'bg-teal-50 text-teal-600 border-teal-200' },
             { label: '查看客户', page: 'customers' as Page, icon: TrendingUp, color: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
           ].map((action) => {

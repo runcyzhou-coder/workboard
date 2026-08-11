@@ -5,10 +5,11 @@ import {
   Users,
   Package,
   Calculator,
-  GraduationCap,
   Wrench,
   FolderOpen,
   X,
+  Inbox,
+  Headphones,
 } from 'lucide-react';
 import { classNames } from '@/lib/utils';
 
@@ -16,10 +17,11 @@ export type Page =
   | 'home'
   | 'dashboard'
   | 'customers'
+  | 'inquiries'
   | 'products'
   | 'document-center'
   | 'profit-calculator'
-  | 'learning'
+  | 'after-sales'
   | 'tools';
 
 interface SidebarProps {
@@ -33,10 +35,11 @@ const navItems: { id: Page; label: string; icon: typeof Home }[] = [
   { id: 'home', label: '首页', icon: Home },
   { id: 'dashboard', label: '仪表盘', icon: LayoutDashboard },
   { id: 'customers', label: '客户管理', icon: Users },
+  { id: 'inquiries', label: '询盘管理', icon: Inbox },
   { id: 'products', label: '产品管理', icon: Package },
   { id: 'document-center', label: '单据中心', icon: FolderOpen },
   { id: 'profit-calculator', label: '防亏核算', icon: Calculator },
-  { id: 'learning', label: '外贸英语', icon: GraduationCap },
+  { id: 'after-sales', label: '售后处理', icon: Headphones },
   { id: 'tools', label: '贸易工具', icon: Wrench },
 ];
 
