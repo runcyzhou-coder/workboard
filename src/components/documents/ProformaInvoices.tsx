@@ -61,7 +61,8 @@ export function ProformaInvoices() {
     const other = form.other_charges || 0;
     const total = subtotal - discount + freight + insurance + other;
 
-    const payload = { ...form, subtotal, total_amount: total };
+    const { customer, id, created_at, updated_at, items: _items, ...rest } = form;
+    const payload = { ...rest, subtotal, total_amount: total };
 
     if (editingPI) {
       await supabase.from('proforma_invoices').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editingPI.id);

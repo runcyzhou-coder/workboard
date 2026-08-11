@@ -42,7 +42,8 @@ export function Contracts() {
     if (!form.contract_number?.trim()) return;
     const subtotal = items.reduce((s, i) => s + (i.quantity || 0) * (i.unit_price || 0), 0);
     const total = subtotal;
-    const payload = { ...form, subtotal, total_amount: total };
+    const { customer, id, created_at, updated_at, items: _items, ...rest } = form;
+    const payload = { ...rest, subtotal, total_amount: total };
     if (editing) {
       await supabase.from('contracts').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing.id);
       await supabase.from('contract_items').delete().eq('contract_id', editing.id);

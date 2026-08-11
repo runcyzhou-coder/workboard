@@ -44,7 +44,8 @@ export function CustomsDeclarations() {
     const grossWt = items.reduce((s, i) => s + (i.gross_weight || 0), 0);
     const netWt = items.reduce((s, i) => s + (i.net_weight || 0), 0);
     const pkgCount = items.reduce((s, i) => s + (i.quantity || 0), 0);
-    const payload = { ...form, total_amount: total, gross_weight: grossWt, net_weight: netWt, package_count: pkgCount };
+    const { customer, id, created_at, updated_at, items: _items, ...rest } = form;
+    const payload = { ...rest, total_amount: total, gross_weight: grossWt, net_weight: netWt, package_count: pkgCount };
     if (editing) {
       await supabase.from('customs_declarations').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing.id);
       await supabase.from('cd_items').delete().eq('cd_id', editing.id);

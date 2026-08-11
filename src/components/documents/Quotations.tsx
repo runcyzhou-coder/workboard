@@ -48,7 +48,8 @@ export function Quotations() {
   async function save() {
     if (!form.quote_number?.trim()) return;
     const total = items.reduce((s, i) => s + (i.quantity || 0) * (i.unit_price || 0), 0);
-    const payload = { ...form, total_amount: total };
+    const { customer, id, created_at, updated_at, items: _items, ...rest } = form;
+    const payload = { ...rest, total_amount: total };
 
     if (editing) {
       await supabase.from('quotations').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing.id);

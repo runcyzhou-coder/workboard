@@ -49,7 +49,8 @@ export function PackingLists() {
     const netWt = items.reduce((s, i) => s + (i.net_weight || 0), 0);
     const vol = items.reduce((s, i) => s + calcVol(i.length ?? null, i.width ?? null, i.height ?? null), 0);
     const pkgCount = items.reduce((s, i) => s + (i.package_count || 0), 0);
-    const payload = { ...form, total_gross_weight: grossWt, total_net_weight: netWt, total_volume: vol, total_packages: pkgCount };
+    const { customer, id, created_at, updated_at, items: _items, ...rest } = form;
+    const payload = { ...rest, total_gross_weight: grossWt, total_net_weight: netWt, total_volume: vol, total_packages: pkgCount };
     if (editing) {
       await supabase.from('packing_lists').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editing.id);
       await supabase.from('pl_items').delete().eq('pl_id', editing.id);
