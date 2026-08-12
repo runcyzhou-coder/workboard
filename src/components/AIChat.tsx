@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-  Send, Sparkles, Phone, Video, MoreVertical, Search,
-  Paperclip, Smile, Mic, CheckCheck, ChevronLeft, Copy,
-  RefreshCw, ExternalLink, Bot, User, Plus,
+  Send, Sparkles, Phone, MoreVertical, Search,
+  Paperclip, Smile, Mic, CheckCheck, Copy,
+  RefreshCw, ExternalLink,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 
 interface ChatMessage {
   id: string;
@@ -13,109 +12,148 @@ interface ChatMessage {
   time: string;
 }
 
-interface Customer {
-  id: string;
-  company_name: string;
-  contact_name: string;
+interface Conversation {
   phone: string;
-  country: string;
-  email: string;
-  notes: string;
-  status: string;
-}
-
-interface ChatSession {
-  customer: Customer;
-  messages: ChatMessage[];
   lastMessage: string;
   lastTime: string;
-  unread: number;
+  sender: 'customer' | 'me';
+  customer: {
+    id: string;
+    company_name: string;
+    contact_name: string;
+    phone: string;
+    country: string;
+    status: string;
+    notes: string;
+  };
 }
 
-// 模拟初始对话数据（实际使用时从 Supabase 或 WhatsApp API 加载）
-const mockConversations: Record<string, ChatMessage[]> = {
-  default: [
-    { id: '1', role: 'customer', text: 'Hi, I am interested in your 100kW wind turbine. Can you send me the specifications and price?', time: '10:30' },
-    { id: '2', role: 'me', text: 'Hello! Thank you for your interest. Let me prepare the detailed spec sheet and quotation for you.', time: '10:32' },
-    { id: '3', role: 'customer', text: 'Great! Also, what is the MOQ and delivery time to Saudi Arabia?', time: '10:35' },
-  ],
-  demo2: [
-    { id: '1', role: 'customer', text: 'Hola, vi su catálogo de paneles solares. ¿Tienen disponibilidad para 500 unidades?', time: '09:15' },
-    { id: '2', role: 'me', text: 'Hola! Sí, tenemos stock disponible. ¿Podría confirmarme el modelo exacto que necesita?', time: '09:20' },
-  ],
-  demo3: [
-    { id: '1', role: 'customer', text: '你好，请问贵公司的风力发电机质保期多久？', time: '14:00' },
-    { id: '2', role: 'me', text: '您好！我们的风力发电机标准质保期为2年，可延保至5年。', time: '14:05' },
-    { id: '3', role: 'customer', text: '好的，请发一份详细的产品手册和报价单给我。', time: '14:08' },
-  ],
-};
+const DEMO_CONVERSATIONS: Conversation[] = [
+  {
+    phone: '16505558385',
+    lastMessage: 'Great! When can you ship?',
+    lastTime: new Date().toISOString(),
+    sender: 'customer',
+    customer: {
+      id: 'demo1', company_name: 'Saudi Renewable Energy Co.',
+      contact_name: 'Ahmed Al-Rashid', phone: '+1 (650) 555-8385',
+      country: 'Saudi Arabia', status: 'active', notes: '风电设备询盘'
+    },
+  },
+  {
+    phone: '5215512345678',
+    lastMessage: 'Hola, ¿pueden enviar catálogo?',
+    lastTime: new Date().toISOString(),
+    sender: 'customer',
+    customer: {
+      id: 'demo2', company_name: 'SolarTech LATAM',
+      contact_name: 'Carlos Mendoza', phone: '+52 55 1234 5678',
+      country: 'Mexico', status: 'active', notes: '光伏储能'
+    },
+  },
+];
+
+function formatTime(iso: string) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+function formatPhoneDisplay(phone: string) {
+  if (!phone) return '';
+  const clean = phone.replace(/[+\s-]/g, '');
+  if (clean.length === 11 && clean.startsWith('86')) {
+    return `+${clean.slice(0, 2)} ${clean.slice(2, 4)} ${clean.slice(4, 8)} ${clean.slice(8)}`;
+  }
+  return phone;
+}
 
 export function AIChat() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [aiReplies, setAiReplies] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showAiPanel, setShowAiPanel] = useState(true);
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 加载客户数据
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('customers')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setCustomers(data);
-          setSelectedCustomerId(data[0].id);
-        } else {
-          // 无客户时用 demo 数据
-          const demoCustomers: Customer[] = [
-            { id: 'demo1', company_name: 'Saudi Renewable Energy Co.', contact_name: 'Ahmed Al-Rashid', phone: '+966501234567', country: 'Saudi Arabia', email: 'ahmed@sre.sa', notes: '风电设备询盘', status: 'active' },
-            { id: 'demo2', company_name: 'SolarTech LATAM', contact_name: 'Carlos Mendoza', phone: '+525512345678', country: 'Mexico', email: 'carlos@solartech.mx', notes: '光伏储能', status: 'active' },
-            { id: 'demo3', company_name: '绿能科技有限公司', contact_name: '王经理', phone: '+8613800138000', country: 'China', email: 'wang@greenenergy.cn', notes: '国内合作', status: 'active' },
-          ];
-          setCustomers(demoCustomers);
-          setSelectedCustomerId('demo1');
-        }
-      } catch (err) {
-        const demoCustomers: Customer[] = [
-          { id: 'demo1', company_name: 'Saudi Renewable Energy Co.', contact_name: 'Ahmed Al-Rashid', phone: '+966501234567', country: 'Saudi Arabia', email: 'ahmed@sre.sa', notes: '风电设备询盘', status: 'active' },
-          { id: 'demo2', company_name: 'SolarTech LATAM', contact_name: 'Carlos Mendoza', phone: '+525512345678', country: 'Mexico', email: 'carlos@solartech.mx', notes: '光伏储能', status: 'active' },
-          { id: 'demo3', company_name: '绿能科技有限公司', contact_name: '王经理', phone: '+8613800138000', country: 'China', email: 'wang@greenenergy.cn', notes: '国内合作', status: 'active' },
-        ];
-        setCustomers(demoCustomers);
-        setSelectedCustomerId('demo1');
-      } finally {
-        setLoading(false);
+  // 加载会话列表
+  const loadConversations = async () => {
+    try {
+      const res = await fetch('/api/whatsapp-fetch');
+      const data = await res.json();
+
+      if (data.conversations && data.conversations.length > 0) {
+        setConversations(data.conversations);
+        setConnected(true);
+      } else {
+        setConversations(DEMO_CONVERSATIONS);
+        setConnected(false);
       }
-    })();
+    } catch {
+      setConversations(DEMO_CONVERSATIONS);
+      setConnected(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadConversations();
+    // 每 15 秒轮询一次
+    const interval = setInterval(loadConversations, 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  // 切换客户时加载对话
-  useEffect(() => {
-    if (!selectedCustomerId) return;
-    const key = selectedCustomerId === 'demo1' ? 'default' : selectedCustomerId === 'demo2' ? 'demo2' : selectedCustomerId === 'demo3' ? 'demo3' : 'default';
-    setMessages(mockConversations[key] || mockConversations.default);
-    setAiReplies([]);
-  }, [selectedCustomerId]);
+  // 加载选中会话的历史消息
+  const loadMessages = async (phone: string) => {
+    try {
+      const formattedPhone = phone.replace(/[+\s-]/g, '');
+      const res = await fetch(`/api/whatsapp-fetch?phone=${encodeURIComponent(formattedPhone)}`);
+      const data = await res.json();
 
-  // 自动滚动到底部
+      if (data.messages && data.messages.length > 0) {
+        const chatMsgs: ChatMessage[] = data.messages.map((m: any) => ({
+          id: m.id || `${m.wam_id || ''}_${Date.now()}`,
+          role: m.sender === 'customer' ? 'customer' : 'me',
+          text: m.text,
+          time: formatTime(m.received_at),
+        }));
+        setMessages(chatMsgs);
+      } else {
+        setMessages(getDemoMessages(phone));
+      }
+    } catch {
+      setMessages(getDemoMessages(phone));
+    }
+  };
+
+  useEffect(() => {
+    if (selectedPhone) {
+      setMessages([]);
+      setAiReplies([]);
+      loadMessages(selectedPhone);
+    }
+  }, [selectedPhone]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+  const selectedConversation = conversations.find(c => c.phone === selectedPhone);
 
   // 发送消息
-  const sendMessage = (text: string) => {
-    if (!text.trim()) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || !selectedPhone) return;
+
+    setSending(true);
     const now = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
     const newMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -126,6 +164,24 @@ export function AIChat() {
     setMessages(prev => [...prev, newMsg]);
     setInputText('');
     setAiReplies([]);
+
+    // 通过真实 WhatsApp API 发送
+    try {
+      const res = await fetch('/api/whatsapp-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: selectedPhone, text: text.trim() }),
+      });
+      const data = await res.json();
+
+      if (!data.ok && !data.simulated) {
+        alert('发送失败：' + (data.error || '未知错误'));
+      }
+    } catch {
+      alert('网络错误，发送失败');
+    } finally {
+      setSending(false);
+    }
   };
 
   // AI 生成回复建议
@@ -133,49 +189,51 @@ export function AIChat() {
     if (messages.length === 0) return;
     setGenerating(true);
     setAiReplies([]);
+
+    const customerName = selectedConversation?.customer.contact_name ||
+      selectedConversation?.customer.company_name || 'Customer';
+    const customerCompany = selectedConversation?.customer.company_name;
+    const customerCountry = selectedConversation?.customer.country;
+
     try {
       const res = await fetch('/api/whatsapp-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customer_name: selectedCustomer?.contact_name || selectedCustomer?.company_name || 'Customer',
-          customer_company: selectedCustomer?.company_name,
-          customer_country: selectedCustomer?.country,
+          customer_name: customerName,
+          customer_company: customerCompany,
+          customer_country: customerCountry,
           messages: messages.map(m => ({ role: m.role, text: m.text, time: m.time })),
-          product_context: selectedCustomer?.notes,
         }),
       });
       const data = await res.json();
-      if (data.replies) {
-        setAiReplies(data.replies);
-      }
+      if (data.replies) setAiReplies(data.replies);
     } catch {
-      setAiReplies(['抱歉，AI 生成失败，请手动输入回复。']);
+      setAiReplies(['AI 生成失败，请手动输入回复。']);
     } finally {
       setGenerating(false);
     }
   };
 
-  // 打开 WhatsApp Web 发送消息
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
   const openWhatsApp = (phone: string, text?: string) => {
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const cleanPhone = phone.replace(/[+\s-]/g, '');
     const url = text
       ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`
       : `https://wa.me/${cleanPhone}`;
     window.open(url, '_blank');
   };
 
-  // 复制到剪贴板
-  const copyText = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  const filteredCustomers = customers.filter(c => {
+  const filteredConversations = conversations.filter(c => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return c.company_name?.toLowerCase().includes(q) ||
-           c.contact_name?.toLowerCase().includes(q) ||
-           c.country?.toLowerCase().includes(q);
+    return c.customer.company_name?.toLowerCase().includes(q) ||
+           c.customer.contact_name?.toLowerCase().includes(q) ||
+           c.customer.country?.toLowerCase().includes(q) ||
+           c.phone.includes(q);
   });
 
   return (
@@ -184,23 +242,38 @@ export function AIChat() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-serif font-bold text-[#2D2A26] flex items-center gap-2">
-            <MessageCircleIcon /> 智能客服
+            WhatsApp 智能客服
           </h2>
-          <p className="text-sm text-[#78716C] mt-0.5">WhatsApp 智能对话 · AI 自动回复建议</p>
+          <p className="text-sm text-[#78716C] mt-0.5">
+            {connected ? '已连接 WhatsApp Cloud API · 实时收发消息' : '演示模式 · API 未连接'}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32] text-xs font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50] animate-pulse" />
-            WhatsApp 已连接
-          </span>
+        <div className="flex items-center gap-3">
+          {connected ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32] text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50]" />
+              WhatsApp 已连接
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF3E0] text-[#E65100] text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF9800]" />
+              演示模式
+            </span>
+          )}
+          <button
+            onClick={loadConversations}
+            className="p-1.5 rounded-lg hover:bg-[#F2EBDC] text-[#78716C] transition-colors"
+            title="刷新"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
       {/* 主聊天区域 */}
-      <div className="flex rounded-2xl overflow-hidden border border-[#E8E2D5] bg-white shadow-sm" style={{ height: 'calc(100vh - 200px)', minHeight: '500px' }}>
-        {/* 左侧：客户列表 */}
-        <div className="w-72 shrink-0 border-r border-[#E8E2D5] flex flex-col bg-[#FAF7F2]">
-          {/* 搜索栏 */}
+      <div className="flex rounded-2xl overflow-hidden border border-[#E8E2D5] bg-white shadow-sm" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
+        {/* 左侧：会话列表 */}
+        <div className="w-64 shrink-0 border-r border-[#E8E2D5] flex flex-col bg-[#FAF7F2]">
           <div className="p-3 border-b border-[#E8E2D5]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
@@ -214,40 +287,43 @@ export function AIChat() {
             </div>
           </div>
 
-          {/* 客户列表 */}
           <div className="flex-1 overflow-y-auto">
             {loading ? (
               <div className="p-4 text-center text-sm text-[#78716C]">加载中...</div>
-            ) : filteredCustomers.length === 0 ? (
-              <div className="p-4 text-center text-sm text-[#78716C]">无匹配客户</div>
+            ) : filteredConversations.length === 0 ? (
+              <div className="p-4 text-center text-sm text-[#78716C]">暂无会话</div>
             ) : (
-              filteredCustomers.map(c => {
-                const key = c.id === 'demo1' ? 'default' : c.id === 'demo2' ? 'demo2' : c.id === 'demo3' ? 'demo3' : 'default';
-                const conv = mockConversations[key] || mockConversations.default;
-                const lastMsg = conv[conv.length - 1];
-                const isSelected = c.id === selectedCustomerId;
+              filteredConversations.map(conv => {
+                const isSelected = conv.phone === selectedPhone;
+                const initial = conv.customer.contact_name?.charAt(0) ||
+                  conv.customer.company_name?.charAt(0) || '?';
+                const timeStr = conv.lastTime ? formatTime(conv.lastTime) : '';
+                const isCustomerMsg = conv.sender === 'customer';
+
                 return (
                   <button
-                    key={c.id}
-                    onClick={() => setSelectedCustomerId(c.id)}
+                    key={conv.phone}
+                    onClick={() => setSelectedPhone(conv.phone)}
                     className={`w-full flex items-start gap-3 px-3 py-3 border-b border-[#E8E2D5]/50 transition-colors text-left ${
                       isSelected ? 'bg-[#7BA369]/10 border-l-2 border-l-[#7BA369]' : 'hover:bg-[#F2EBDC]'
                     }`}
                   >
-                    {/* 头像 */}
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-medium ${
                       isSelected ? 'bg-[#7BA369] text-white' : 'bg-[#E8E2D5] text-[#5C5246]'
                     }`}>
-                      {c.contact_name?.charAt(0) || c.company_name?.charAt(0) || '?'}
+                      {initial}
                     </div>
-                    {/* 信息 */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-sm font-medium text-[#2D2A26] truncate">{c.contact_name || c.company_name}</span>
-                        <span className="text-[10px] text-[#78716C] shrink-0">{lastMsg?.time}</span>
+                        <span className="text-sm font-medium text-[#2D2A26] truncate">
+                          {conv.customer.contact_name || conv.customer.company_name}
+                        </span>
+                        <span className="text-[10px] text-[#78716C] shrink-0">{timeStr}</span>
                       </div>
-                      <p className="text-xs text-[#78716C] truncate mt-0.5">{c.company_name}</p>
-                      <p className="text-xs text-[#78716C] truncate mt-0.5">{lastMsg?.text}</p>
+                      <p className="text-xs text-[#78716C] truncate mt-0.5">{conv.customer.company_name}</p>
+                      <p className={`text-xs truncate mt-0.5 ${isCustomerMsg ? 'text-[#5C5246]' : 'text-[#7BA369]'}`}>
+                        {conv.lastMessage}
+                      </p>
                     </div>
                   </button>
                 );
@@ -258,22 +334,26 @@ export function AIChat() {
 
         {/* 中央：聊天窗口 */}
         <div className="flex-1 flex flex-col min-w-0">
-          {selectedCustomer ? (
+          {selectedConversation ? (
             <>
-              {/* 顶部：客户信息栏 */}
+              {/* 顶部栏 */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-[#E8E2D5] bg-white">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-full bg-[#7BA369] text-white flex items-center justify-center text-sm font-medium shrink-0">
-                    {selectedCustomer.contact_name?.charAt(0) || selectedCustomer.company_name?.charAt(0) || '?'}
+                    {selectedConversation.customer.contact_name?.charAt(0) || '?'}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#2D2A26] truncate">{selectedCustomer.contact_name || selectedCustomer.company_name}</p>
-                    <p className="text-xs text-[#78716C] truncate">{selectedCustomer.company_name} · {selectedCustomer.country}</p>
+                    <p className="text-sm font-medium text-[#2D2A26] truncate">
+                      {selectedConversation.customer.contact_name || selectedConversation.customer.company_name}
+                    </p>
+                    <p className="text-xs text-[#78716C] truncate">
+                      {formatPhoneDisplay(selectedConversation.phone)} · {selectedConversation.customer.country}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
-                    onClick={() => openWhatsApp(selectedCustomer.phone)}
+                    onClick={() => openWhatsApp(selectedConversation.phone)}
                     title="在 WhatsApp 中打开"
                     className="p-2 rounded-lg hover:bg-[#F2EBDC] text-[#78716C] hover:text-[#25D366] transition-colors"
                   >
@@ -288,7 +368,7 @@ export function AIChat() {
                 </div>
               </div>
 
-              {/* 聊天消息区 */}
+              {/* 消息区 */}
               <div
                 className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
                 style={{
@@ -296,14 +376,21 @@ export function AIChat() {
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4cdc4' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
                 }}
               >
-                {/* 日期分隔 */}
                 <div className="flex justify-center">
-                  <span className="px-3 py-1 rounded-full bg-white/80 text-xs text-[#78716C] shadow-sm">今天</span>
+                  <span className="px-3 py-1 rounded-full bg-white/80 text-xs text-[#78716C] shadow-sm">
+                    {connected ? 'WhatsApp 实时消息' : '演示消息'}
+                  </span>
                 </div>
+
+                {messages.length === 0 && (
+                  <div className="text-center py-8 text-sm text-[#78716C]">暂无消息记录</div>
+                )}
 
                 {messages.map(msg => (
                   <div key={msg.id} className={`flex ${msg.role === 'me' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[75%] rounded-lg shadow-sm ${msg.role === 'me' ? 'bg-[#DCF8C6] rounded-tr-none' : 'bg-white rounded-tl-none'}`}>
+                    <div className={`max-w-[75%] rounded-lg shadow-sm ${
+                      msg.role === 'me' ? 'bg-[#DCF8C6] rounded-tr-none' : 'bg-white rounded-tl-none'
+                    }`}>
                       <div className="px-3 py-2">
                         <p className="text-sm text-[#2D2A26] whitespace-pre-wrap break-words">{msg.text}</p>
                         <div className="flex items-center justify-end gap-1 mt-0.5">
@@ -318,53 +405,44 @@ export function AIChat() {
               </div>
 
               {/* AI 回复建议面板 */}
-              {showAiPanel && (aiReplies.length > 0 || generating) && (
+              {(aiReplies.length > 0 || generating) && (
                 <div className="border-t border-[#E8E2D5] bg-[#F7F3EB] px-4 py-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="flex items-center gap-1.5 text-xs font-medium text-[#5C5246]">
                       <Sparkles className="w-3.5 h-3.5 text-[#7BA369]" />
                       AI 智能回复建议
                     </span>
-                    <button
-                      onClick={() => setAiReplies([])}
-                      className="text-xs text-[#78716C] hover:text-[#2D2A26]"
-                    >
+                    <button onClick={() => setAiReplies([])} className="text-xs text-[#78716C] hover:text-[#2D2A26]">
                       收起
                     </button>
                   </div>
                   {generating ? (
                     <div className="flex items-center gap-2 py-2 text-sm text-[#78716C]">
                       <RefreshCw className="w-4 h-4 animate-spin text-[#7BA369]" />
-                      AI 正在分析对话并生成回复...
+                      AI 分析中...
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {aiReplies.map((reply, i) => (
-                        <div
-                          key={i}
-                          className="group flex items-start gap-2 p-2.5 rounded-lg bg-white border border-[#E8E2D5] hover:border-[#7BA369] transition-colors"
-                        >
+                        <div key={i} className="group flex items-start gap-2 p-2.5 rounded-lg bg-white border border-[#E8E2D5] hover:border-[#7BA369] transition-colors">
                           <span className="text-[10px] font-mono text-[#78716C] mt-0.5 shrink-0">#{i + 1}</span>
                           <p className="flex-1 text-sm text-[#2D2A26] whitespace-pre-wrap">{reply}</p>
-                          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => copyText(reply)}
-                              title="复制"
-                              className="p-1 rounded hover:bg-[#F2EBDC] text-[#78716C]"
-                            >
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button onClick={() => copyText(reply)} title="复制" className="p-1 rounded hover:bg-[#F2EBDC] text-[#78716C]">
                               <Copy className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => sendMessage(reply)}
-                              title="发送"
-                              className="p-1 rounded hover:bg-[#F2EBDC] text-[#78716C] hover:text-[#7BA369]"
+                              title="发送到 WhatsApp"
+                              className="p-1 rounded hover:bg-[#E8F5E9] text-[#7BA369]"
+                              disabled={sending}
                             >
                               <Send className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => openWhatsApp(selectedCustomer.phone, reply)}
-                              title="在 WhatsApp 中发送"
-                              className="p-1 rounded hover:bg-[#F2EBDC] text-[#78716C] hover:text-[#25D366]"
+                              onClick={() => openWhatsApp(selectedConversation.phone, reply)}
+                              title="在 WhatsApp 中打开"
+                              className="p-1 rounded hover:bg-[#F2EBDC] text-[#25D366]"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </button>
@@ -385,7 +463,7 @@ export function AIChat() {
                   <button
                     onClick={generateAiReplies}
                     disabled={generating || messages.length === 0}
-                    title="生成 AI 回复建议"
+                    title="AI 生成回复建议"
                     className={`p-2 rounded-full shrink-0 transition-colors ${
                       generating ? 'bg-[#7BA369]/20 text-[#7BA369] animate-pulse' : 'hover:bg-[#E8F5E9] text-[#7BA369]'
                     } disabled:opacity-40`}
@@ -398,104 +476,61 @@ export function AIChat() {
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputText); } }}
-                      placeholder="输入消息..."
+                      placeholder={connected ? '输入消息... 将通过 WhatsApp 发送' : '输入消息...（演示模式）'}
                       className="w-full px-4 py-2.5 text-sm bg-[#FAF7F2] border border-[#E8E2D5] rounded-full focus:outline-none focus:border-[#7BA369] transition-colors pr-10"
                     />
                     <button className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-[#E8E2D5] text-[#78716C]">
                       <Smile className="w-5 h-5" />
                     </button>
                   </div>
-                  {inputText.trim() ? (
-                    <button
-                      onClick={() => sendMessage(inputText)}
-                      className="p-2.5 rounded-full bg-[#7BA369] text-white hover:bg-[#5C8A4A] transition-colors shrink-0"
-                    >
-                      <Send className="w-5 h-5" />
-                    </button>
-                  ) : (
-                    <button className="p-2.5 rounded-full bg-[#7BA369] text-white hover:bg-[#5C8A4A] transition-colors shrink-0">
-                      <Mic className="w-5 h-5" />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => sendMessage(inputText)}
+                    disabled={sending || !inputText.trim()}
+                    className={`p-2.5 rounded-full transition-colors shrink-0 ${
+                      sending ? 'bg-[#78716C]' : 'bg-[#7BA369] hover:bg-[#5C8A4A]'
+                    } text-white disabled:opacity-50`}
+                  >
+                    {sending ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-[#78716C]">
               <div className="text-center">
-                <MessageCircleIcon className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                <p>选择一个客户开始对话</p>
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#E8E2D5] flex items-center justify-center">
+                  <MessageCircleIcon className="w-8 h-8 text-[#78716C]" />
+                </div>
+                <p className="text-sm">选择一个会话开始对话</p>
+                {!connected && (
+                  <p className="text-xs mt-2 text-[#78716C]/70">
+                    连接 WhatsApp 后可接收真实客户消息
+                  </p>
+                )}
               </div>
             </div>
           )}
         </div>
-
-        {/* 右侧：客户详情面板 */}
-        {selectedCustomer && (
-          <div className="w-64 shrink-0 border-l border-[#E8E2D5] bg-[#FAF7F2] hidden lg:flex flex-col overflow-y-auto">
-            <div className="p-4 text-center border-b border-[#E8E2D5]">
-              <div className="w-16 h-16 rounded-full bg-[#7BA369] text-white flex items-center justify-center text-xl font-medium mx-auto mb-2">
-                {selectedCustomer.contact_name?.charAt(0) || selectedCustomer.company_name?.charAt(0) || '?'}
-              </div>
-              <p className="text-sm font-medium text-[#2D2A26]">{selectedCustomer.contact_name || selectedCustomer.company_name}</p>
-              <p className="text-xs text-[#78716C] mt-0.5">{selectedCustomer.company_name}</p>
-              <p className="text-xs text-[#78716C] mt-0.5">{selectedCustomer.country}</p>
-            </div>
-
-            <div className="p-4 space-y-3 flex-1">
-              {/* 联系方式 */}
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-wider text-[#78716C]/70 mb-1.5">联系方式</p>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-xs">
-                    <Phone className="w-3.5 h-3.5 text-[#78716C] shrink-0" />
-                    <span className="text-[#5C5246] truncate">{selectedCustomer.phone || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <ExternalLink className="w-3.5 h-3.5 text-[#78716C] shrink-0" />
-                    <span className="text-[#5C5246] truncate">{selectedCustomer.email || '—'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 备注 */}
-              {selectedCustomer.notes && (
-                <div>
-                  <p className="text-[10px] font-mono uppercase tracking-wider text-[#78716C]/70 mb-1.5">备注</p>
-                  <p className="text-xs text-[#5C5246] bg-white rounded-lg p-2 border border-[#E8E2D5]">{selectedCustomer.notes}</p>
-                </div>
-              )}
-
-              {/* 快捷操作 */}
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-wider text-[#78716C]/70 mb-1.5">快捷操作</p>
-                <div className="space-y-1.5">
-                  <button
-                    onClick={() => openWhatsApp(selectedCustomer.phone)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-xs font-medium transition-colors"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    在 WhatsApp 中打开
-                  </button>
-                  <button
-                    onClick={generateAiReplies}
-                    disabled={generating}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#7BA369]/10 hover:bg-[#7BA369]/20 text-[#7BA369] text-xs font-medium transition-colors disabled:opacity-50"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    AI 生成回复
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-// 自定义 WhatsApp 图标
+// Demo 消息（API 未连接时使用）
+function getDemoMessages(phone: string): ChatMessage[] {
+  if (phone.includes('6505558385')) {
+    return [
+      { id: '1', role: 'customer', text: 'Hi, I am interested in your 100kW wind turbine. Can you send me the specifications and price?', time: '10:30' },
+      { id: '2', role: 'me', text: 'Hello! Thank you for your interest. Let me prepare the detailed spec sheet and quotation.', time: '10:32' },
+      { id: '3', role: 'customer', text: 'Great! Also, what is the MOQ and delivery time to Saudi Arabia?', time: '10:35' },
+    ];
+  }
+  return [
+    { id: '1', role: 'customer', text: 'Hola, vi su catálogo. ¿Tienen disponibilidad para 500 paneles solares?', time: '09:15' },
+    { id: '2', role: 'me', text: 'Hola! Sí, tenemos stock disponible. ¿Podría confirmarme el modelo exacto?', time: '09:20' },
+  ];
+}
+
 function MessageCircleIcon({ className = '' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" style={{ width: '1em', height: '1em' }}>
