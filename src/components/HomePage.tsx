@@ -26,6 +26,7 @@ interface IndustryNews {
   category: '政策' | '市场' | '技术' | '项目';
   date: string;
   hotLevel: 'hot' | 'warm' | 'normal';
+  url?: string;
 }
 
 // ============ 热销产品 ============
@@ -539,11 +540,11 @@ function EventModal({
             </button>
           ) : <div />}
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="intj-btn-ghost">取消</button>
+            <button onClick={onClose} className="rpg-btn-ghost">取消</button>
             <button
               onClick={handleSave}
               disabled={!title.trim() || saving}
-              className="intj-btn disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rpg-btn disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={1.75} /> : <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />}
               {mode === 'add' ? '添加' : '保存'}
@@ -603,8 +604,8 @@ www.kiki-tech.com`;
           <pre className="whitespace-pre-wrap text-sm text-[#F3EFE6] leading-relaxed font-sans">{letter}</pre>
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-dashed border-[#3A2D54]/60">
-          <button onClick={onClose} className="intj-btn-ghost">关闭</button>
-          <button onClick={copyLetter} className="intj-btn">
+          <button onClick={onClose} className="rpg-btn-ghost">关闭</button>
+          <button onClick={copyLetter} className="rpg-btn">
             {copied ? <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> : <Sparkles className="w-4 h-4" strokeWidth={1.75} />}
             {copied ? '已复制' : '复制全文'}
           </button>
@@ -697,7 +698,7 @@ function IndustrySelectModal({
               <button
                 onClick={handleConfirm}
                 disabled={!customIndustry.trim()}
-                className="intj-btn disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rpg-btn disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 确认
               </button>
@@ -950,7 +951,9 @@ function MiniCalendar({
   }
 
   return (
-    <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
+    <div className="rpg-panel intj-cut-corner p-5 transition-all duration-200">
+      <span className="corner-gem-3"></span>
+      <span className="corner-gem-4"></span>
       {/* Header：年月选择器 + 导航 */}
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div className="flex items-center gap-2">
@@ -1294,20 +1297,23 @@ export function HomePage({ onNavigate }: HomeProps) {
   return (
     <div className="space-y-6">
       {/* 1. 顶部 Banner（问候 + 业务指标卡片） */}
-      <div className="relative z-10 overflow-hidden rounded-2xl border-2 border-[#3A2D54] bg-gradient-to-br from-[#1B142C]/95 via-[#221A3A]/90 to-[#0D0B18]/95 backdrop-blur-md shadow-[0_0_30px_rgba(168,85,247,0.22)] p-6 sm:p-8 intj-cut-corner">
+      <div className="rpg-hero relative z-10 overflow-hidden rounded-2xl p-6 sm:p-8 intj-cut-corner">
+        <span className="corner-gem-3"></span>
+        <span className="corner-gem-4"></span>
         {/* Grid overlay */}
         <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:'linear-gradient(rgba(168,85,247,0.12) 1px, transparent 1px),linear-gradient(90deg, rgba(168,85,247,0.12) 1px, transparent 1px)',backgroundSize:'32px 32px'}} />
         {/* Purple radial glow */}
         <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#A855F7]/15 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#06B6D4]/10 blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+        <div className="relative z-10 flex gap-4">
+          {/* LEFT column */}
+          <div className="flex-1">
             <div className="flex items-center gap-2 text-xs font-medium text-[#B8AEC8] font-handwriting text-[13px] mb-2">
               <Sparkles className="w-4 h-4 text-[#A855F7]" strokeWidth={1.75} />
               <span>AI 智能首页</span>
             </div>
             <div className="flex items-center gap-3 mb-1 flex-wrap">
-              <h1 className="text-3xl font-serif font-bold text-[#F3EFE6] tracking-wide">早安，KIKI TECH</h1>
+              <h1 className="text-3xl font-serif font-bold rpg-hero-text-gradient tracking-wide">早安，KIKI TECH</h1>
               <button
                 onClick={() => setShowIndustryModal(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#221A3A]/80 border border-[#3A2D54] text-[#B8AEC8] hover:border-[#A855F7] hover:text-[#F3EFE6] transition-all text-sm font-semibold"
@@ -1328,23 +1334,36 @@ export function HomePage({ onNavigate }: HomeProps) {
                 )}
               </button>
             </div>
-            <p className="text-[#B8AEC8] text-sm">{dateStr} · 今天也是开拓全球市场的一天 💪</p>
+            <p className="text-[#B8AEC8] text-sm mb-4">{dateStr} · 今天也是开拓全球市场的一天 💪</p>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <div className="rpg-card p-3 min-w-[130px] !p-3">
+                <p className="text-[10px] text-[#8879A0] font-medium">客户总数</p>
+                <p className="text-2xl font-serif font-bold text-[#F3EFE6]"><span className="underline decoration-wavy decoration-[#A855F7]/60 decoration-2 underline-offset-4">{stats.customerCount}</span> <span className="text-sm font-normal text-[#8879A0]">个</span></p>
+              </div>
+              <div className="rpg-card p-3 min-w-[130px] !p-3">
+                <p className="text-[10px] text-[#8879A0] font-medium">本月新增询盘</p>
+                <p className="text-2xl font-serif font-bold text-[#F3EFE6]"><span className="underline decoration-wavy decoration-[#A855F7]/60 decoration-2 underline-offset-4">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-[#8879A0]">个</span></p>
+              </div>
+              <div className="rpg-card p-3 min-w-[130px] !p-3 border-[#A855F7]/60">
+                <p className="text-[10px] text-[#F87171] font-medium flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 text-[#F87171]" strokeWidth={1.75} />待收尾款预警
+                </p>
+                <p className="text-2xl font-serif font-bold text-[#F87171]"><span className="underline decoration-wavy decoration-[#F87171]/60 decoration-2 underline-offset-4">${(stats.pendingPayment / 10000).toFixed(1)}M</span></p>
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className="rpg-btn"
+            >
+              <Target className="w-4 h-4" strokeWidth={1.75} />
+              进入战略推演
+              <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
+            </button>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <div className="bg-[#161228]/70 border border-[#3A2D54] rounded-xl px-4 py-3 min-w-[130px]">
-              <p className="text-[10px] text-[#8879A0] font-medium">客户总数</p>
-              <p className="text-2xl font-serif font-bold text-[#F3EFE6]"><span className="underline decoration-wavy decoration-[#A855F7]/60 decoration-2 underline-offset-4">{stats.customerCount}</span> <span className="text-sm font-normal text-[#8879A0]">个</span></p>
-            </div>
-            <div className="bg-[#161228]/70 border border-[#3A2D54] rounded-xl px-4 py-3 min-w-[130px]">
-              <p className="text-[10px] text-[#8879A0] font-medium">本月新增询盘</p>
-              <p className="text-2xl font-serif font-bold text-[#F3EFE6]"><span className="underline decoration-wavy decoration-[#A855F7]/60 decoration-2 underline-offset-4">{stats.newInquiryCount}</span> <span className="text-sm font-normal text-[#8879A0]">个</span></p>
-            </div>
-            <div className="bg-[#3A1F1F]/80 border-2 border-[#A855F7]/60 rounded-xl px-4 py-3 min-w-[130px]">
-              <p className="text-[10px] text-[#F87171] font-medium flex items-center gap-1">
-                <AlertCircle className="w-3 h-3 text-[#F87171]" strokeWidth={1.75} />待收尾款预警
-              </p>
-              <p className="text-2xl font-serif font-bold text-[#F87171]"><span className="underline decoration-wavy decoration-[#F87171]/60 decoration-2 underline-offset-4">${(stats.pendingPayment / 10000).toFixed(1)}M</span></p>
-            </div>
+          {/* RIGHT column */}
+          <div className="hidden md:flex flex-col items-center justify-center relative flex-shrink-0">
+            <div className="absolute inset-0 bg-[#A855F7]/10 blur-3xl rounded-full" />
+            <img src="/assets/intj-mascot.jpg" alt="INTJ Strategist" className="w-64 h-auto rpg-mascot-glow pointer-events-none relative z-10" />
           </div>
         </div>
       </div>
@@ -1355,11 +1374,13 @@ export function HomePage({ onNavigate }: HomeProps) {
           <button
             key={btn.label}
             onClick={() => onNavigate(btn.page)}
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 border-[#3A2D54] bg-[#1B142C]/80 shadow-[0_0_20px_rgba(168,85,247,0.18)] transition-all duration-200 hover:border-[#A855F7] hover:shadow-[0_0_28px_rgba(168,85,247,0.28)] hover:-translate-y-0.5 intj-cut-corner intj-gem"
+            className="rpg-card !p-3 !text-left"
           >
-            <span className="text-2xl shrink-0">{btn.icon}</span>
-            <span className="text-sm font-semibold text-[#F3EFE6] flex-1 text-left">{btn.label}</span>
-            <kbd className="bg-[#0B0813]/60 text-[#B8AEC8] border border-[#3A2D54] rounded px-1.5 py-0.5 text-[10px] font-mono">{btn.kbd}</kbd>
+            <div className="rpg-card-icon !mb-0 !w-10 !h-10">
+              <span className="text-2xl">{btn.icon}</span>
+            </div>
+            <p className="rpg-card-title !text-sm">{btn.label}</p>
+            <span className="absolute top-2 right-2 bg-[#0B0813]/60 text-[#B8AEC8] border border-[#3A2D54] rounded px-1.5 py-0.5 text-[10px] font-mono">{btn.kbd}</span>
           </button>
         ))}
       </div>
@@ -1377,7 +1398,9 @@ export function HomePage({ onNavigate }: HomeProps) {
         </div>
 
         {/* 右：每日任务 */}
-        <div className="intj-card intj-cut-corner intj-gem p-5 lg:col-span-2">
+        <div className="rpg-panel intj-cut-corner p-5 lg:col-span-2">
+          <span className="corner-gem-3"></span>
+          <span className="corner-gem-4"></span>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-[#221A3A]/80 flex items-center justify-center">
@@ -1412,7 +1435,7 @@ export function HomePage({ onNavigate }: HomeProps) {
             />
             <button
               onClick={addTodo}
-              className="intj-btn px-3 py-2.5"
+              className="rpg-btn px-3 py-2.5"
             >
               <Plus className="w-4 h-4" strokeWidth={1.75} />
             </button>
@@ -1545,7 +1568,9 @@ export function HomePage({ onNavigate }: HomeProps) {
       {/* 4. 行业快讯 + 热销产品 + 热门目标市场（三列并排） */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
         {/* 列1：行业快讯 */}
-        <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
+        <div className="rpg-panel intj-cut-corner p-5 transition-all duration-200">
+          <span className="corner-gem-3"></span>
+          <span className="corner-gem-4"></span>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-[#221A3A]/80 flex items-center justify-center">
@@ -1624,9 +1649,21 @@ export function HomePage({ onNavigate }: HomeProps) {
                         <span className="truncate">{n.source}</span>
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button className="flex items-center gap-1 text-[#06B6D4] font-medium hover:text-[#7DD3FC]">
-                          原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
-                        </button>
+                        {n.url ? (
+                          <a
+                            href={n.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[#06B6D4] font-medium hover:text-[#7DD3FC] transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
+                          </a>
+                        ) : (
+                          <button className="flex items-center gap-1 text-[#06B6D4] font-medium hover:text-[#7DD3FC]">
+                            原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
+                          </button>
+                        )}
                         <button
                           onClick={() => setAiLetterNews(n)}
                           className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#A855F7]/15 text-[#D8B4FE] font-medium hover:bg-[#A855F7]/25 border border-[#A855F7]/50"
@@ -1653,7 +1690,9 @@ export function HomePage({ onNavigate }: HomeProps) {
         </div>
 
         {/* 列2：热销产品排行 */}
-        <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
+        <div className="rpg-panel intj-cut-corner p-5 transition-all duration-200">
+          <span className="corner-gem-3"></span>
+          <span className="corner-gem-4"></span>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-[#161228]/70 flex items-center justify-center">
@@ -1736,7 +1775,9 @@ export function HomePage({ onNavigate }: HomeProps) {
         </div>
 
         {/* 列3：热门目标市场 */}
-        <div className="intj-card intj-cut-corner intj-gem p-5 transition-all duration-200">
+        <div className="rpg-panel intj-cut-corner p-5 transition-all duration-200">
+          <span className="corner-gem-3"></span>
+          <span className="corner-gem-4"></span>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-[#161228]/70 flex items-center justify-center">
@@ -1809,7 +1850,9 @@ export function HomePage({ onNavigate }: HomeProps) {
       </div>
 
       {/* 5. 收汇与物流风控预警卡片（AI 动态生成） */}
-      <div className="intj-card intj-cut-corner intj-gem p-5 relative z-10 border-2 border-[#A855F7]/70">
+      <div className="rpg-panel intj-cut-corner p-5 relative z-10 border-2 border-[#A855F7]/70">
+        <span className="corner-gem-3"></span>
+        <span className="corner-gem-4"></span>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-[#3A1F1F]/80 flex items-center justify-center">

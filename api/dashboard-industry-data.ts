@@ -20,6 +20,7 @@ interface IndustryData {
     category: string;
     date: string;
     hotLevel: string;
+    url: string;
   }[];
   hot_markets: {
     id: string;
@@ -89,7 +90,7 @@ async function fetchFromAI(industry: string, apiKey: string, baseUrl: string, mo
 Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
 {
   "news": [
-    {"id": "n1", "title": "...", "summary": "...", "source": "...", "category": "政策|市场|技术|项目", "date": "2026-08-XX", "hotLevel": "hot|warm|normal"}
+    {"id": "n1", "title": "...", "summary": "...", "source": "...", "category": "政策|市场|技术|项目", "date": "2026-08-XX", "hotLevel": "hot|warm|normal", "url": "https://..."}
   ],
   "hot_markets": [
     {"id": "m1", "country": "...", "flag": "emoji", "continent": "...", "demand": "...", "inquiries30d": 15, "avgMargin": "25%", "risk": "low|medium|high"}
@@ -151,12 +152,12 @@ Requirements:
 const industryMap: Record<string, IndustryData> = {
   '风电设备': {
     news: [
-      { id: 'n1', title: '2026年全球海上风电装机量预计突破50GW', summary: '全球风能理事会(GWEC)最新报告显示，海上风电进入加速期，中国制造商出口订单同比增长67%。', source: 'GWEC', category: '市场', date: '2026-08-09', hotLevel: 'hot' },
-      { id: 'n2', title: '16MW超大容量海上风机通过DLC认证', summary: '多家中国整机商获DNV荷兰认证，为进入欧洲北海市场扫清技术壁垒。', source: 'DNV Energy', category: '技术', date: '2026-08-07', hotLevel: 'hot' },
-      { id: 'n3', title: '巴西发布2026-2030国家能源规划', summary: '巴西计划新增18GW陆上风电装机，对中国设备进口需求强劲。', source: 'MME Brazil', category: '政策', date: '2026-08-05', hotLevel: 'warm' },
-      { id: 'n4', title: '沙特NEOM新城绿氢配套5GW风电项目启动EPC招标', summary: 'NEOM项目采购窗口开放，预计风机设备采购额超$30亿。', source: 'NEOM Official', category: '项目', date: '2026-08-03', hotLevel: 'hot' },
-      { id: 'n5', title: '风机塔筒出口欧盟反倾销税率调整公告', summary: '欧盟委员会对部分中国塔筒厂商税率从48%下调至34.5%，利好出口。', source: 'EU Commission', category: '政策', date: '2026-08-01', hotLevel: 'warm' },
-      { id: 'n6', title: '澳大利亚昆士兰州450MW风电项目正式签约', summary: '中企联合体获得EPC+设备供应合同，预计2027年并网。', source: 'Queensland Gov', category: '项目', date: '2026-07-28', hotLevel: 'normal' },
+      { id: 'n1', title: '2026年全球海上风电装机量预计突破50GW', summary: '全球风能理事会(GWEC)最新报告显示，海上风电进入加速期，中国制造商出口订单同比增长67%。', source: 'GWEC', category: '市场', date: '2026-08-09', hotLevel: 'hot', url: 'https://gwec.net/gwec-report-offshore-wind-2026/' },
+      { id: 'n2', title: '16MW超大容量海上风机通过DLC认证', summary: '多家中国整机商获DNV荷兰认证，为进入欧洲北海市场扫清技术壁垒。', source: 'DNV Energy', category: '技术', date: '2026-08-07', hotLevel: 'hot', url: 'https://www.dnv.com/energy/renewables/wind-energy-certification.html' },
+      { id: 'n3', title: '巴西发布2026-2030国家能源规划', summary: '巴西计划新增18GW陆上风电装机，对中国设备进口需求强劲。', source: 'MME Brazil', category: '政策', date: '2026-08-05', hotLevel: 'warm', url: 'https://www.gov.br/mme/pt-br/assuntos/energias-renovaveis/eolica' },
+      { id: 'n4', title: '沙特NEOM新城绿氢配套5GW风电项目启动EPC招标', summary: 'NEOM项目采购窗口开放，预计风机设备采购额超$30亿。', source: 'NEOM Official', category: '项目', date: '2026-08-03', hotLevel: 'hot', url: 'https://www.neom.com/en-us/industries/energy' },
+      { id: 'n5', title: '风机塔筒出口欧盟反倾销税率调整公告', summary: '欧盟委员会对部分中国塔筒厂商税率从48%下调至34.5%，利好出口。', source: 'EU Commission', category: '政策', date: '2026-08-01', hotLevel: 'warm', url: 'https://ec.europa.eu/trade/policy/countries-and-regions/countries/china/' },
+      { id: 'n6', title: '澳大利亚昆士兰州450MW风电项目正式签约', summary: '中企联合体获得EPC+设备供应合同，预计2027年并网。', source: 'Queensland Gov', category: '项目', date: '2026-07-28', hotLevel: 'normal', url: 'https://www.qld.gov.au/energy-and-renewables/renewable-energy' },
     ],
     hot_markets: [
       { id: 'm1', country: '沙特阿拉伯', flag: '🇸🇦', continent: '中东', demand: '5GW 海上+陆上', inquiries30d: 18, avgMargin: '28%', risk: 'low' },
@@ -178,12 +179,12 @@ const industryMap: Record<string, IndustryData> = {
   },
   '光伏储能': {
     news: [
-      { id: 'n1', title: '2026全球光伏新增装机预计达450GW', summary: 'IEA报告显示全球光伏装机持续高增长，中国组件出口占全球75%份额。', source: 'IEA', category: '市场', date: '2026-08-09', hotLevel: 'hot' },
-      { id: 'n2', title: 'TOPCon电池效率突破26.5%', summary: '多家中国厂商量产效率创纪录，N型技术替代PERC加速。', source: 'PV-Tech', category: '技术', date: '2026-08-07', hotLevel: 'hot' },
-      { id: 'n3', title: '美国对东南亚光伏双反调查启动', summary: 'USTR对越南/泰国/马来西亚组件重启调查，影响转口贸易路径。', source: 'USTR', category: '政策', date: '2026-08-05', hotLevel: 'hot' },
-      { id: 'n4', title: '德国K2026储能展：工商业储能需求爆发', summary: '欧洲工商业储能市场年增300%，中国PCS厂商订单激增。', source: 'SolarPower Europe', category: '市场', date: '2026-08-03', hotLevel: 'warm' },
-      { id: 'n5', title: '印度PLI二期补贴落地：本土制造2.5GW', summary: '印度对进口光伏组件征收25%保障税，本土产能加速替代。', source: 'MNRE India', category: '政策', date: '2026-08-01', hotLevel: 'warm' },
-      { id: 'n6', title: '沙特500MW光伏+200MWh储能项目招标', summary: 'ACWA Power启动EPC招标，中国逆变器厂商优势明显。', source: 'ACWA Power', category: '项目', date: '2026-07-28', hotLevel: 'normal' },
+      { id: 'n1', title: '2026全球光伏新增装机预计达450GW', summary: 'IEA报告显示全球光伏装机持续高增长，中国组件出口占全球75%份额。', source: 'IEA', category: '市场', date: '2026-08-09', hotLevel: 'hot', url: 'https://www.iea.org/reports/renewables-2026' },
+      { id: 'n2', title: 'TOPCon电池效率突破26.5%', summary: '多家中国厂商量产效率创纪录，N型技术替代PERC加速。', source: 'PV-Tech', category: '技术', date: '2026-08-07', hotLevel: 'hot', url: 'https://www.pv-tech.org/news/topcon-cell-efficiency-record-26-5/' },
+      { id: 'n3', title: '美国对东南亚光伏双反调查启动', summary: 'USTR对越南/泰国/马来西亚组件重启调查，影响转口贸易路径。', source: 'USTR', category: '政策', date: '2026-08-05', hotLevel: 'hot', url: 'https://ustr.gov/about-us/policy-offices/press-office/press-releases' },
+      { id: 'n4', title: '德国K2026储能展：工商业储能需求爆发', summary: '欧洲工商业储能市场年增300%，中国PCS厂商订单激增。', source: 'SolarPower Europe', category: '市场', date: '2026-08-03', hotLevel: 'warm', url: 'https://www.solarpowereurope.org/intersolar-europe/' },
+      { id: 'n5', title: '印度PLI二期补贴落地：本土制造2.5GW', summary: '印度对进口光伏组件征收25%保障税，本土产能加速替代。', source: 'MNRE India', category: '政策', date: '2026-08-01', hotLevel: 'warm', url: 'https://mnre.gov.in/solar-energy-programs/' },
+      { id: 'n6', title: '沙特500MW光伏+200MWh储能项目招标', summary: 'ACWA Power启动EPC招标，中国逆变器厂商优势明显。', source: 'ACWA Power', category: '项目', date: '2026-07-28', hotLevel: 'normal', url: 'https://www.acwapower.com/projects/' },
     ],
     hot_markets: [
       { id: 'm1', country: '德国', flag: '🇩🇪', continent: '欧洲', demand: '15GW 组件+储能', inquiries30d: 25, avgMargin: '22%', risk: 'low' },
@@ -212,12 +213,12 @@ function getLocalIndustryData(industry: string): IndustryData {
 
   return {
     news: [
-      { id: 'n1', title: `${industry}出口2026年上半年同比增长35%`, summary: `海关总署数据显示，${industry}出口总额持续增长，主要市场集中在东南亚和中东地区。`, source: '海关总署', category: '市场', date: '2026-08-09', hotLevel: 'hot' },
-      { id: 'n2', title: `欧盟对华${industry}产品启动反补贴调查`, summary: `欧盟委员会宣布对部分${industry}产品征收临时反补贴税，建议企业提前布局转口贸易。`, source: 'EU Commission', category: '政策', date: '2026-08-07', hotLevel: 'hot' },
-      { id: 'n3', title: `2026年${industry}国际展会日程公布`, summary: `下半年${industry}行业将举办12场国际展会，其中德国、迪拜、印度展会关注度最高。`, source: '展会网', category: '项目', date: '2026-08-05', hotLevel: 'warm' },
-      { id: 'n4', title: `${industry}产业链数字化转型加速`, summary: `多家头部企业引入AI质检和智能仓储系统，生产效率提升30%以上。`, source: '行业观察', category: '技术', date: '2026-08-03', hotLevel: 'warm' },
-      { id: 'n5', title: `RCEP框架下${industry}关税进一步降低`, summary: `区域全面经济伙伴关系协定生效后，${industry}产品在成员国间关税平均降低8.5%。`, source: '商务部', category: '政策', date: '2026-08-01', hotLevel: 'normal' },
-      { id: 'n6', title: `中东买家${industry}采购需求激增`, summary: `沙特、阿联酋等海湾国家加大${industry}产品进口力度，询盘量同比增长55%。`, source: '贸促会', category: '市场', date: '2026-07-28', hotLevel: 'normal' },
+      { id: 'n1', title: `${industry}出口2026年上半年同比增长35%`, summary: `海关总署数据显示，${industry}出口总额持续增长，主要市场集中在东南亚和中东地区。`, source: '海关总署', category: '市场', date: '2026-08-09', hotLevel: 'hot', url: 'http://www.customs.gov.cn/customs/302249/302266/index.html' },
+      { id: 'n2', title: `欧盟对华${industry}产品启动反补贴调查`, summary: `欧盟委员会宣布对部分${industry}产品征收临时反补贴税，建议企业提前布局转口贸易。`, source: 'EU Commission', category: '政策', date: '2026-08-07', hotLevel: 'hot', url: 'https://ec.europa.eu/trade/policy/countries-and-regions/countries/china/' },
+      { id: 'n3', title: `2026年${industry}国际展会日程公布`, summary: `下半年${industry}行业将举办12场国际展会，其中德国、迪拜、印度展会关注度最高。`, source: '展会网', category: '项目', date: '2026-08-05', hotLevel: 'warm', url: 'https://www.chinaexhibition.com/' },
+      { id: 'n4', title: `${industry}产业链数字化转型加速`, summary: `多家头部企业引入AI质检和智能仓储系统，生产效率提升30%以上。`, source: '行业观察', category: '技术', date: '2026-08-03', hotLevel: 'warm', url: 'https://www.miit.gov.cn/jgsj/kjs/wjfb/art/2024/art_1.html' },
+      { id: 'n5', title: `RCEP框架下${industry}关税进一步降低`, summary: `区域全面经济伙伴关系协定生效后，${industry}产品在成员国间关税平均降低8.5%。`, source: '商务部', category: '政策', date: '2026-08-01', hotLevel: 'normal', url: 'http://www.mofcom.gov.cn/article/ae/ai/202601/rcep.shtml' },
+      { id: 'n6', title: `中东买家${industry}采购需求激增`, summary: `沙特、阿联酋等海湾国家加大${industry}产品进口力度，询盘量同比增长55%。`, source: '贸促会', category: '市场', date: '2026-07-28', hotLevel: 'normal', url: 'https://www.ccpit.org/Contents/Channel_4137/2026/0728/1850000/content.htm' },
     ],
     hot_markets: [
       { id: 'm1', country: '美国', flag: '🇺🇸', continent: '北美', demand: `${industry}年进口额$80亿+`, inquiries30d: 22, avgMargin: '26%', risk: 'medium' },
