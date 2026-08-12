@@ -13,10 +13,10 @@ import type { Customer, BackgroundReport } from '@/lib/supabase';
 import { CustomerCharts } from '@/components/CustomerCharts';
 
 const statusOptions: { value: Customer['status']; label: string; color: string }[] = [
-  { value: 'prospect', label: '潜在', color: 'bg-[#161228]/70 text-[#8879A0]' },
-  { value: 'negotiating', label: '谈判中', color: 'bg-[#3A2D54]/40 text-[#D8B4FE]' },
-  { value: 'active', label: '活跃', color: 'bg-[#221A3A]/70 text-[#A855F7]' },
-  { value: 'inactive', label: '不活跃', color: 'bg-[#221A3A]/50 text-[#78716C]' },
+  { value: 'prospect', label: '潜在', color: 'bg-slate-100 text-slate-600' },
+  { value: 'negotiating', label: '谈判中', color: 'bg-amber-100 text-amber-700' },
+  { value: 'active', label: '活跃', color: 'bg-emerald-100 text-emerald-700' },
+  { value: 'inactive', label: '不活跃', color: 'bg-slate-100 text-slate-400' },
 ];
 
 // AI Analysis Types
@@ -583,32 +583,32 @@ Website: www.kiki-tech.com`;
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F3EFE6]">客户管理</h1>
-          <p className="text-[#8879A0] mt-1">管理外贸客户信息与跟进状态</p>
+          <h1 className="text-2xl font-bold text-slate-900">客户管理</h1>
+          <p className="text-slate-500 mt-1">管理外贸客户信息与跟进状态</p>
         </div>
         <button
           onClick={startAdd}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] transition-colors font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
         >
           <Plus className="w-4 h-4" />
           新建客户
         </button>
       </div>
 
-      <div className="relative z-10 flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="搜索公司名、联系人、邮箱、国家..."
-            className="w-full pl-10 pr-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
-          className="px-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]"
+          className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">全部状态</option>
           {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -617,17 +617,17 @@ Website: www.kiki-tech.com`;
 
       {/* 客户可视化图表 */}
       {!loading && customers.length > 0 && (
-        <div className="bg-[#161228]/60 rounded-xl border border-[#3A2D54] overflow-hidden">
+        <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
           <button
             onClick={() => setShowCharts(!showCharts)}
-            className="w-full flex items-center justify-between px-5 py-3 hover:bg-[#221A3A]/50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3 hover:bg-slate-100 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-[#A855F7]" />
-              <span className="text-sm font-semibold text-[#F3EFE6]">客户数据可视化</span>
-              <span className="text-xs text-[#78716C]">国家分布 · 状态分布 · 行业分布 · 标签分布</span>
+              <BarChart3 className="w-4 h-4 text-indigo-600" />
+              <span className="text-sm font-semibold text-slate-900">客户数据可视化</span>
+              <span className="text-xs text-slate-400">国家分布 · 状态分布 · 行业分布 · 标签分布</span>
             </div>
-            {showCharts ? <ChevronUp className="w-4 h-4 text-[#78716C]" /> : <ChevronDown className="w-4 h-4 text-[#78716C]" />}
+            {showCharts ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
           {showCharts && (
             <div className="px-5 pb-5">
@@ -639,12 +639,12 @@ Website: www.kiki-tech.com`;
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-full text-center py-12 text-[#78716C]">
+          <div className="col-span-full text-center py-12 text-slate-400">
             <UsersIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p>加载中...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-[#78716C]">
+          <div className="col-span-full text-center py-12 text-slate-400">
             <Building2 className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p>{search || filterStatus !== 'all' ? '没有匹配的客户' : '还没有客户，点击"新建客户"开始'}</p>
           </div>
@@ -652,39 +652,39 @@ Website: www.kiki-tech.com`;
           filtered.map(c => {
             const statusInfo = statusOptions.find(s => s.value === c.status);
             return (
-              <div key={c.id} className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5 hover:shadow-lg transition-shadow">
+              <div key={c.id} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-[#F3EFE6] truncate">{c.company_name}</h3>
-                    {c.contact_name && <p className="text-sm text-[#8879A0] mt-0.5">{c.contact_name}</p>}
+                    <h3 className="font-semibold text-slate-900 truncate">{c.company_name}</h3>
+                    {c.contact_name && <p className="text-sm text-slate-500 mt-0.5">{c.contact_name}</p>}
                   </div>
                   <span className={classNames('px-2 py-0.5 rounded text-xs font-medium shrink-0', statusInfo?.color)}>
                     {statusInfo?.label}
                   </span>
                 </div>
 
-                <div className="space-y-1.5 text-sm text-[#B8AEC8]">
-                  {c.email && <div className="flex items-center gap-2 truncate"><Mail className="w-3.5 h-3.5 text-[#78716C] shrink-0" /><span className="truncate">{c.email}</span></div>}
-                  {c.phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[#78716C] shrink-0" />{c.phone}</div>}
-                  {c.country && <div className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#78716C] shrink-0" />{c.country}</div>}
-                  {c.website && <div className="flex items-center gap-2 truncate"><Globe className="w-3.5 h-3.5 text-[#78716C] shrink-0" /><span className="truncate">{c.website}</span></div>}
+                <div className="space-y-1.5 text-sm text-slate-600">
+                  {c.email && <div className="flex items-center gap-2 truncate"><Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" /><span className="truncate">{c.email}</span></div>}
+                  {c.phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />{c.phone}</div>}
+                  {c.country && <div className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />{c.country}</div>}
+                  {c.website && <div className="flex items-center gap-2 truncate"><Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" /><span className="truncate">{c.website}</span></div>}
                 </div>
 
                 {c.tags && c.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {c.tags.map(tag => (
-                      <span key={tag} className="px-2 py-0.5 bg-[#161228]/70 text-[#8879A0] rounded text-xs">{tag}</span>
+                      <span key={tag} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">{tag}</span>
                     ))}
                   </div>
                 )}
 
-                {c.notes && <p className="text-xs text-[#8879A0] mt-3 line-clamp-2">{c.notes}</p>}
+                {c.notes && <p className="text-xs text-slate-500 mt-3 line-clamp-2">{c.notes}</p>}
 
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#3A2D54]/50">
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => { setAnalyzingCustomer(c); setAnalyzing(true); setTimeout(() => setAnalyzing(false), 600); }}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-[#A855F7] bg-[#221A3A]/60 hover:bg-[#221A3A]/80 rounded-lg transition-colors"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
                     >
                       <Sparkles className="w-3.5 h-3.5" />AI分析
                     </button>
@@ -693,8 +693,8 @@ Website: www.kiki-tech.com`;
                       className={classNames(
                         'flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors',
                         c.background_report
-                          ? 'text-[#A855F7] bg-[#221A3A]/60 hover:bg-[#221A3A]/70'
-                          : 'text-[#D8B4FE] bg-[#221A3A]/60 hover:bg-[#221A3A]/80'
+                          ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+                          : 'text-purple-600 bg-purple-50 hover:bg-purple-100'
                       )}
                     >
                       <SearchIcon className="w-3.5 h-3.5" />一键背调
@@ -702,10 +702,10 @@ Website: www.kiki-tech.com`;
                     </button>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => startEdit(c)} className="p-2 text-[#78716C] hover:text-[#06B6D4] hover:bg-[#161228]/70 rounded-lg transition-colors">
+                    <button onClick={() => startEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => remove(c.id)} className="p-2 text-[#78716C] hover:text-[#F87171] hover:bg-[#3A1F1F]/80 rounded-lg transition-colors">
+                    <button onClick={() => remove(c.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -719,48 +719,48 @@ Website: www.kiki-tech.com`;
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-          <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A2D54]/50">
-              <h2 className="text-lg font-semibold text-[#F3EFE6]">{editing ? '编辑客户' : '新建客户'}</h2>
-              <button onClick={() => setShowForm(false)} className="text-[#78716C] hover:text-[#B8AEC8]">
+          <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">{editing ? '编辑客户' : '新建客户'}</h2>
+              <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="relative z-10 p-6 space-y-4">
+            <div className="p-6 space-y-4">
               {/* 智能识别区域（仅新建时显示） */}
               {!editing && (
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
                   <div className="flex items-center gap-2 mb-2.5">
-                    <Sparkles className="w-4 h-4 text-[#A855F7]" />
-                    <span className="text-sm font-semibold text-[#F3EFE6]">智能识别</span>
-                    <span className="text-xs text-[#A855F7]">粘贴邮件签名 / 名片 / 聊天记录，自动填表</span>
+                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-semibold text-indigo-900">智能识别</span>
+                    <span className="text-xs text-indigo-500">粘贴邮件签名 / 名片 / 聊天记录，自动填表</span>
                   </div>
                   <textarea
                     value={rawText}
                     onChange={e => { setRawText(e.target.value); if (recognizedFields.length) clearRecognized(); }}
                     placeholder={`示例：\nJohn Smith\nACME Trading Co., Ltd\nEmail: john@acme.com\nTel: +1 234 567 8900\nAddress: 123 Main Street, New York, USA\nwww.acme.com`}
                     rows={5}
-                    className="w-full px-3 py-2 bg-[#1B142C]/90 border border-[#3A2D54]/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A855F7] placeholder:text-[#D8B4FE]/70 resize-y font-mono"
+                    className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-indigo-300/70 resize-y font-mono"
                   />
                   <div className="flex items-center justify-between mt-2.5 gap-3">
                     <div className="min-w-0 flex-1">
                       {recognizedFields.length > 0 ? (
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <CheckCircle className="w-3.5 h-3.5 text-[#A855F7] shrink-0" />
-                          <span className="text-xs text-[#A855F7] font-medium">已填入:</span>
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="text-xs text-emerald-700 font-medium">已填入:</span>
                           {recognizedFields.map(f => (
-                            <span key={f} className="px-1.5 py-0.5 bg-[#221A3A]/70 text-[#A855F7] rounded text-[11px] font-medium">{f}</span>
+                            <span key={f} className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[11px] font-medium">{f}</span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-xs text-[#A855F7]/80">支持识别：公司名 · 联系人 · 邮箱 · 电话 · 国家 · 地址 · 网站</span>
+                        <span className="text-xs text-indigo-500/80">支持识别：公司名 · 联系人 · 邮箱 · 电话 · 国家 · 地址 · 网站</span>
                       )}
                     </div>
                     <button
                       type="button"
                       onClick={recognizeText}
                       disabled={!rawText.trim() || recognizing}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium transition-colors shrink-0"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium transition-colors shrink-0"
                     >
                       {recognizing ? (
                         <>
@@ -779,16 +779,16 @@ Website: www.kiki-tech.com`;
               )}
               <Field label="公司名称 *">
                 <input value={form.company_name || ''} onChange={e => setForm({ ...form, company_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="联系人">
                   <input value={form.contact_name || ''} onChange={e => setForm({ ...form, contact_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </Field>
                 <Field label="状态">
                   <select value={form.status || 'prospect'} onChange={e => setForm({ ...form, status: e.target.value as Customer['status'] })}
-                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </Field>
@@ -796,26 +796,26 @@ Website: www.kiki-tech.com`;
               <div className="grid grid-cols-2 gap-4">
                 <Field label="邮箱">
                   <input type="email" value={form.email || ''} onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </Field>
                 <Field label="电话">
                   <input value={form.phone || ''} onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="国家">
                   <input value={form.country || ''} onChange={e => setForm({ ...form, country: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </Field>
                 <Field label="网站">
                   <input value={form.website || ''} onChange={e => setForm({ ...form, website: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </Field>
               </div>
               <Field label="地址">
                 <input value={form.address || ''} onChange={e => setForm({ ...form, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="标签">
                 <div className="flex gap-2">
@@ -824,16 +824,16 @@ Website: www.kiki-tech.com`;
                     onChange={e => setTagInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
                     placeholder="输入标签后回车"
-                    className="flex-1 px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]"
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <button onClick={addTag} className="px-3 py-2 bg-[#161228]/70 text-[#8879A0] rounded-lg hover:bg-[#3A2D54]/40 text-sm">
+                  <button onClick={addTag} className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 text-sm">
                     <Tag className="w-4 h-4" />
                   </button>
                 </div>
                 {form.tags && form.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {form.tags.map(tag => (
-                      <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-[#161228]/70 text-[#06B6D4] rounded text-xs">
+                      <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
                         {tag}
                         <button onClick={() => removeTag(tag)}><X className="w-3 h-3" /></button>
                       </span>
@@ -843,12 +843,12 @@ Website: www.kiki-tech.com`;
               </Field>
               <Field label="备注">
                 <textarea value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#3A2D54]">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-[#B8AEC8] hover:text-[#F3EFE6] font-medium text-sm">取消</button>
-              <button onClick={save} className="px-4 py-2 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] font-medium text-sm">
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-200">
+              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium text-sm">取消</button>
+              <button onClick={save} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm">
                 {editing ? '保存' : '创建'}
               </button>
             </div>
@@ -859,7 +859,7 @@ Website: www.kiki-tech.com`;
       {/* AI Analysis Modal */}
       {analyzingCustomer && currentAnalysis && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setAnalyzingCustomer(null)}>
-          <div className="bg-[#1B142C]/90 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {(() => {
               const analysis = currentAnalysis;
               const tierColors: Record<string, string> = {
@@ -869,17 +869,17 @@ Website: www.kiki-tech.com`;
                 D: 'from-slate-500 to-slate-600',
               };
               const tierTextColors: Record<string, string> = {
-                A: 'text-[#A855F7] bg-[#221A3A]/60 border-[#3A2D54]/50',
-                B: 'text-[#06B6D4] bg-[#161228]/70 border-b border-[#3A2D54]/50',
-                C: 'text-[#D8B4FE] bg-[#3A2D54]/60 border-[#3A2D54]/50',
-                D: 'text-[#B8AEC8] bg-[#161228]/60 border-[#3A2D54]',
+                A: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+                B: 'text-blue-600 bg-blue-50 border-blue-200',
+                C: 'text-amber-600 bg-amber-50 border-amber-200',
+                D: 'text-slate-600 bg-slate-50 border-slate-200',
               };
-              const rateColor = analysis.conversionRate >= 70 ? 'text-[#A855F7]' : analysis.conversionRate >= 40 ? 'text-[#D8B4FE]' : 'text-[#F87171]';
-              const rateBg = analysis.conversionRate >= 70 ? 'bg-[#221A3A]/600' : analysis.conversionRate >= 40 ? 'bg-[#3A2D54]/600' : 'bg-[#3A1F1F]/800';
+              const rateColor = analysis.conversionRate >= 70 ? 'text-emerald-600' : analysis.conversionRate >= 40 ? 'text-amber-600' : 'text-red-600';
+              const rateBg = analysis.conversionRate >= 70 ? 'bg-emerald-500' : analysis.conversionRate >= 40 ? 'bg-amber-500' : 'bg-red-500';
               const priorityColor: Record<string, string> = {
-                high: 'bg-[#3A1F1F]/80 text-[#F87171] border-[#A855F7]/60',
-                medium: 'bg-[#3A2D54]/60 text-[#D8B4FE] border-[#3A2D54]/50',
-                low: 'bg-[#161228]/70 text-[#8879A0] border-[#3A2D54]',
+                high: 'bg-red-50 text-red-700 border-red-200',
+                medium: 'bg-amber-50 text-amber-700 border-amber-200',
+                low: 'bg-slate-50 text-slate-600 border-slate-200',
               };
               const priorityLabel: Record<string, string> = { high: '高优先', medium: '中优先', low: '低优先' };
               const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -894,7 +894,7 @@ Website: www.kiki-tech.com`;
                   <div className={classNames('rounded-t-2xl px-6 py-5 text-white bg-gradient-to-r', tierColors[analysis.customerTier])}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-[#1B142C]/90 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
                           {analyzing ? (
                             <Sparkles className="w-6 h-6 animate-pulse" />
                           ) : (
@@ -904,14 +904,14 @@ Website: www.kiki-tech.com`;
                         <div>
                           <div className="flex items-center gap-2">
                             <h2 className="text-xl font-bold">AI 客户智能分析</h2>
-                            <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#1B142C]/90/25 backdrop-blur">
+                            <span className="px-2 py-0.5 rounded text-xs font-bold bg-white/25 backdrop-blur">
                               {analyzingCustomer.company_name}
                             </span>
                           </div>
-                          <p className="text-sm text-[#D8B4FE] mt-1">成交预测 · 跟进建议 · 风险评估</p>
+                          <p className="text-sm text-white/80 mt-1">成交预测 · 跟进建议 · 风险评估</p>
                         </div>
                       </div>
-                      <button onClick={() => setAnalyzingCustomer(null)} className="text-[#D8B4FE] hover:text-white transition-colors">
+                      <button onClick={() => setAnalyzingCustomer(null)} className="text-white/80 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                       </button>
                     </div>
@@ -924,41 +924,41 @@ Website: www.kiki-tech.com`;
                         <div className="relative">
                           <div className="w-16 h-16 rounded-full border-4 border-indigo-100" />
                           <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-indigo-600 animate-spin" />
-                          <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#A855F7] animate-pulse" />
+                          <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-indigo-600 animate-pulse" />
                         </div>
-                        <p className="text-[#B8AEC8] font-medium">AI 正在分析客户数据...</p>
-                        <p className="text-xs text-[#78716C]">评估成交概率、识别风险因素、生成个性化跟进方案</p>
+                        <p className="text-slate-600 font-medium">AI 正在分析客户数据...</p>
+                        <p className="text-xs text-slate-400">评估成交概率、识别风险因素、生成个性化跟进方案</p>
                       </div>
                     ) : (
                       <>
                         {/* KPI Row */}
                         <div className="grid grid-cols-3 gap-4">
                           {/* Conversion Rate */}
-                          <div className="bg-[#161228]/60 rounded-xl p-5 border border-[#3A2D54]/50">
+                          <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <div className="flex items-center gap-2 mb-3">
-                              <Target className="w-4 h-4 text-[#8879A0]" />
-                              <span className="text-xs font-medium text-[#8879A0]">成交率预测</span>
+                              <Target className="w-4 h-4 text-slate-500" />
+                              <span className="text-xs font-medium text-slate-500">成交率预测</span>
                             </div>
                             <p className={classNames('text-3xl font-bold', rateColor)}>{analysis.conversionRate}%</p>
-                            <div className="mt-3 w-full bg-[#3A2D54]/40 rounded-full h-2 overflow-hidden">
+                            <div className="mt-3 w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                               <div className={classNames('h-full rounded-full transition-all duration-1000', rateBg)} style={{ width: `${analysis.conversionRate}%` }} />
                             </div>
-                            <p className="text-xs text-[#78716C] mt-2">
-                              置信度: <span className="font-medium text-[#B8AEC8]">{analysis.confidence === 'high' ? '高' : analysis.confidence === 'medium' ? '中' : '低'}</span>
+                            <p className="text-xs text-slate-400 mt-2">
+                              置信度: <span className="font-medium text-slate-600">{analysis.confidence === 'high' ? '高' : analysis.confidence === 'medium' ? '中' : '低'}</span>
                             </p>
                           </div>
 
                           {/* Customer Tier */}
-                          <div className="bg-[#161228]/60 rounded-xl p-5 border border-[#3A2D54]/50">
+                          <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <div className="flex items-center gap-2 mb-3">
-                              <TrendingUp className="w-4 h-4 text-[#8879A0]" />
-                              <span className="text-xs font-medium text-[#8879A0]">客户分级</span>
+                              <TrendingUp className="w-4 h-4 text-slate-500" />
+                              <span className="text-xs font-medium text-slate-500">客户分级</span>
                             </div>
                             <div className="flex items-end gap-2">
                               <span className={classNames('text-5xl font-black', tierTextColors[analysis.customerTier].split(' ')[0])}>
                                 {analysis.customerTier}
                               </span>
-                              <span className="text-xs text-[#8879A0] pb-2 mb-0.5">级客户</span>
+                              <span className="text-xs text-slate-500 pb-2 mb-0.5">级客户</span>
                             </div>
                             <span className={classNames('inline-block mt-3 px-2 py-1 rounded-md text-xs font-medium border', tierTextColors[analysis.customerTier])}>
                               {analysis.customerTier === 'A' ? '战略级，优先资源投入' :
@@ -969,17 +969,17 @@ Website: www.kiki-tech.com`;
                           </div>
 
                           {/* Next Follow-up */}
-                          <div className="bg-[#161228]/60 rounded-xl p-5 border border-[#3A2D54]/50">
+                          <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <div className="flex items-center gap-2 mb-3">
-                              <Clock className="w-4 h-4 text-[#8879A0]" />
-                              <span className="text-xs font-medium text-[#8879A0]">建议下次跟进</span>
+                              <Clock className="w-4 h-4 text-slate-500" />
+                              <span className="text-xs font-medium text-slate-500">建议下次跟进</span>
                             </div>
-                            <p className="text-2xl font-bold text-[#F3EFE6]">{analysis.nextFollowUpDays} 天内</p>
-                            <div className="flex items-center gap-1.5 mt-2 text-xs text-[#8879A0]">
+                            <p className="text-2xl font-bold text-slate-900">{analysis.nextFollowUpDays} 天内</p>
+                            <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500">
                               <Calendar className="w-3.5 h-3.5" />
                               <span>{nextDate.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', weekday: 'short' })}</span>
                             </div>
-                            <span className="inline-block mt-3 px-2 py-1 rounded-md text-xs font-medium bg-[#161228]/70 text-[#06B6D4] border border-b border-[#3A2D54]/50">
+                            <span className="inline-block mt-3 px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                               {analysis.nextFollowUpDays <= 3 ? '紧急跟进' : analysis.nextFollowUpDays <= 7 ? '近期安排' : '计划提醒'}
                             </span>
                           </div>
@@ -987,24 +987,24 @@ Website: www.kiki-tech.com`;
 
                         {/* Strengths & Risks */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="bg-[#221A3A]/60/50 rounded-xl p-5 border border-emerald-100">
-                            <h3 className="flex items-center gap-2 text-sm font-semibold text-[#A855F7] mb-3">
+                          <div className="bg-emerald-50/50 rounded-xl p-5 border border-emerald-100">
+                            <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-800 mb-3">
                               <CheckCircle className="w-4 h-4" />机会与优势
                             </h3>
                             {analysis.strengths.length === 0 ? (
-                              <p className="text-xs text-[#A855F7]/60">暂无显著优势，建议完善客户信息</p>
+                              <p className="text-xs text-emerald-700/60">暂无显著优势，建议完善客户信息</p>
                             ) : (
                               <ul className="space-y-2">
                                 {analysis.strengths.map((s, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm text-[#A855F7]">
-                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#221A3A]/600 shrink-0" />
+                                  <li key={i} className="flex items-start gap-2 text-sm text-emerald-800">
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                                     {s}
                                   </li>
                                 ))}
                               </ul>
                             )}
                           </div>
-                          <div className="bg-[#3A1F1F]/80/50 rounded-xl p-5 border border-red-100">
+                          <div className="bg-red-50/50 rounded-xl p-5 border border-red-100">
                             <h3 className="flex items-center gap-2 text-sm font-semibold text-red-800 mb-3">
                               <AlertCircle className="w-4 h-4" />风险因素
                             </h3>
@@ -1014,7 +1014,7 @@ Website: www.kiki-tech.com`;
                               <ul className="space-y-2">
                                 {analysis.riskFactors.map((r, i) => (
                                   <li key={i} className="flex items-start gap-2 text-sm text-red-800">
-                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#3A1F1F]/800 shrink-0" />
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                                     {r}
                                   </li>
                                 ))}
@@ -1025,27 +1025,27 @@ Website: www.kiki-tech.com`;
 
                         {/* Recommended Actions */}
                         <div>
-                          <h3 className="flex items-center gap-2 text-base font-semibold text-[#F3EFE6] mb-4">
-                            <Zap className="w-5 h-5 text-[#D8B4FE]" />
+                          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 mb-4">
+                            <Zap className="w-5 h-5 text-amber-500" />
                             AI 推荐跟进动作
-                            <span className="text-xs text-[#78716C] font-normal">（按优先级排序）</span>
+                            <span className="text-xs text-slate-400 font-normal">（按优先级排序）</span>
                           </h3>
                           <div className="space-y-3">
                             {analysis.recommendedActions.map((action, i) => {
                               const Icon = iconMap[action.icon] || Target;
                               return (
-                                <div key={i} className="flex items-start gap-4 p-4 rounded-xl border border-[#3A2D54] hover:border-[#3A2D54]/70 hover:shadow-sm transition-all bg-[#1B142C]/90">
+                                <div key={i} className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all bg-white">
                                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
                                     <Icon className="w-5 h-5 text-white" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <h4 className="text-sm font-semibold text-[#F3EFE6]">{action.title}</h4>
+                                      <h4 className="text-sm font-semibold text-slate-900">{action.title}</h4>
                                       <span className={classNames('px-2 py-0.5 rounded text-[10px] font-semibold border', priorityColor[action.priority])}>
                                         {priorityLabel[action.priority]}
                                       </span>
                                     </div>
-                                    <p className="text-sm text-[#B8AEC8] leading-relaxed">{action.detail}</p>
+                                    <p className="text-sm text-slate-600 leading-relaxed">{action.detail}</p>
                                   </div>
                                 </div>
                               );
@@ -1054,12 +1054,12 @@ Website: www.kiki-tech.com`;
                         </div>
 
                         {/* Footer Tips */}
-                        <div className="bg-gradient-to-r from-[#1B142C] to-[#221A3A] rounded-xl p-5 text-white">
+                        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 text-white">
                           <div className="flex items-start gap-3">
                             <Sparkles className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
                             <div>
                               <h4 className="text-sm font-bold mb-1">外贸跟进心法</h4>
-                              <p className="text-xs text-[#B8AEC8] leading-relaxed">
+                              <p className="text-xs text-slate-300 leading-relaxed">
                                 "80% 的成交来自第 4-11 次跟进。大多数外贸人在第 2 次被拒绝后就放弃了，而客户需要时间建立信任。
                                 坚持用不同角度（案例、价格、交期、售后）与客户沟通，让他记住你，等到采购时机自然想到你。"
                               </p>
@@ -1072,13 +1072,13 @@ Website: www.kiki-tech.com`;
 
                   {/* Footer */}
                   {!analyzing && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-[#3A2D54] bg-[#161228]/60 rounded-b-2xl">
-                      <p className="text-xs text-[#8879A0]">
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+                      <p className="text-xs text-slate-500">
                         客户录入时间: {formatDate(analyzingCustomer.created_at)} · AI 分析结果仅供参考
                       </p>
                       <div className="flex gap-2">
-                        <button onClick={() => setAnalyzingCustomer(null)} className="px-4 py-2 text-[#B8AEC8] hover:text-[#F3EFE6] font-medium text-sm">关闭</button>
-                        <button onClick={() => { startEdit(analyzingCustomer); setAnalyzingCustomer(null); }} className="px-4 py-2 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] font-medium text-sm">
+                        <button onClick={() => setAnalyzingCustomer(null)} className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium text-sm">关闭</button>
+                        <button onClick={() => { startEdit(analyzingCustomer); setAnalyzingCustomer(null); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm">
                           编辑客户资料
                         </button>
                       </div>
@@ -1094,20 +1094,20 @@ Website: www.kiki-tech.com`;
       {/* AI 一键背调 Modal */}
       {researchCustomer && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={closeResearch}>
-          <div className="bg-[#1B142C]/90 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-[#A855F7] to-[#6B21A8] rounded-t-2xl px-6 py-4 text-white">
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-t-2xl px-6 py-4 text-white">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#1B142C]/90 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
                     <SearchIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h2 className="text-lg font-bold">AI 客户一键背调</h2>
-                    <p className="text-sm text-[#D8B4FE]">{researchCustomer.company_name}</p>
+                    <p className="text-sm text-white/80">{researchCustomer.company_name}</p>
                   </div>
                 </div>
-                <button onClick={closeResearch} className="text-[#D8B4FE] hover:text-white transition-colors">
+                <button onClick={closeResearch} className="text-white/80 hover:text-white transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1117,7 +1117,7 @@ Website: www.kiki-tech.com`;
                   onClick={() => setResearchTab('report')}
                   className={classNames(
                     'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                    researchTab === 'report' ? 'bg-[#1B142C]/90 text-purple-700' : 'text-[#B8AEC8] hover:bg-[#1B142C]/10'
+                    researchTab === 'report' ? 'bg-white text-purple-700' : 'text-white/70 hover:bg-white/10'
                   )}
                 >
                   <FileText className="w-3.5 h-3.5 inline mr-1" />背调报告
@@ -1126,7 +1126,7 @@ Website: www.kiki-tech.com`;
                   onClick={() => setResearchTab('profile')}
                   className={classNames(
                     'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                    researchTab === 'profile' ? 'bg-[#1B142C]/90 text-purple-700' : 'text-[#B8AEC8] hover:bg-[#1B142C]/10'
+                    researchTab === 'profile' ? 'bg-white text-purple-700' : 'text-white/70 hover:bg-white/10'
                   )}
                 >
                   <Building2 className="w-3.5 h-3.5 inline mr-1" />客户档案
@@ -1140,35 +1140,35 @@ Website: www.kiki-tech.com`;
                 /* 客户档案 Tab */
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">公司名称</p>
-                      <p className="text-sm font-medium text-[#F3EFE6]">{researchCustomer.company_name}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">公司名称</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.company_name}</p>
                     </div>
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">联系人</p>
-                      <p className="text-sm font-medium text-[#F3EFE6]">{researchCustomer.contact_name || '—'}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">联系人</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.contact_name || '—'}</p>
                     </div>
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">国家</p>
-                      <p className="text-sm font-medium text-[#F3EFE6]">{researchCustomer.country || '—'}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">国家</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.country || '—'}</p>
                     </div>
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">网站</p>
-                      <p className="text-sm font-medium text-[#F3EFE6] truncate">{researchCustomer.website || '—'}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">网站</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{researchCustomer.website || '—'}</p>
                     </div>
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">邮箱</p>
-                      <p className="text-sm font-medium text-[#F3EFE6] truncate">{researchCustomer.email || '—'}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">邮箱</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{researchCustomer.email || '—'}</p>
                     </div>
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">电话</p>
-                      <p className="text-sm font-medium text-[#F3EFE6]">{researchCustomer.phone || '—'}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">电话</p>
+                      <p className="text-sm font-medium text-slate-900">{researchCustomer.phone || '—'}</p>
                     </div>
                   </div>
                   {researchCustomer.notes && (
-                    <div className="bg-[#161228]/60 rounded-lg p-4">
-                      <p className="text-xs text-[#8879A0] mb-1">备注</p>
-                      <p className="text-sm text-[#F3EFE6]">{researchCustomer.notes}</p>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      <p className="text-xs text-slate-500 mb-1">备注</p>
+                      <p className="text-sm text-slate-700">{researchCustomer.notes}</p>
                     </div>
                   )}
                 </div>
@@ -1178,28 +1178,28 @@ Website: www.kiki-tech.com`;
                   <div className="relative">
                     <div className="w-16 h-16 rounded-full border-4 border-purple-100" />
                     <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-purple-600 animate-spin" />
-                    <SearchIcon className="absolute inset-0 m-auto w-6 h-6 text-[#D8B4FE] animate-pulse" />
+                    <SearchIcon className="absolute inset-0 m-auto w-6 h-6 text-purple-600 animate-pulse" />
                   </div>
                   <div className="text-center">
-                    <p className="text-[#F3EFE6] font-medium">AI 正在深度调研 {researchCustomer.company_name}...</p>
-                    <p className="text-xs text-[#78716C] mt-1">分析行业定位 · 采购需求 · 风险评估 · 攻单策略</p>
+                    <p className="text-slate-700 font-medium">AI 正在深度调研 {researchCustomer.company_name}...</p>
+                    <p className="text-xs text-slate-400 mt-1">分析行业定位 · 采购需求 · 风险评估 · 攻单策略</p>
                   </div>
                 </div>
               ) : !researchReport ? (
                 /* 未背调 — 触发界面 */
                 <div className="flex flex-col items-center justify-center py-16 space-y-6">
-                  <div className="w-20 h-20 rounded-full bg-[#221A3A]/80 flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center">
                     <SearchIcon className="w-10 h-10 text-purple-500" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-lg font-bold text-[#F3EFE6]">尚未生成背调报告</h3>
-                    <p className="text-sm text-[#8879A0] mt-1 max-w-md">
-                      点击下方按钮，AI 将自动分析 <span className="font-medium text-[#F3EFE6]">{researchCustomer.company_name}</span> 的行业定位、采购需求、决策人方向与攻单建议。
+                    <h3 className="text-lg font-bold text-slate-900">尚未生成背调报告</h3>
+                    <p className="text-sm text-slate-500 mt-1 max-w-md">
+                      点击下方按钮，AI 将自动分析 <span className="font-medium text-slate-700">{researchCustomer.company_name}</span> 的行业定位、采购需求、决策人方向与攻单建议。
                     </p>
                   </div>
                   <button
                     onClick={runResearch}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#6B21A8] text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all font-medium text-sm shadow-lg"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all font-medium text-sm shadow-lg"
                   >
                     <Sparkles className="w-4 h-4" />
                     开始 AI 背调
@@ -1209,8 +1209,8 @@ Website: www.kiki-tech.com`;
                 /* 开发信展示 */
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="flex items-center gap-2 text-base font-bold text-[#F3EFE6]">
-                      <Send className="w-5 h-5 text-[#A855F7]" />
+                    <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                      <Send className="w-5 h-5 text-indigo-500" />
                       基于背调结果生成的开发信
                     </h3>
                     <div className="flex items-center gap-2">
@@ -1218,19 +1218,19 @@ Website: www.kiki-tech.com`;
                         onClick={() => {
                           navigator.clipboard.writeText(generatedLetter);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#A855F7] bg-[#221A3A]/60 hover:bg-[#221A3A]/80 rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
                       >
                         <FileText className="w-3.5 h-3.5" />复制全文
                       </button>
                       <button
                         onClick={() => setGeneratedLetter(null)}
-                        className="px-3 py-1.5 text-xs font-medium text-[#B8AEC8] hover:bg-[#221A3A]/50 rounded-lg transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                       >
                         返回报告
                       </button>
                     </div>
                   </div>
-                  <pre className="bg-[#161228]/60 rounded-xl p-5 text-xs text-[#F3EFE6] whitespace-pre-wrap font-mono leading-relaxed max-h-[60vh] overflow-y-auto border border-[#3A2D54]">
+                  <pre className="bg-slate-50 rounded-xl p-5 text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed max-h-[60vh] overflow-y-auto border border-slate-200">
                     {generatedLetter}
                   </pre>
                 </div>
@@ -1238,16 +1238,16 @@ Website: www.kiki-tech.com`;
                 /* 背调报告展示 — 重构卡片化布局 */
                 <div className="space-y-4">
                   {/* 1. 顶部 Quick Badges（标签高亮） */}
-                  <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md p-5 border border-[#3A2D54]">
+                  <div className="bg-white rounded-xl p-5 border border-slate-200">
                     <div className="flex items-start justify-between mb-3">
                       <div className="min-w-0">
-                        <h3 className="text-lg font-bold text-[#F3EFE6]">{researchCustomer.company_name}</h3>
-                        <p className="text-sm text-[#8879A0] mt-0.5 truncate">{researchReport.main_business.split('.')[0]}</p>
+                        <h3 className="text-lg font-bold text-slate-900">{researchCustomer.company_name}</h3>
+                        <p className="text-sm text-slate-500 mt-0.5 truncate">{researchReport.main_business.split('.')[0]}</p>
                       </div>
                       <button
                         onClick={runResearch}
                         disabled={researchLoading}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#8879A0] bg-[#161228]/60 hover:bg-[#221A3A]/50 rounded-lg transition-colors border border-[#3A2D54] shrink-0"
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 shrink-0"
                         title="重新生成背调报告"
                       >
                         <RefreshCw className={classNames('w-3.5 h-3.5', researchLoading && 'animate-spin')} />
@@ -1256,12 +1256,12 @@ Website: www.kiki-tech.com`;
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {/* 公司类型 — 蓝色 */}
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#161228]/70 text-[#06B6D4] border border-b border-[#3A2D54]/50">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">
                         <Briefcase className="w-3 h-3" />
                         {researchReport.company_type}
                       </span>
                       {/* 客户规模 — 灰色 */}
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#221A3A]/50 text-[#F3EFE6] border border-[#3A2D54]">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                         <Building2 className="w-3 h-3" />
                         {researchReport.scale}
                       </span>
@@ -1269,10 +1269,10 @@ Website: www.kiki-tech.com`;
                       <span className={classNames(
                         'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border',
                         researchReport.match_level === 'high'
-                          ? 'bg-[#221A3A]/70 text-[#A855F7] border-[#3A2D54]/50'
+                          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                           : researchReport.match_level === 'medium'
-                            ? 'bg-[#3A2D54]/40 text-[#D8B4FE] border-[#3A2D54]/50'
-                            : 'bg-[#221A3A]/50 text-[#8879A0] border-[#3A2D54]'
+                            ? 'bg-amber-100 text-amber-700 border-amber-200'
+                            : 'bg-slate-100 text-slate-500 border-slate-200'
                       )}>
                         <Award className="w-3 h-3" />
                         {researchReport.match_level === 'high' ? '高匹配度' : researchReport.match_level === 'medium' ? '中等匹配' : '低匹配'}
@@ -1281,17 +1281,17 @@ Website: www.kiki-tech.com`;
                       <span className={classNames(
                         'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border',
                         researchReport.risk_level === 'low'
-                          ? 'bg-[#221A3A]/70 text-[#A855F7] border-[#3A2D54]/50'
+                          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                           : researchReport.risk_level === 'medium'
-                            ? 'bg-[#3A2D54]/40 text-[#D8B4FE] border-[#3A2D54]/50'
-                            : 'bg-[#3A1F1F]/80 text-[#F87171] border-[#A855F7]/60'
+                            ? 'bg-amber-100 text-amber-700 border-amber-200'
+                            : 'bg-red-100 text-red-700 border-red-200'
                       )}>
                         <Shield className="w-3 h-3" />
                         {researchReport.risk_level === 'low' ? '低风险' : researchReport.risk_level === 'medium' ? '中风险' : '高风险'}
                       </span>
                       {/* 额外标签 */}
                       {researchReport.tags.slice(0, 2).map((tag, i) => (
-                        <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-[#221A3A]/80 text-[#D8B4FE] border border-indigo-100">
+                        <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-600 border border-indigo-100">
                           {tag}
                         </span>
                       ))}
@@ -1299,31 +1299,31 @@ Website: www.kiki-tech.com`;
                   </div>
 
                   {/* 2. 决策人线索卡片 */}
-                  <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md p-5 border border-[#3A2D54]">
-                    <h3 className="flex items-center gap-2 text-sm font-bold text-[#F3EFE6] mb-4">
-                      <UserSearch className="w-4 h-4 text-[#A855F7]" />
+                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-4">
+                      <UserSearch className="w-4 h-4 text-indigo-500" />
                       决策人线索
-                      <span className="text-xs text-[#78716C] font-normal">AI 识别的关键职位，点击在 LinkedIn 查找</span>
+                      <span className="text-xs text-slate-400 font-normal">AI 识别的关键职位，点击在 LinkedIn 查找</span>
                     </h3>
                     <div className="space-y-2">
                       {researchReport.decision_makers.length > 0 ? researchReport.decision_makers.map((dm, i) => {
                         const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(researchCustomer.company_name + ' ' + dm.title)}`;
                         return (
-                          <div key={i} className="flex items-center justify-between p-3 bg-[#161228]/60 rounded-lg hover:bg-[#221A3A]/50 transition-colors group">
+                          <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-8 h-8 rounded-full bg-[#221A3A]/80 flex items-center justify-center shrink-0">
-                                <Briefcase className="w-4 h-4 text-[#A855F7]" />
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                <Briefcase className="w-4 h-4 text-indigo-600" />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-[#F3EFE6] truncate">{dm.title}</p>
-                                <p className="text-xs text-[#8879A0]">{dm.department}</p>
+                                <p className="text-sm font-medium text-slate-900 truncate">{dm.title}</p>
+                                <p className="text-xs text-slate-500">{dm.department}</p>
                               </div>
                             </div>
                             <a
                               href={linkedInUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-[#0A66C2] bg-[#161228]/70 hover:bg-[#161228]/70 rounded-lg transition-colors shrink-0"
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-[#0A66C2] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors shrink-0"
                               title={`在 LinkedIn 查找 ${dm.title}`}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -1332,33 +1332,33 @@ Website: www.kiki-tech.com`;
                           </div>
                         );
                       }) : (
-                        <p className="text-sm text-[#78716C] text-center py-4">暂无决策人线索数据</p>
+                        <p className="text-sm text-slate-400 text-center py-4">暂无决策人线索数据</p>
                       )}
                     </div>
                   </div>
 
                   {/* 3. 攻单切入点卡片 */}
-                  <div className="bg-[#3A2D54]/60 rounded-xl p-5 border-2 border-[#3A2D54]/50">
-                    <h3 className="flex items-center gap-2 text-sm font-bold text-[#F3EFE6] mb-3">
-                      <Lightbulb className="w-4 h-4 text-[#D8B4FE]" />
+                  <div className="bg-amber-50 rounded-xl p-5 border-2 border-amber-200">
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">
+                      <Lightbulb className="w-4 h-4 text-amber-600" />
                       建议破冰切入点
-                      <span className="text-xs text-[#D8B4FE] font-normal">第一封邮件该写什么</span>
+                      <span className="text-xs text-amber-600 font-normal">第一封邮件该写什么</span>
                     </h3>
-                    <p className="text-sm text-[#F3EFE6] leading-relaxed bg-[#1B142C]/90/60 rounded-lg p-3 border border-amber-100">
+                    <p className="text-sm text-slate-800 leading-relaxed bg-white/60 rounded-lg p-3 border border-amber-100">
                       {researchReport.pitch_hook || researchReport.ai_pitch_strategy}
                     </p>
                   </div>
 
                   {/* 4. 产品匹配分析 */}
-                  <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md p-5 border border-[#3A2D54]">
-                    <h3 className="flex items-center gap-2 text-sm font-bold text-[#F3EFE6] mb-3">
-                      <Target className="w-4 h-4 text-[#A855F7]" />
+                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">
+                      <Target className="w-4 h-4 text-indigo-500" />
                       客户主营产品与我们产品的匹配分析
                     </h3>
-                    <p className="text-sm text-[#F3EFE6] leading-relaxed mb-4">{researchReport.matching_point || researchReport.main_business}</p>
+                    <p className="text-sm text-slate-700 leading-relaxed mb-4">{researchReport.matching_point || researchReport.main_business}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {researchReport.key_match_products.map((p, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#221A3A]/80 text-[#D8B4FE] rounded-lg text-xs font-medium border border-indigo-100">
+                        <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium border border-indigo-100">
                           <CheckCircle className="w-3 h-3" />
                           {p}
                         </span>
@@ -1367,17 +1367,17 @@ Website: www.kiki-tech.com`;
                   </div>
 
                   {/* 5. 风险评估（折叠区） */}
-                  <details className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] group">
+                  <details className="bg-white rounded-xl border border-slate-200 group">
                     <summary className="flex items-center gap-2 px-5 py-4 cursor-pointer select-none">
-                      <Shield className="w-4 h-4 text-[#F87171]" />
-                      <span className="text-sm font-bold text-[#F3EFE6]">风险评估详情</span>
-                      <ChevronDown className="w-4 h-4 text-[#78716C] ml-auto group-open:rotate-180 transition-transform" />
+                      <Shield className="w-4 h-4 text-red-500" />
+                      <span className="text-sm font-bold text-slate-900">风险评估详情</span>
+                      <ChevronDown className="w-4 h-4 text-slate-400 ml-auto group-open:rotate-180 transition-transform" />
                     </summary>
                     <div className="px-5 pb-4">
-                      <p className="text-sm text-[#F3EFE6] leading-relaxed">{researchReport.risk_assessment}</p>
-                      <div className="mt-3 pt-3 border-t border-[#3A2D54]/50">
-                        <p className="text-xs text-[#8879A0] mb-1 font-medium">AI 完整攻单策略</p>
-                        <p className="text-xs text-[#B8AEC8] leading-relaxed">{researchReport.ai_pitch_strategy}</p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{researchReport.risk_assessment}</p>
+                      <div className="mt-3 pt-3 border-t border-slate-100">
+                        <p className="text-xs text-slate-500 mb-1 font-medium">AI 完整攻单策略</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">{researchReport.ai_pitch_strategy}</p>
                       </div>
                     </div>
                   </details>
@@ -1386,14 +1386,14 @@ Website: www.kiki-tech.com`;
                   <div className="space-y-3">
                     <button
                       onClick={generateDevLetter}
-                      className="w-full flex items-center justify-center gap-2 px-6 py-4 text-sm font-bold text-white bg-gradient-to-r from-[#6B21A8] via-[#A855F7] to-[#6B21A8] hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-700 rounded-xl transition-all shadow-lg hover:shadow-xl"
+                      className="w-full flex items-center justify-center gap-2 px-6 py-4 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-700 rounded-xl transition-all shadow-lg hover:shadow-xl"
                     >
                       <Sparkles className="w-5 h-5" />
                       结合背调一键生成开发信
                       <Send className="w-4 h-4" />
                     </button>
-                    <div className="flex items-center justify-center gap-2 text-xs text-[#78716C]">
-                      <CheckCircle className="w-3.5 h-3.5 text-[#A855F7]" />
+                    <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
                       报告已保存 · 生成于 {formatDate(researchReport.generated_at)} · 点击上方按钮自动带入 pitch_hook 与 matching_point
                     </div>
                   </div>
@@ -1410,7 +1410,7 @@ Website: www.kiki-tech.com`;
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
       {children}
     </div>
   );

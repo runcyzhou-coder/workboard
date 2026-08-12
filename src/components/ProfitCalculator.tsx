@@ -227,14 +227,14 @@ export function ProfitCalculator() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F3EFE6]">防亏报价核算</h1>
-          <p className="text-[#8879A0] mt-1">输入成本、数量、运费、关税和平台扣点，自动计算利润与利润率</p>
+          <h1 className="text-2xl font-bold text-slate-900">防亏报价核算</h1>
+          <p className="text-slate-500 mt-1">输入成本、数量、运费、关税和平台扣点，自动计算利润与利润率</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-2 px-4 py-2.5 bg-[#1B142C]/90 border border-[#3A2D54] text-[#F3EFE6] rounded-lg hover:bg-[#221A3A]/70 font-medium text-sm">
+          <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm">
             <History className="w-4 h-4" />历史记录
           </button>
-          <button onClick={saveCalc} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#6B21A8] to-[#4C1D95] text-[#F3EFE6] rounded-lg hover:bg-[#4C1D95] font-medium text-sm">
+          <button onClick={saveCalc} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm">
             {saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {saved ? '已保存' : '保存核算'}
           </button>
@@ -242,20 +242,20 @@ export function ProfitCalculator() {
       </div>
 
       {/* Real-time Exchange Rate Panel */}
-      <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#3A2D54]/50/50 bg-gradient-to-r from-cyan-50 to-blue-50">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-cyan-50 to-blue-50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
               <Globe2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-semibold text-[#F3EFE6] flex items-center gap-2">
+              <h2 className="font-semibold text-slate-900 flex items-center gap-2">
                 实时汇率看板
                 {rateCache.loading && (
-                  <RefreshCw className="w-3.5 h-3.5 text-[#06B6D4] animate-spin" />
+                  <RefreshCw className="w-3.5 h-3.5 text-cyan-600 animate-spin" />
                 )}
               </h2>
-              <p className="text-xs text-[#8879A0] mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 数据来源: {rateCache.error ? '本地参考基准' : '实时汇率 API'}
                 {rateCache.data?.date && ` · 数据日期 ${rateCache.data.date}`}
                 {rateCache.fetchedAt && ` · 更新于 ${new Date(rateCache.fetchedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`}
@@ -263,18 +263,18 @@ export function ProfitCalculator() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-[#8879A0] shrink-0">基准货币</label>
+            <label className="text-xs text-slate-500 shrink-0">基准货币</label>
             <select
               value={rateBase}
               onChange={e => setRateBase(e.target.value)}
-              className="px-3 py-1.5 bg-[#1B142C]/90 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
             >
               {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}
             </select>
             <button
               onClick={() => fetchRates(rateBase, true)}
               disabled={rateCache.loading}
-              className="p-2 rounded-lg text-[#8879A0] hover:text-[#06B6D4] hover:bg-[#1B142C]/90 border border-[#3A2D54] disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg text-slate-500 hover:text-cyan-600 hover:bg-white border border-slate-200 disabled:opacity-50 transition-colors"
               title="刷新汇率"
             >
               <RefreshCw className={classNames('w-4 h-4', rateCache.loading && 'animate-spin')} />
@@ -283,7 +283,7 @@ export function ProfitCalculator() {
         </div>
 
         {rateCache.error && (
-          <div className="px-5 py-2 bg-[#3A2D54]/60 border-b border-[#3A2D54]/50 border-amber-100 text-xs text-[#D8B4FE] flex items-center gap-1.5">
+          <div className="px-5 py-2 bg-amber-50 border-b border-amber-100 text-xs text-amber-700 flex items-center gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />{rateCache.error}
           </div>
         )}
@@ -301,19 +301,19 @@ export function ProfitCalculator() {
                   className={classNames(
                     'text-left p-3 rounded-xl border transition-all hover:shadow-md',
                     isCurrentCalc
-                      ? 'border-cyan-400 bg-[#161228]/70 ring-2 ring-cyan-100'
-                      : 'border-[#3A2D54] bg-[#1B142C]/90 hover:border-[#3A2D54]/70'
+                      ? 'border-cyan-400 bg-cyan-50 ring-2 ring-cyan-100'
+                      : 'border-slate-200 bg-white hover:border-cyan-300'
                   )}
                 >
-                  <div className="flex items-center gap-1 text-[10px] text-[#8879A0] mb-1">
+                  <div className="flex items-center gap-1 text-[10px] text-slate-500 mb-1">
                     <span>{pair.from}</span>
-                    <ArrowRight className="w-3 h-3 text-[#78716C]" />
+                    <ArrowRight className="w-3 h-3 text-slate-400" />
                     <span>{pair.to}</span>
                   </div>
-                  <p className="text-lg font-bold text-[#F3EFE6] leading-tight">
+                  <p className="text-lg font-bold text-slate-900 leading-tight">
                     {rate.toFixed(rate >= 100 ? 2 : rate >= 10 ? 3 : 4)}
                   </p>
-                  <p className="text-[10px] text-[#78716C] mt-1 truncate">{pair.label}</p>
+                  <p className="text-[10px] text-slate-400 mt-1 truncate">{pair.label}</p>
                   {isCurrentCalc && (
                     <p className="text-[10px] font-medium text-cyan-700 mt-1 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />已应用到核算
@@ -325,13 +325,13 @@ export function ProfitCalculator() {
           </div>
 
           {/* Full rate table */}
-          <div className="border-t border-[#3A2D54]/50 pt-4">
+          <div className="border-t border-slate-100 pt-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-[#F3EFE6] flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-[#06B6D4]" />
-                完整汇率表 <span className="text-xs font-normal text-[#78716C]">(基准: 1 {rateBase})</span>
+              <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-cyan-600" />
+                完整汇率表 <span className="text-xs font-normal text-slate-400">(基准: 1 {rateBase})</span>
               </h3>
-              <p className="text-[10px] text-[#78716C]">点击任意币种可快速切换核算币种并填入对应汇率</p>
+              <p className="text-[10px] text-slate-400">点击任意币种可快速切换核算币种并填入对应汇率</p>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {CURRENCIES.map(c => {
@@ -341,13 +341,13 @@ export function ProfitCalculator() {
                   <button
                     key={c.code}
                     onClick={() => applyRateToCalc('USD' === rateBase ? 'USD' : rateBase, c.code)}
-                    className="group flex flex-col items-center p-2.5 rounded-lg border border-[#3A2D54] hover:border-cyan-400 hover:bg-[#161228]/70 transition-all"
+                    className="group flex flex-col items-center p-2.5 rounded-lg border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all"
                   >
                     <div className="flex items-center gap-1 mb-0.5">
-                      <DollarSign className="w-3 h-3 text-[#78716C] group-hover:text-[#06B6D4]" />
-                      <span className="text-xs font-semibold text-[#F3EFE6] group-hover:text-cyan-700">{c.code}</span>
+                      <DollarSign className="w-3 h-3 text-slate-400 group-hover:text-cyan-600" />
+                      <span className="text-xs font-semibold text-slate-700 group-hover:text-cyan-700">{c.code}</span>
                     </div>
-                    <p className="text-sm font-bold text-[#F3EFE6] tabular-nums">
+                    <p className="text-sm font-bold text-slate-900 tabular-nums">
                       {rate.toFixed(rate >= 100 ? 2 : rate >= 10 ? 3 : 4)}
                     </p>
                   </button>
@@ -360,80 +360,80 @@ export function ProfitCalculator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Input panel */}
-        <div className="lg:col-span-2 bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-6 space-y-5">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="核算标题">
               <input value={input.title} onChange={e => setInput({ ...input, title: e.target.value })} placeholder="如：蓝牙耳机1000pcs出口德国"
-                className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="产品名称 *">
               <input value={input.product_name} onChange={e => setInput({ ...input, product_name: e.target.value })}
-                className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Field label="数量">
               <input type="number" value={input.quantity || ''} onChange={e => setInput({ ...input, quantity: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="成本单价">
               <input type="number" step="0.01" value={input.cost_price || ''} onChange={e => setInput({ ...input, cost_price: num(e.target.value) })}
-                className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="售价单价">
               <input type="number" step="0.01" value={input.selling_price || ''} onChange={e => setInput({ ...input, selling_price: num(e.target.value) })}
-                className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </Field>
             <Field label="币种">
               <select value={input.currency} onChange={e => setInput({ ...input, currency: e.target.value })}
-                className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
               </select>
             </Field>
           </div>
 
-          <div className="border-t border-[#3A2D54]/50 pt-5">
-            <h3 className="text-sm font-semibold text-[#F3EFE6] mb-3">额外成本</h3>
+          <div className="border-t border-slate-100 pt-5">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">额外成本</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Field label="运费 (总计)">
                 <input type="number" step="0.01" value={input.freight_cost || ''} onChange={e => setInput({ ...input, freight_cost: num(e.target.value) })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="其他费用">
                 <input type="number" step="0.01" value={input.other_costs || ''} onChange={e => setInput({ ...input, other_costs: num(e.target.value) })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="平台固定费用">
                 <input type="number" step="0.01" value={input.platform_fee_fixed || ''} onChange={e => setInput({ ...input, platform_fee_fixed: num(e.target.value) })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="平台扣点 (%)">
                 <input type="number" step="0.01" value={input.platform_fee_pct || ''} onChange={e => setInput({ ...input, platform_fee_pct: num(e.target.value) })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="关税 (%)">
                 <input type="number" step="0.01" value={input.tariff_pct || ''} onChange={e => setInput({ ...input, tariff_pct: num(e.target.value) })}
-                  className="w-full px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </Field>
               <Field label="汇率 (参考)">
                 <div className="flex gap-2">
                   <input type="number" step="0.0001" value={input.exchange_rate || ''} onChange={e => setInput({ ...input, exchange_rate: num(e.target.value) })}
-                    className="flex-1 px-3 py-2 border border-[#3A2D54] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   <button
                     onClick={() => {
                       const rate = getRate('CNY', input.currency);
                       setInput(prev => ({ ...prev, exchange_rate: rate }));
                     }}
                     disabled={rateCache.loading}
-                    className="flex items-center gap-1 px-3 py-2 bg-[#161228]/70 text-cyan-700 border border-[#3A2D54]/50 rounded-lg hover:bg-[#161228]/70 text-xs font-medium disabled:opacity-50"
+                    className="flex items-center gap-1 px-3 py-2 bg-cyan-50 text-cyan-700 border border-cyan-200 rounded-lg hover:bg-cyan-100 text-xs font-medium disabled:opacity-50"
                     title="获取 CNY → 当前币种的实时汇率"
                   >
                     <RefreshCw className={classNames('w-3.5 h-3.5', rateCache.loading && 'animate-spin')} />
                     取实时
                   </button>
                 </div>
-                <p className="text-[11px] text-[#78716C] mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   当前币种 {input.currency} · 1 CNY = {(1 / (getRate('CNY', input.currency) || 1)).toFixed(4)} {input.currency}
                 </p>
               </Field>
@@ -445,7 +445,7 @@ export function ProfitCalculator() {
         <div className="space-y-4">
           <div className={classNames(
             'rounded-xl p-6 text-white transition-colors',
-            isProfit ? (isWarning ? 'bg-gradient-to-br from-[#D8B4FE] to-[#A855F7]' : 'bg-gradient-to-br from-[#A855F7] to-[#6B21A8]') : 'bg-gradient-to-br from-red-500 to-red-600'
+            isProfit ? (isWarning ? 'bg-gradient-to-br from-amber-500 to-amber-600' : 'bg-gradient-to-br from-emerald-500 to-emerald-600') : 'bg-gradient-to-br from-red-500 to-red-600'
           )}>
             <div className="flex items-center gap-2 mb-4">
               {isProfit ? (isWarning ? <AlertTriangle className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />) : <TrendingDown className="w-5 h-5" />}
@@ -455,8 +455,8 @@ export function ProfitCalculator() {
             <p className="text-sm opacity-80 mt-1">利润率: {profitMargin.toFixed(2)}%</p>
           </div>
 
-          <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-[#F3EFE6] mb-2">核算明细</h3>
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+            <h3 className="text-sm font-semibold text-slate-700 mb-2">核算明细</h3>
             <Row label="销售收入" value={formatCurrency(totalRevenue, input.currency)} />
             <Row label="产品成本" value={formatCurrency(input.cost_price * quantity, input.currency)} negative />
             <Row label="运费" value={formatCurrency(input.freight_cost, input.currency)} negative />
@@ -464,13 +464,13 @@ export function ProfitCalculator() {
             <Row label="平台固定费" value={formatCurrency(input.platform_fee_fixed, input.currency)} negative />
             <Row label={`平台扣点 (${input.platform_fee_pct}%)`} value={formatCurrency(platformFee, input.currency)} negative />
             <Row label={`关税 (${input.tariff_pct}%)`} value={formatCurrency(tariff, input.currency)} negative />
-            <div className="border-t border-[#3A2D54]/50 pt-3 flex justify-between text-sm font-semibold">
-              <span className="text-[#F3EFE6]">总成本</span>
-              <span className="text-[#F3EFE6]">{formatCurrency(grandTotalCost, input.currency)}</span>
+            <div className="border-t border-slate-100 pt-3 flex justify-between text-sm font-semibold">
+              <span className="text-slate-700">总成本</span>
+              <span className="text-slate-900">{formatCurrency(grandTotalCost, input.currency)}</span>
             </div>
             <div className="flex justify-between text-sm font-bold">
-              <span className="text-[#F3EFE6]">净利润</span>
-              <span className={isProfit ? 'text-[#A855F7]' : 'text-[#F87171]'}>
+              <span className="text-slate-700">净利润</span>
+              <span className={isProfit ? 'text-emerald-600' : 'text-red-500'}>
                 {isProfit ? '+' : ''}{formatCurrency(profit, input.currency)}
               </span>
             </div>
@@ -480,28 +480,28 @@ export function ProfitCalculator() {
 
       {/* History */}
       {showHistory && (
-        <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5">
-          <h3 className="text-lg font-semibold text-[#F3EFE6] mb-4">历史核算记录</h3>
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">历史核算记录</h3>
           {history.length === 0 ? (
-            <p className="text-center text-[#78716C] py-6 text-sm">暂无历史记录</p>
+            <p className="text-center text-slate-400 py-6 text-sm">暂无历史记录</p>
           ) : (
             <div className="space-y-2">
               {history.map(h => (
-                <div key={h.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#221A3A]/70 transition-colors border border-[#3A2D54]/50">
+                <div key={h.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-[#F3EFE6] truncate">{h.title}</p>
-                      <span className={classNames('px-2 py-0.5 rounded text-xs font-medium', h.profit >= 0 ? 'bg-[#221A3A]/70 text-[#A855F7]' : 'bg-[#3A1F1F]/80 text-[#F87171]')}>
+                      <p className="text-sm font-medium text-slate-900 truncate">{h.title}</p>
+                      <span className={classNames('px-2 py-0.5 rounded text-xs font-medium', h.profit >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700')}>
                         {h.profit >= 0 ? '+' : ''}{formatCurrency(h.profit, h.currency)}
                       </span>
                     </div>
-                    <p className="text-xs text-[#8879A0] mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       {h.product_name} · {h.quantity} pcs · 利润率 {h.profit_margin.toFixed(1)}% · {formatDate(h.created_at)}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button onClick={() => loadHistoryItem(h)} className="px-3 py-1.5 text-xs text-[#06B6D4] hover:bg-[#161228]/70 rounded-lg font-medium">载入</button>
-                    <button onClick={() => deleteHistory(h.id)} className="p-1.5 text-[#78716C] hover:text-[#F87171] hover:bg-[#3A1F1F]/80 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => loadHistoryItem(h)} className="px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded-lg font-medium">载入</button>
+                    <button onClick={() => deleteHistory(h.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               ))}
@@ -516,7 +516,7 @@ export function ProfitCalculator() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#F3EFE6] mb-1.5">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
       {children}
     </div>
   );
@@ -525,8 +525,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Row({ label, value, negative }: { label: string; value: string; negative?: boolean }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-[#B8AEC8]">{label}</span>
-      <span className={negative ? 'text-[#F87171]' : 'text-[#F3EFE6]'}>{negative ? '-' : ''}{value}</span>
+      <span className="text-slate-600">{label}</span>
+      <span className={negative ? 'text-red-500' : 'text-slate-900'}>{negative ? '-' : ''}{value}</span>
     </div>
   );
 }

@@ -21,12 +21,12 @@ export function DocHeader({ title, subtitle, docNumber }: DocHeaderProps) {
         {settings?.logo_url ? (
           <img src={settings.logo_url} alt="Logo" className="h-16 w-auto object-contain shrink-0" />
         ) : (
-          <div className="h-14 px-5 bg-[#221A3A] text-[#F3EFE6] rounded-lg flex items-center font-bold text-xl shrink-0">
+          <div className="h-14 px-5 bg-slate-900 text-white rounded-lg flex items-center font-bold text-xl shrink-0">
             {settings?.company_name ? settings.company_name.charAt(0) : 'K'}
           </div>
         )}
         {settings?.company_name && (
-          <span className="text-2xl font-bold text-[#F3EFE6] tracking-wide leading-tight">
+          <span className="text-2xl font-bold text-slate-900 tracking-wide leading-tight">
             {settings.company_name}
           </span>
         )}
@@ -34,22 +34,22 @@ export function DocHeader({ title, subtitle, docNumber }: DocHeaderProps) {
 
       {/* 联系信息行：电话 / 地址 / Email */}
       {(settings?.address || settings?.phone || settings?.email) && (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-[#B8AEC8] mb-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-600 mb-3">
           {settings?.address && (
             <span className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#8879A0] shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
               {settings.address}
             </span>
           )}
           {settings?.email && (
             <span className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-[#8879A0] shrink-0" />
+              <Mail className="w-3.5 h-3.5 text-slate-500 shrink-0" />
               {settings.email}
             </span>
           )}
           {settings?.phone && (
             <span className="flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-[#8879A0] shrink-0" />
+              <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
               {settings.phone}
             </span>
           )}
@@ -57,17 +57,17 @@ export function DocHeader({ title, subtitle, docNumber }: DocHeaderProps) {
       )}
 
       {/* 长横线（深蓝灰主题） */}
-      <div className="border-t-[3px] border-[#3A2D54] mb-5" />
+      <div className="border-t-[3px] border-slate-900 mb-5" />
 
       {/* 单据名称（大写）+ 编号日期 */}
       <div className="text-center">
-        <h1 className="text-3xl font-extrabold tracking-widest text-[#F3EFE6]">
+        <h1 className="text-3xl font-extrabold tracking-widest text-slate-900">
           {titleUpper}
         </h1>
-        {subtitle && <p className="text-sm text-[#8879A0] mt-1.5">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-slate-500 mt-1.5">{subtitle}</p>}
         <div className="flex justify-center items-center gap-6 mt-2">
-          <span className="text-sm font-semibold text-[#F3EFE6]">{docNumber}</span>
-          <span className="text-xs text-[#78716C]">{formatDate(new Date().toISOString())}</span>
+          <span className="text-sm font-semibold text-slate-700">{docNumber}</span>
+          <span className="text-xs text-slate-400">{formatDate(new Date().toISOString())}</span>
         </div>
       </div>
     </div>

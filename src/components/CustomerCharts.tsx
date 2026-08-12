@@ -120,7 +120,7 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
 
   if (total === 0) {
     return (
-      <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-8 text-center text-[#78716C]">
+      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">
         <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
         <p className="text-sm">添加客户后即可查看可视化图表</p>
       </div>
@@ -139,21 +139,21 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* 国家分布 - 横向条形图 */}
-        <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#221A3A]/60 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-[#A855F7]" />
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-indigo-600" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[#F3EFE6]">客户国家分布</h3>
-              <p className="text-xs text-[#8879A0]">Top 10 国家/地区</p>
+              <h3 className="text-sm font-semibold text-slate-900">客户国家分布</h3>
+              <p className="text-xs text-slate-500">Top 10 国家/地区</p>
             </div>
           </div>
           <div className="space-y-2.5">
             {countryData.map(([country, count], i) => (
               <div key={country} className="flex items-center gap-3">
-                <div className="w-24 text-xs text-[#B8AEC8] font-medium truncate shrink-0">{country}</div>
-                <div className="flex-1 bg-[#221A3A]/50 rounded-full h-6 overflow-hidden relative">
+                <div className="w-24 text-xs text-slate-600 font-medium truncate shrink-0">{country}</div>
+                <div className="flex-1 bg-slate-100 rounded-full h-6 overflow-hidden relative">
                   <div
                     className="h-full rounded-full flex items-center justify-end pr-2 transition-all duration-700"
                     style={{
@@ -164,7 +164,7 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
                     <span className="text-[10px] text-white font-bold">{count}</span>
                   </div>
                 </div>
-                <div className="w-10 text-xs text-[#78716C] text-right shrink-0">
+                <div className="w-10 text-xs text-slate-400 text-right shrink-0">
                   {Math.round(count / total * 100)}%
                 </div>
               </div>
@@ -173,14 +173,14 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
         </div>
 
         {/* 客户状态分布 - 饼图 */}
-        <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#221A3A]/60 flex items-center justify-center">
-              <PieIcon className="w-4 h-4 text-[#A855F7]" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <PieIcon className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[#F3EFE6]">客户状态分布</h3>
-              <p className="text-xs text-[#8879A0]">按跟进状态分类</p>
+              <h3 className="text-sm font-semibold text-slate-900">客户状态分布</h3>
+              <p className="text-xs text-slate-500">按跟进状态分类</p>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -205,9 +205,9 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
               {statusSegments.map((seg, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: seg.color }} />
-                  <span className="text-xs text-[#B8AEC8] flex-1">{seg.label}</span>
-                  <span className="text-xs font-semibold text-[#F3EFE6]">{seg.value}</span>
-                  <span className="text-[10px] text-[#78716C] w-8 text-right">{Math.round(seg.pct * 100)}%</span>
+                  <span className="text-xs text-slate-600 flex-1">{seg.label}</span>
+                  <span className="text-xs font-semibold text-slate-900">{seg.value}</span>
+                  <span className="text-[10px] text-slate-400 w-8 text-right">{Math.round(seg.pct * 100)}%</span>
                 </div>
               ))}
             </div>
@@ -215,14 +215,14 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
         </div>
 
         {/* 行业分布 - 饼图 */}
-        <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#221A3A]/80 flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-[#D8B4FE]" />
+            <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+              <Building2 className="w-4 h-4 text-violet-600" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[#F3EFE6]">客户行业分布</h3>
-              <p className="text-xs text-[#8879A0]">按行业领域分类</p>
+              <h3 className="text-sm font-semibold text-slate-900">客户行业分布</h3>
+              <p className="text-xs text-slate-500">按行业领域分类</p>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -247,8 +247,8 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
               {industrySegments.map((seg, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: seg.color }} />
-                  <span className="text-xs text-[#B8AEC8] flex-1 truncate">{seg.label}</span>
-                  <span className="text-xs font-semibold text-[#F3EFE6]">{seg.value}</span>
+                  <span className="text-xs text-slate-600 flex-1 truncate">{seg.label}</span>
+                  <span className="text-xs font-semibold text-slate-900">{seg.value}</span>
                 </div>
               ))}
             </div>
@@ -256,18 +256,18 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
         </div>
 
         {/* 标签分布 - 横向条形图 */}
-        <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-5">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#3A2D54]/60 flex items-center justify-center">
-              <BarChart3 className="w-4 h-4 text-[#D8B4FE]" />
+            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+              <BarChart3 className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[#F3EFE6]">客户标签分布</h3>
-              <p className="text-xs text-[#8879A0]">Top 8 高频标签</p>
+              <h3 className="text-sm font-semibold text-slate-900">客户标签分布</h3>
+              <p className="text-xs text-slate-500">Top 8 高频标签</p>
             </div>
           </div>
           {tagData.length === 0 ? (
-            <div className="text-center py-8 text-[#78716C]">
+            <div className="text-center py-8 text-slate-400">
               <Layers className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-xs">暂无标签数据</p>
             </div>
@@ -277,8 +277,8 @@ export function CustomerCharts({ customers }: CustomerChartsProps) {
                 const maxTag = Math.max(...tagData.map(d => d[1]), 1);
                 return (
                   <div key={tag} className="flex items-center gap-3">
-                    <div className="w-20 text-xs text-[#B8AEC8] font-medium truncate shrink-0">{tag}</div>
-                    <div className="flex-1 bg-[#221A3A]/50 rounded-full h-5 overflow-hidden">
+                    <div className="w-20 text-xs text-slate-600 font-medium truncate shrink-0">{tag}</div>
+                    <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
                       <div
                         className="h-full rounded-full flex items-center justify-end pr-2 transition-all duration-700"
                         style={{
@@ -307,12 +307,12 @@ function StatCard({ icon: Icon, label, value, color }: {
   color: string;
 }) {
   return (
-    <div className="bg-[#1B142C]/90 rounded-xl intj-card intj-cut-corner intj-gem backdrop-blur-md border border-[#3A2D54] p-4">
+    <div className="bg-white rounded-xl border border-slate-200 p-4">
       <div className={classNames('w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2', color)}>
         <Icon className="w-4 h-4 text-white" />
       </div>
-      <p className="text-2xl font-bold text-[#F3EFE6]">{value}</p>
-      <p className="text-xs text-[#8879A0]">{label}</p>
+      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-xs text-slate-500">{label}</p>
     </div>
   );
 }
