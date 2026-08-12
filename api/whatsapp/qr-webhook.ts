@@ -1,6 +1,6 @@
-// Generic Webhook 接口 — 适配 Evolution API / 扫码网关
-// 接收格式: { sender: string, message: string }
-// 接收买家消息后存入 Supabase，并触发 AI 生成回复，再通过网关自动发送
+// Green-API Webhook 接收接口
+// 接收 Green-API 推送的消息，存入 Supabase，并触发 AI 自动回复
+// 同时兼容 Generic 格式 { sender, message }
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -10,28 +10,28 @@ const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
-// AI 配置
 const AI_API_KEY = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
 const AI_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 const AI_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
-// 网关发送配置
-const GATEWAY_URL = process.env.WHATSAPP_GATEWAY_URL || ''; // e.g. http://localhost:3000/send-message
-const GATEWAY_TOKEN = process.env.WHATSAPP_GATEWAY_TOKEN || ''; // 网关鉴权 token
+// Green-API 配置
+const GREEN_API_ID = process.env.GREEN_API_ID_INSTANCE || '';
+const GREEN_API_TOKEN = process.env.GREEN_API_TOKEN_INSTANCE || '';
+const GREEN_API_BASE = 'https://api.green-api.com';
 
-// ===== 存储买家消息 =====
-async function saveIncomingMessage(sender: string, message: string) {
+// ===== 存储消息 =====
+async function saveMessage(phone: string, name: string, text: string, sender: 'customer' | 'me') {
   const now = new Date().toISOString();
 
-  // 1. 查找或创建客户
+  // 查找或创建客户
   const { data: existingCustomer } = await supabase
     .from('customers')
     .select('id, contact_name, company_name, country')
-    .ilike('phone', sender)
+    .ilike('phone', phone)
     .maybeSingle();
 
   let customerId: string;
-  let customerName = `Customer ${sender}`;
+  let customerName = name || `Customer ${phone}`;
 
   if (existingCustomer) {
     customerId = existingCustomer.id;
@@ -42,50 +42,49 @@ async function saveIncomingMessage(sender: string, message: string) {
       .insert({
         company_name: customerName,
         contact_name: customerName,
-        phone: sender,
+        phone: phone,
         email: '',
         country: '',
         status: 'active',
-        notes: 'WhatsApp 扫码网关自动创建',
+        notes: 'WhatsApp Green-API 自动创建',
       })
       .select('id')
       .single();
 
     if (error || !newCustomer) {
-      console.error('[QR-Webhook] 创建客户失败:', error);
+      console.error('[Webhook] 创建客户失败:', error);
       customerId = 'unknown';
     } else {
       customerId = newCustomer.id;
     }
   }
 
-  // 2. 存储消息
+  // 存储消息
   const { error: msgError } = await supabase
     .from('whatsapp_messages')
     .insert({
       customer_id: customerId,
-      phone: sender,
-      sender: 'customer',
-      text: message,
+      phone: phone,
+      sender: sender,
+      text: text,
       received_at: now,
     });
 
   if (msgError) {
-    console.error('[QR-Webhook] 存储消息失败:', msgError);
+    console.error('[Webhook] 存储消息失败:', msgError);
   }
 
   return { customerId, customerName };
 }
 
-// ===== AI 生成回复（RAG 知识库检索） =====
+// ===== AI 生成回复 =====
 async function generateAiReply(
-  sender: string,
   customerName: string,
   message: string,
   history: { role: string; text: string }[]
 ): Promise<string | null> {
   if (!AI_API_KEY) {
-    console.warn('[QR-Webhook] AI API key 未配置，跳过自动回复');
+    console.warn('[Webhook] AI API key 未配置');
     return null;
   }
 
@@ -130,70 +129,52 @@ Write a direct reply:`;
     });
 
     if (!response.ok) {
-      console.error('[QR-Webhook] AI API 错误:', response.status);
+      console.error('[Webhook] AI API 错误:', response.status);
       return null;
     }
 
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content?.trim();
-
-    if (!reply) {
-      console.error('[QR-Webhook] AI 返回空内容');
-      return null;
-    }
-
-    return reply;
+    return reply || null;
   } catch (err) {
-    console.error('[QR-Webhook] AI 生成失败:', err);
+    console.error('[Webhook] AI 生成失败:', err);
     return null;
   }
 }
 
-// ===== 通过网关发送消息 =====
-async function sendViaGateway(receiver: string, text: string): Promise<boolean> {
-  if (!GATEWAY_URL) {
-    console.warn('[QR-Webhook] 网关 URL 未配置，跳过自动发送');
+// ===== 通过 Green-API 发送消息 =====
+async function sendViaGreenApi(phone: string, text: string): Promise<boolean> {
+  if (!GREEN_API_ID || !GREEN_API_TOKEN) {
+    console.warn('[Webhook] Green-API 凭据未配置');
     return false;
   }
 
+  // Green-API 的 chatId 格式: 85256973869@c.us
+  const chatId = phone.includes('@') ? phone : `${phone}@c.us`;
+
   try {
-    const response = await fetch(GATEWAY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(GATEWAY_TOKEN ? { 'Authorization': `Bearer ${GATEWAY_TOKEN}` } : {}),
-      },
-      body: JSON.stringify({
-        sender: receiver, // 网关通常用 receiver 字段
-        receiver: receiver,
-        message: text,
-      }),
-    });
+    const response = await fetch(
+      `${GREEN_API_BASE}/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: chatId,
+          message: text,
+        }),
+      }
+    );
 
     if (!response.ok) {
-      console.error('[QR-Webhook] 网关发送失败:', response.status);
+      console.error('[Webhook] Green-API 发送失败:', response.status);
       return false;
     }
 
     return true;
   } catch (err) {
-    console.error('[QR-Webhook] 网关请求异常:', err);
+    console.error('[Webhook] Green-API 请求异常:', err);
     return false;
   }
-}
-
-// ===== 保存发出的消息 =====
-async function saveOutgoingMessage(receiver: string, text: string, customerId: string) {
-  const now = new Date().toISOString();
-  await supabase
-    .from('whatsapp_messages')
-    .insert({
-      customer_id: customerId,
-      phone: receiver,
-      sender: 'me',
-      text: text,
-      received_at: now,
-    });
 }
 
 export default async function handler(req: any, res: any) {
@@ -202,22 +183,95 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { sender, message } = req.body;
+    const body = req.body;
 
-    // 兼容多种字段名
-    const phone = sender || req.body.phone || req.body.from || req.body.number;
-    const text = message || req.body.text || req.body.body || req.body.content;
+    // ===== 兼容两种格式 =====
+
+    // 格式1: Green-API Webhook
+    if (body.typeWebhook === 'incomingMessageReceived' || body.messageData) {
+      const sender = body.senderData?.sender || '';
+      const senderName = body.senderData?.senderName || `Customer ${sender}`;
+      const idMessage = body.idMessage || '';
+
+      // 提取消息文本
+      let text = '';
+      const msgData = body.messageData || {};
+
+      if (msgData.typeMessage === 'textMessage') {
+        text = msgData.textMessageData?.textMessage || '';
+      } else if (msgData.typeMessage === 'extendedTextMessage') {
+        text = msgData.extendedTextMessageData?.text || '';
+      } else if (msgData.typeMessage === 'imageMessage') {
+        text = `[图片] ${msgData.imageMessageData?.caption || ''}`;
+      } else if (msgData.typeMessage === 'videoMessage') {
+        text = `[视频] ${msgData.videoMessageData?.caption || ''}`;
+      } else if (msgData.typeMessage === 'voiceMessage') {
+        text = '[语音消息]';
+      } else if (msgData.typeMessage === 'documentMessage') {
+        text = `[文件] ${msgData.documentMessageData?.fileName || ''}`;
+      } else if (msgData.typeMessage === 'locationMessage') {
+        text = `[位置] ${msgData.locationMessageData?.latitude || ''}, ${msgData.locationMessageData?.longitude || ''}`;
+      } else if (msgData.typeMessage === 'contactMessage') {
+        text = `[联系人] ${msgData.contactMessageData?.displayName || ''}`;
+      } else {
+        text = `[${msgData.typeMessage || 'unknown'}]`;
+      }
+
+      if (!sender || !text) {
+        return res.status(200).json({ ok: true });
+      }
+
+      console.log(`[Green-API] 收到消息: ${senderName} (${sender}): ${text}`);
+
+      // 1. 存储买家消息
+      const { customerId, customerName } = await saveMessage(sender, senderName, text, 'customer');
+
+      // 2. 获取历史消息
+      const { data: history } = await supabase
+        .from('whatsapp_messages')
+        .select('sender, text')
+        .eq('phone', sender)
+        .order('received_at', { ascending: true })
+        .limit(20);
+
+      // 3. AI 生成回复
+      const aiReply = await generateAiReply(
+        customerName,
+        text,
+        (history || []).map(h => ({ role: h.sender, text: h.text }))
+      );
+
+      // 4. 通过 Green-API 自动发送
+      let sent = false;
+      if (aiReply) {
+        sent = await sendViaGreenApi(sender, aiReply);
+        if (sent) {
+          // 5. 保存发出的消息
+          await saveMessage(sender, customerName, aiReply, 'me');
+          console.log(`[Green-API] AI 自动回复已发送: ${sender}: ${aiReply.substring(0, 50)}...`);
+        }
+      }
+
+      return res.status(200).json({
+        ok: true,
+        received: { sender, message: text },
+        ai_reply: aiReply,
+        auto_sent: sent,
+      });
+    }
+
+    // 格式2: Generic Webhook { sender, message }
+    const phone = body.sender || body.phone || body.from || body.number;
+    const text = body.message || body.text || body.body || body.content;
 
     if (!phone || !text) {
       return res.status(400).json({ error: 'sender and message are required' });
     }
 
-    console.log(`[QR-Webhook] 收到消息: ${phone}: ${text}`);
+    console.log(`[Generic] 收到消息: ${phone}: ${text}`);
 
-    // 1. 存储买家消息
-    const { customerId, customerName } = await saveIncomingMessage(phone, text);
+    const { customerId, customerName } = await saveMessage(phone, `Customer ${phone}`, text, 'customer');
 
-    // 2. 获取最近的历史消息（用于 AI 上下文）
     const { data: history } = await supabase
       .from('whatsapp_messages')
       .select('sender, text')
@@ -225,22 +279,17 @@ export default async function handler(req: any, res: any) {
       .order('received_at', { ascending: true })
       .limit(20);
 
-    // 3. AI 生成回复
     const aiReply = await generateAiReply(
-      phone,
       customerName,
       text,
       (history || []).map(h => ({ role: h.sender, text: h.text }))
     );
 
-    // 4. 通过网关自动发送 AI 回复
     let sent = false;
     if (aiReply) {
-      sent = await sendViaGateway(phone, aiReply);
+      sent = await sendViaGreenApi(phone, aiReply);
       if (sent) {
-        // 5. 保存发出的消息
-        await saveOutgoingMessage(phone, aiReply, customerId);
-        console.log(`[QR-Webhook] AI 自动回复已发送: ${phone}: ${aiReply.substring(0, 50)}...`);
+        await saveMessage(phone, customerName, aiReply, 'me');
       }
     }
 
@@ -251,7 +300,7 @@ export default async function handler(req: any, res: any) {
       auto_sent: sent,
     });
   } catch (error: any) {
-    console.error('[QR-Webhook] 错误:', error);
-    return res.status(500).json({ error: error.message || 'Internal error' });
+    console.error('[Webhook] 错误:', error);
+    return res.status(200).json({ ok: true });
   }
 }
