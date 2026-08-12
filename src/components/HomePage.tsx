@@ -1625,21 +1625,15 @@ export function HomePage({ onNavigate }: HomeProps) {
                         <span className="truncate">{n.source}</span>
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        {n.url ? (
-                          <a
-                            href={n.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-[#A8C28E] font-medium hover:text-[#5F8A4D] transition-colors"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
-                          </a>
-                        ) : (
-                          <button className="flex items-center gap-1 text-[#A8C28E] font-medium hover:text-[#5F8A4D]">
-                            原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
-                          </button>
-                        )}
+                        <a
+                          href={`https://www.google.com/search?q=${encodeURIComponent(n.title + ' ' + n.source)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-[#A8C28E] font-medium hover:text-[#5F8A4D] transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          原文 <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
+                        </a>
                         <button
                           onClick={() => setAiLetterNews(n)}
                           className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#7BA369]/10 text-[#7BA369] font-medium hover:bg-[#7BA369]/20 border border-[#7BA369]/30"
