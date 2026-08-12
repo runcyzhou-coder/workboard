@@ -357,8 +357,8 @@ export function Customers() {
   // AI analysis state
   const [analyzingCustomer, setAnalyzingCustomer] = useState<Customer | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  // Pre-compute analysis at top level (hooks rule compliance)
-  const currentAnalysis = useMemo(() => analyzingCustomer ? analyzeCustomer(analyzingCustomer) : null, [analyzingCustomer]);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const currentAnalysis = aiAnalysis;
 
   // 背调 state
   const [researchCustomer, setResearchCustomer] = useState<Customer | null>(null);
@@ -683,7 +683,27 @@ Website: www.kiki-tech.com`;
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => { setAnalyzingCustomer(c); setAnalyzing(true); setTimeout(() => setAnalyzing(false), 600); }}
+                      onClick={async () => {
+                        setAnalyzingCustomer(c);
+                        setAnalyzing(true);
+                        setAiAnalysis(null);
+                        try {
+                          const res = await fetch('/api/customer-analysis', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(c),
+                          });
+                          const data = await res.json();
+                          if (data.analysis) {
+                            setAiAnalysis(data.analysis);
+                          } else {
+                            setAiAnalysis(analyzeCustomer(c));
+                          }
+                        } catch {
+                          setAiAnalysis(analyzeCustomer(c));
+                        }
+                        setAnalyzing(false);
+                      }}
                       className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
                     >
                       <Sparkles className="w-3.5 h-3.5" />AI分析
@@ -857,10 +877,19 @@ Website: www.kiki-tech.com`;
       )}
 
       {/* AI Analysis Modal */}
-      {analyzingCustomer && currentAnalysis && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setAnalyzingCustomer(null)}>
+      {analyzingCustomer && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => { setAnalyzingCustomer(null); setAiAnalysis(null); }}>
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            {(() => {
+            {analyzing ? (
+              <div className="flex flex-col items-center justify-center py-24">
+                <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-4">
+                  <Sparkles className="w-6 h-6 text-indigo-600 animate-pulse" />
+                </div>
+                <p className="text-slate-600 font-medium">AI 正在分析客户数据...</p>
+                <p className="text-xs text-slate-400 mt-1">DeepSeek AI 深度分析中，请稍候</p>
+              </div>
+            ) : currentAnalysis ? (
+            (() => {
               const analysis = currentAnalysis;
               const tierColors: Record<string, string> = {
                 A: 'from-emerald-500 to-teal-600',
@@ -911,7 +940,7 @@ Website: www.kiki-tech.com`;
                           <p className="text-sm text-white/80 mt-1">成交预测 · 跟进建议 · 风险评估</p>
                         </div>
                       </div>
-                      <button onClick={() => setAnalyzingCustomer(null)} className="text-white/80 hover:text-white transition-colors">
+                      <button onClick={() => { setAnalyzingCustomer(null); setAiAnalysis(null); }} className="text-white/80 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                       </button>
                     </div>
@@ -1077,8 +1106,8 @@ Website: www.kiki-tech.com`;
                         客户录入时间: {formatDate(analyzingCustomer.created_at)} · AI 分析结果仅供参考
                       </p>
                       <div className="flex gap-2">
-                        <button onClick={() => setAnalyzingCustomer(null)} className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium text-sm">关闭</button>
-                        <button onClick={() => { startEdit(analyzingCustomer); setAnalyzingCustomer(null); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm">
+                        <button onClick={() => { setAnalyzingCustomer(null); setAiAnalysis(null); }} className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium text-sm">关闭</button>
+                        <button onClick={() => { startEdit(analyzingCustomer); setAnalyzingCustomer(null); setAiAnalysis(null); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm">
                           编辑客户资料
                         </button>
                       </div>
@@ -1086,7 +1115,8 @@ Website: www.kiki-tech.com`;
                   )}
                 </>
               );
-            })()}
+            })()
+            ) : null}
           </div>
         </div>
       )}
