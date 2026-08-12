@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Send, Sparkles, Phone, MoreVertical, Search,
-  Paperclip, Smile, Mic, CheckCheck, Copy,
-  RefreshCw, ExternalLink,
+  Paperclip, Smile, CheckCheck, Copy,
+  RefreshCw, ExternalLink, Zap, QrCode,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -27,31 +27,6 @@ interface Conversation {
     notes: string;
   };
 }
-
-const DEMO_CONVERSATIONS: Conversation[] = [
-  {
-    phone: '16505558385',
-    lastMessage: 'Great! When can you ship?',
-    lastTime: new Date().toISOString(),
-    sender: 'customer',
-    customer: {
-      id: 'demo1', company_name: 'Saudi Renewable Energy Co.',
-      contact_name: 'Ahmed Al-Rashid', phone: '+1 (650) 555-8385',
-      country: 'Saudi Arabia', status: 'active', notes: '风电设备询盘'
-    },
-  },
-  {
-    phone: '5215512345678',
-    lastMessage: 'Hola, ¿pueden enviar catálogo?',
-    lastTime: new Date().toISOString(),
-    sender: 'customer',
-    customer: {
-      id: 'demo2', company_name: 'SolarTech LATAM',
-      contact_name: 'Carlos Mendoza', phone: '+52 55 1234 5678',
-      country: 'Mexico', status: 'active', notes: '光伏储能'
-    },
-  },
-];
 
 function formatTime(iso: string) {
   try {
@@ -82,6 +57,7 @@ export function AIChat() {
   const [searchQuery, setSearchQuery] = useState('');
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [autoReply, setAutoReply] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 加载会话列表
@@ -94,11 +70,11 @@ export function AIChat() {
         setConversations(data.conversations);
         setConnected(true);
       } else {
-        setConversations(DEMO_CONVERSATIONS);
+        setConversations([]);
         setConnected(false);
       }
     } catch {
-      setConversations(DEMO_CONVERSATIONS);
+      setConversations([]);
       setConnected(false);
     } finally {
       setLoading(false);
@@ -107,8 +83,8 @@ export function AIChat() {
 
   useEffect(() => {
     loadConversations();
-    // 每 15 秒轮询一次
-    const interval = setInterval(loadConversations, 15000);
+    // 每 10 秒轮询一次（网关模式下更频繁）
+    const interval = setInterval(loadConversations, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -128,10 +104,10 @@ export function AIChat() {
         }));
         setMessages(chatMsgs);
       } else {
-        setMessages(getDemoMessages(phone));
+        setMessages([]);
       }
     } catch {
-      setMessages(getDemoMessages(phone));
+      setMessages([]);
     }
   };
 
@@ -140,6 +116,9 @@ export function AIChat() {
       setMessages([]);
       setAiReplies([]);
       loadMessages(selectedPhone);
+      // 选中会话后每 5 秒刷新消息
+      const interval = setInterval(() => loadMessages(selectedPhone), 5000);
+      return () => clearInterval(interval);
     }
   }, [selectedPhone]);
 
@@ -149,7 +128,7 @@ export function AIChat() {
 
   const selectedConversation = conversations.find(c => c.phone === selectedPhone);
 
-  // 发送消息
+  // 发送消息（通过网关）
   const sendMessage = async (text: string) => {
     if (!text.trim() || !selectedPhone) return;
 
@@ -165,9 +144,9 @@ export function AIChat() {
     setInputText('');
     setAiReplies([]);
 
-    // 通过真实 WhatsApp API 发送
+    // 通过网关发送
     try {
-      const res = await fetch('/api/whatsapp-send', {
+      const res = await fetch('/api/whatsapp/qr-send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: selectedPhone, text: text.trim() }),
@@ -242,22 +221,37 @@ export function AIChat() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-serif font-bold text-[#2D2A26] flex items-center gap-2">
+            <QrCode className="w-5 h-5 text-[#7BA369]" />
             WhatsApp 智能客服
           </h2>
           <p className="text-sm text-[#78716C] mt-0.5">
-            {connected ? '已连接 WhatsApp Cloud API · 实时收发消息' : '演示模式 · API 未连接'}
+            {connected ? '已连接扫码网关 · 实时收发消息 · AI 自动回复' : '扫码网关未连接 · 请配置网关 URL'}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* AI 自动回复开关 */}
+          <button
+            onClick={() => setAutoReply(!autoReply)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              autoReply
+                ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                : 'bg-[#F2EBDC] text-[#78716C]'
+            }`}
+            title="AI 自动回复开关"
+          >
+            <Zap className={`w-3.5 h-3.5 ${autoReply ? 'text-[#7BA369]' : ''}`} />
+            自动回复 {autoReply ? 'ON' : 'OFF'}
+          </button>
+
           {connected ? (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32] text-xs font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50]" />
-              WhatsApp 已连接
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50] animate-pulse" />
+              网关已连接
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF3E0] text-[#E65100] text-xs font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF9800]" />
-              演示模式
+              未连接
             </span>
           )}
           <button
@@ -291,7 +285,13 @@ export function AIChat() {
             {loading ? (
               <div className="p-4 text-center text-sm text-[#78716C]">加载中...</div>
             ) : filteredConversations.length === 0 ? (
-              <div className="p-4 text-center text-sm text-[#78716C]">暂无会话</div>
+              <div className="p-8 text-center">
+                <QrCode className="w-10 h-10 mx-auto mb-2 text-[#E8E2D5]" />
+                <p className="text-sm text-[#78716C]">暂无会话</p>
+                <p className="text-xs text-[#78716C]/70 mt-1">
+                  客户给您的 WhatsApp 发消息后将自动显示
+                </p>
+              </div>
             ) : (
               filteredConversations.map(conv => {
                 const isSelected = conv.phone === selectedPhone;
@@ -378,7 +378,7 @@ export function AIChat() {
               >
                 <div className="flex justify-center">
                   <span className="px-3 py-1 rounded-full bg-white/80 text-xs text-[#78716C] shadow-sm">
-                    {connected ? 'WhatsApp 实时消息' : '演示消息'}
+                    {connected ? 'WhatsApp 实时消息 · 网关模式' : '未连接'}
                   </span>
                 </div>
 
@@ -433,7 +433,7 @@ export function AIChat() {
                             </button>
                             <button
                               onClick={() => sendMessage(reply)}
-                              title="发送到 WhatsApp"
+                              title="通过网关发送"
                               className="p-1 rounded hover:bg-[#E8F5E9] text-[#7BA369]"
                               disabled={sending}
                             >
@@ -476,7 +476,7 @@ export function AIChat() {
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputText); } }}
-                      placeholder={connected ? '输入消息... 将通过 WhatsApp 发送' : '输入消息...（演示模式）'}
+                      placeholder={connected ? '输入消息... 通过网关发送' : '输入消息...（未连接）'}
                       className="w-full px-4 py-2.5 text-sm bg-[#FAF7F2] border border-[#E8E2D5] rounded-full focus:outline-none focus:border-[#7BA369] transition-colors pr-10"
                     />
                     <button className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-[#E8E2D5] text-[#78716C]">
@@ -499,12 +499,17 @@ export function AIChat() {
             <div className="flex-1 flex items-center justify-center text-[#78716C]">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#E8E2D5] flex items-center justify-center">
-                  <MessageCircleIcon className="w-8 h-8 text-[#78716C]" />
+                  <QrCode className="w-8 h-8 text-[#78716C]" />
                 </div>
                 <p className="text-sm">选择一个会话开始对话</p>
                 {!connected && (
                   <p className="text-xs mt-2 text-[#78716C]/70">
-                    连接 WhatsApp 后可接收真实客户消息
+                    连接扫码网关后可接收真实客户消息
+                  </p>
+                )}
+                {connected && autoReply && (
+                  <p className="text-xs mt-2 text-[#7BA369]">
+                    AI 自动回复已开启 · 客户消息将自动回复
                   </p>
                 )}
               </div>
@@ -513,28 +518,5 @@ export function AIChat() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Demo 消息（API 未连接时使用）
-function getDemoMessages(phone: string): ChatMessage[] {
-  if (phone.includes('6505558385')) {
-    return [
-      { id: '1', role: 'customer', text: 'Hi, I am interested in your 100kW wind turbine. Can you send me the specifications and price?', time: '10:30' },
-      { id: '2', role: 'me', text: 'Hello! Thank you for your interest. Let me prepare the detailed spec sheet and quotation.', time: '10:32' },
-      { id: '3', role: 'customer', text: 'Great! Also, what is the MOQ and delivery time to Saudi Arabia?', time: '10:35' },
-    ];
-  }
-  return [
-    { id: '1', role: 'customer', text: 'Hola, vi su catálogo. ¿Tienen disponibilidad para 500 paneles solares?', time: '09:15' },
-    { id: '2', role: 'me', text: 'Hola! Sí, tenemos stock disponible. ¿Podría confirmarme el modelo exacto?', time: '09:20' },
-  ];
-}
-
-function MessageCircleIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" style={{ width: '1em', height: '1em' }}>
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-    </svg>
   );
 }
