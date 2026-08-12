@@ -11,6 +11,7 @@ import {
   Inbox,
   Headphones,
   Truck,
+  MessageCircle,
 } from 'lucide-react';
 import { classNames } from '@/lib/utils';
 
@@ -21,6 +22,7 @@ export type Page =
   | 'inquiries'
   | 'shipments'
   | 'products'
+  | 'ai-chat'
   | 'document-center'
   | 'profit-calculator'
   | 'after-sales'
@@ -40,6 +42,7 @@ const navItems: { id: Page; label: string; icon: typeof Home; kbd: string }[] = 
   { id: 'inquiries', label: '询盘管理', icon: Inbox, kbd: 'G I' },
   { id: 'shipments', label: '物流管理', icon: Truck, kbd: 'G S' },
   { id: 'products', label: '产品管理', icon: Package, kbd: 'G P' },
+  { id: 'ai-chat', label: '智能客服', icon: MessageCircle, kbd: 'G M' },
   { id: 'document-center', label: '单据中心', icon: FolderOpen, kbd: 'G O' },
   { id: 'profit-calculator', label: '防亏核算', icon: Calculator, kbd: 'G A' },
   { id: 'after-sales', label: '售后处理', icon: Headphones, kbd: 'G R' },

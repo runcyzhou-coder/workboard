@@ -8,6 +8,7 @@ import { Customers } from '@/components/Customers';
 import { Inquiries } from '@/components/Inquiries';
 import { Shipments } from '@/components/Shipments';
 import { Products } from '@/components/Products';
+import { AIChat } from '@/components/AIChat';
 import { DocumentCenter, type DocType } from '@/components/DocumentCenter';
 import { ProfitCalculator } from '@/components/ProfitCalculator';
 import { AfterSales } from '@/components/AfterSales';
@@ -97,6 +98,7 @@ function App() {
           {page === 'inquiries' && <Inquiries onNavigateDoc={(t) => { setPendingDocType(t as DocType); setPage('document-center'); }} />}
           {page === 'shipments' && <Shipments />}
           {page === 'products' && <Products />}
+          {page === 'ai-chat' && <AIChat />}
           {page === 'document-center' && <DocumentCenter initialDocType={pendingDocType ?? undefined} onConsumed={() => setPendingDocType(null)} />}
           {page === 'profit-calculator' && <ProfitCalculator />}
           {page === 'after-sales' && <AfterSales />}
