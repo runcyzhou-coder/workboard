@@ -8,11 +8,12 @@ import { Customers } from '@/components/Customers';
 import { Inquiries } from '@/components/Inquiries';
 import { Shipments } from '@/components/Shipments';
 import { Products } from '@/components/Products';
-import { AIChat } from '@/components/AIChat';
+// import { AIChat } from '@/components/AIChat'; // 暂时隐藏：流程未跑通
 import { DocumentCenter, type DocType } from '@/components/DocumentCenter';
 import { ProfitCalculator } from '@/components/ProfitCalculator';
 import { AfterSales } from '@/components/AfterSales';
 import { TradeTools } from '@/components/TradeTools';
+import { DevCustomers } from '@/components/DevCustomers';
 
 function App() {
   const [page, setPage] = useState<Page>('home');
@@ -94,11 +95,12 @@ function App() {
         <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           {page === 'home' && <HomePage onNavigate={handleNavigate} />}
           {page === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
+          {page === 'dev-customers' && <DevCustomers />}
           {page === 'customers' && <Customers />}
           {page === 'inquiries' && <Inquiries onNavigateDoc={(t) => { setPendingDocType(t as DocType); setPage('document-center'); }} />}
           {page === 'shipments' && <Shipments />}
           {page === 'products' && <Products />}
-          {page === 'ai-chat' && <AIChat />}
+          {/* {page === 'ai-chat' && <AIChat />} */} {/* 暂时隐藏：流程未跑通 */}
           {page === 'document-center' && <DocumentCenter initialDocType={pendingDocType ?? undefined} onConsumed={() => setPendingDocType(null)} />}
           {page === 'profit-calculator' && <ProfitCalculator />}
           {page === 'after-sales' && <AfterSales />}

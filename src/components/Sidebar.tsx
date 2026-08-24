@@ -12,6 +12,7 @@ import {
   Headphones,
   Truck,
   MessageCircle,
+  Compass,
 } from 'lucide-react';
 import { classNames } from '@/lib/utils';
 
@@ -26,7 +27,8 @@ export type Page =
   | 'document-center'
   | 'profit-calculator'
   | 'after-sales'
-  | 'tools';
+  | 'tools'
+  | 'dev-customers';
 
 interface SidebarProps {
   currentPage: Page;
@@ -38,11 +40,12 @@ interface SidebarProps {
 const navItems: { id: Page; label: string; icon: typeof Home; kbd: string }[] = [
   { id: 'home', label: '首页', icon: Home, kbd: 'G H' },
   { id: 'dashboard', label: '仪表盘', icon: LayoutDashboard, kbd: 'G D' },
+  { id: 'dev-customers', label: '客户开发', icon: Compass, kbd: 'G V' },
   { id: 'customers', label: '客户管理', icon: Users, kbd: 'G C' },
   { id: 'inquiries', label: '询盘管理', icon: Inbox, kbd: 'G I' },
-  { id: 'shipments', label: '物流管理', icon: Truck, kbd: 'G S' },
+  { id: 'shipments', label: '订单履约', icon: Truck, kbd: 'G S' },
   { id: 'products', label: '产品管理', icon: Package, kbd: 'G P' },
-  { id: 'ai-chat', label: '智能客服', icon: MessageCircle, kbd: 'G M' },
+  // { id: 'ai-chat', label: '智能客服', icon: MessageCircle, kbd: 'G M' }, // 暂时隐藏：流程未跑通
   { id: 'document-center', label: '单据中心', icon: FolderOpen, kbd: 'G O' },
   { id: 'profit-calculator', label: '防亏核算', icon: Calculator, kbd: 'G A' },
   { id: 'after-sales', label: '售后处理', icon: Headphones, kbd: 'G R' },

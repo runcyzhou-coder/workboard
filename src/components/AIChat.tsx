@@ -67,38 +67,50 @@ export function AIChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 检查网关连接状态 + 获取二维码
+  // 关键：除非明确返回未授权且有二维码，否则默认显示聊天面板（避免限流导致隐藏）
   const checkGatewayStatus = async () => {
     setCheckingStatus(true);
     try {
-      const res = await fetch('/api/whatsapp/qr-status');
+      const res = await fetch('/api/whatsapp-fetch?action=status');
       const data = await res.json();
 
-      if (data.connected) {
+      // 只要不是明确的「notAuthorized + 有二维码」，就尽量显示为已连接状态
+      // 这样可以避免 429 限流 / 网络错误导致聊天面板消失
+      const clearlyNotAuthorized = !data.connected && data.state === 'notAuthorized' && data.qrCode;
+
+      if (clearlyNotAuthorized) {
+        setConnected(false);
+        setQrCode(data.qrCode);
+        setGatewayStatus('请扫码登录');
+      } else {
         setConnected(true);
         setQrCode(null);
-        setGatewayStatus('已连接');
-      } else {
-        setConnected(false);
-        if (data.qrCode) {
-          setQrCode(data.qrCode);
-          setGatewayStatus('请扫码登录');
-        } else {
-          setQrCode(null);
-          setGatewayStatus(data.message || data.state || '未连接');
-        }
+        setGatewayStatus(data.message || (data.connected ? '已连接' : '连接中'));
       }
     } catch {
-      setConnected(false);
-      setGatewayStatus('检查失败');
+      // 网络错误 → 仍然显示为已连接，确保面板可见
+      setConnected(true);
+      setQrCode(null);
+      setGatewayStatus('连接中');
     } finally {
       setCheckingStatus(false);
     }
   };
 
+  // 主动拉取消息 + 触发 AI 回复处理
+  const pollNewMessages = async () => {
+    try {
+      await fetch('/api/whatsapp-fetch?action=poll&t=' + Date.now(), { cache: 'no-store' });
+    } catch {}
+    try {
+      await fetch('/api/whatsapp-fetch?action=process&t=' + Date.now(), { cache: 'no-store' });
+    } catch {}
+  };
+
   // 加载会话列表
   const loadConversations = async () => {
     try {
-      const res = await fetch('/api/whatsapp-fetch');
+      const res = await fetch('/api/whatsapp-fetch?action=fetch');
       const data = await res.json();
 
       if (data.conversations && data.conversations.length > 0) {
@@ -116,18 +128,30 @@ export function AIChat() {
   useEffect(() => {
     checkGatewayStatus();
     loadConversations();
-    const interval = setInterval(() => {
+    pollNewMessages();
+
+    // 状态检查：30 秒一次（避免 Green-API 429 限流）
+    const statusInterval = setInterval(() => {
       checkGatewayStatus();
+    }, 30000);
+
+    // 会话列表 & 主动拉消息：8 秒一次（消息及时显示）
+    const msgInterval = setInterval(() => {
+      pollNewMessages();
       loadConversations();
-    }, 10000);
-    return () => clearInterval(interval);
+    }, 8000);
+
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(msgInterval);
+    };
   }, []);
 
   // 加载选中会话的历史消息
   const loadMessages = async (phone: string) => {
     try {
       const formattedPhone = phone.replace(/[+\s-]/g, '');
-      const res = await fetch(`/api/whatsapp-fetch?phone=${encodeURIComponent(formattedPhone)}`);
+      const res = await fetch(`/api/whatsapp-fetch?action=fetch&phone=${encodeURIComponent(formattedPhone)}`);
       const data = await res.json();
 
       if (data.messages && data.messages.length > 0) {
@@ -179,17 +203,16 @@ export function AIChat() {
     setAiReplies([]);
 
     try {
-      const res = await fetch('/api/whatsapp/qr-send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: selectedPhone, text: text.trim() }),
-      });
+      const toPhone = selectedPhone.replace(/[+\s-]/g, '');
+      const msgText = encodeURIComponent(text.trim());
+      const res = await fetch(`/api/whatsapp-fetch?action=send&to=${encodeURIComponent(toPhone)}&text=${msgText}`);
       const data = await res.json();
 
       if (!data.ok && !data.simulated) {
         alert('发送失败：' + (data.error || '未知错误'));
       }
-    } catch {
+    } catch (e) {
+      console.error('Send error:', e);
       alert('网络错误，发送失败');
     } finally {
       setSending(false);

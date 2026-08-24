@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search, X, Home, LayoutDashboard, Users, Package, Calculator,
   Wrench, FolderOpen, Inbox, Headphones, Truck, MessageCircle,
-  ChevronRight, FileText, Quote, Briefcase,
+  ChevronRight, FileText, Quote, Briefcase, Compass,
 } from 'lucide-react';
 import type { Page } from './Sidebar';
 import { classNames } from '@/lib/utils';
@@ -26,11 +26,12 @@ interface CommandItem {
 const navCommands: CommandItem[] = [
   { id: 'home', label: '首页', description: '工作台概览 · 行业快讯 · 每日任务', icon: Home, page: 'home', kbd: 'G H', category: '导航' },
   { id: 'dashboard', label: '仪表盘', description: '业务数据总览 · 统计卡片', icon: LayoutDashboard, page: 'dashboard', kbd: 'G D', category: '导航' },
+  { id: 'dev-customers', label: '客户开发', description: '每日开发记录 · 跟进 · 复盘分析', icon: Compass, page: 'dev-customers', kbd: 'G V', category: '导航' },
   { id: 'customers', label: '客户管理', description: '客户档案 · AI 背调 · 跟进记录', icon: Users, page: 'customers', kbd: 'G C', category: '导航' },
   { id: 'inquiries', label: '询盘管理', description: '询盘跟进 · 一键生成单据', icon: Inbox, page: 'inquiries', kbd: 'G I', category: '导航' },
-  { id: 'shipments', label: '物流管理', description: '订舱 · 提单 · 物流轨迹', icon: Truck, page: 'shipments', kbd: 'G S', category: '导航' },
+  { id: 'shipments', label: '订单履约', description: 'PO · 交期 · 物流 · 款项全流程', icon: Truck, page: 'shipments', kbd: 'G S', category: '导航' },
   { id: 'products', label: '产品管理', description: '产品库 · 规格 · 价格', icon: Package, page: 'products', kbd: 'G P', category: '导航' },
-  { id: 'ai-chat', label: '智能客服', description: 'WhatsApp 对话 · AI 智能回复', icon: MessageCircle, page: 'ai-chat', kbd: 'G M', category: '导航' },
+  // { id: 'ai-chat', label: '智能客服', description: 'WhatsApp 对话 · AI 智能回复', icon: MessageCircle, page: 'ai-chat', kbd: 'G M', category: '导航' }, // 暂时隐藏：流程未跑通
   { id: 'document-center', label: '单据中心', description: '商业发票 · 装箱单 · 合同', icon: FolderOpen, page: 'document-center', kbd: 'G O', category: '导航' },
   { id: 'profit-calculator', label: '防亏核算', description: '利润计算 · 实时汇率 · 成本分析', icon: Calculator, page: 'profit-calculator', kbd: 'G A', category: '导航' },
   { id: 'after-sales', label: '售后处理', description: '售后工单 · 问题跟进', icon: Headphones, page: 'after-sales', kbd: 'G R', category: '导航' },

@@ -13,6 +13,13 @@ import { supabase } from '@/lib/supabase';
 import type { CalendarEvent, CalendarEventType, CalendarEventPriority } from '@/lib/supabase';
 import type { Page } from '@/components/Sidebar';
 
+// Buffer polyfill for browser
+const Buffer = {
+  from(str: string): any {
+    return { toString: (encoding: string) => btoa(unescape(encodeURIComponent(str))) };
+  }
+} as any;
+
 interface HomeProps {
   onNavigate: (page: Page) => void;
 }
@@ -948,28 +955,61 @@ function MiniCalendar({
 
 // ============ AI 写信 Modal ============
 function AILetterModal({ news, onClose }: { news: IndustryNews; onClose: () => void }) {
-  const letter = `Subject: Re: ${news.title} — Potential Cooperation Opportunity
+  const [letter, setLetter] = useState('');
+  const [generating, setGenerating] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
 
-Dear Valued Client,
+  useEffect(() => {
+    async function generateLetter() {
+      setGenerating(true);
+      setError(false);
+      try {
+        const newsData = {
+          title: news.title,
+          summary: news.summary,
+          source: news.source,
+          category: news.category,
+        };
+        const newsBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(newsData))));
+        const res = await fetch(`/api/dashboard?action=ai-letter&news=${encodeURIComponent(newsBase64)}`);
+        const json = await res.json();
+        if (json.letter) {
+          setLetter(json.letter);
+        } else {
+          setError(true);
+          setLetter(getFallbackLetter(news));
+        }
+      } catch {
+        setError(true);
+        setLetter(getFallbackLetter(news));
+      }
+      setGenerating(false);
+    }
+    generateLetter();
+  }, [news]);
 
-We at KIKI TECH have been closely monitoring the latest development: "${news.title}". As reported by ${news.source}, ${news.summary}
+  function getFallbackLetter(n: IndustryNews): string {
+    return `Subject: Opportunity for Cooperation — ${n.title}
 
-As a leading manufacturer in the wind energy equipment industry, KIKI TECH offers competitive solutions including:
-• High-efficiency wind turbines (4.5MW–16MW) with international certifications (DNV, IEC)
-• Complete supply chain support from manufacturing to after-sales service
-• Competitive pricing with flexible payment terms
+Dear Valued Partner,
 
-Given the current market dynamics described in the news, we believe this presents an excellent opportunity for collaboration. Our team is ready to provide detailed technical specifications and customized quotations upon your request.
+I hope this message finds you well.
 
-Would you be available for a brief call next week to discuss potential synergies?
+I'm Runcy from KIKI TECH, a leading manufacturer of industrial equipment. We noticed the recent development regarding "${n.title}" (reported by ${n.source}), and we believe this may create interesting opportunities for collaboration.
+
+At KIKI TECH, we specialize in high-quality industrial equipment with competitive pricing and reliable after-sales service. Our team is ready to provide detailed technical specifications and customized quotations upon your request.
+
+Would you be open to discussing how KIKI TECH can support your projects?
+
+Looking forward to your reply.
 
 Best regards,
-KIKI TECH Team
+Runcy
+KIKI TECH
 Email: sales@kiki-tech.com
-Tel: +86-xxx-xxxx-xxxx
 www.kiki-tech.com`;
-
-  const [copied, setCopied] = useState(false);
+  }
 
   function copyLetter() {
     navigator.clipboard.writeText(letter);
@@ -984,6 +1024,8 @@ www.kiki-tech.com`;
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-[#7BA369]" strokeWidth={1.75} />
             <h2 className="text-lg font-serif font-bold text-[#2D2A26]">AI 提取商机写信</h2>
+            {!generating && !error && <span className="text-[10px] bg-[#EDF3E4] text-[#5F8A4D] px-2 py-0.5 rounded-full">AI生成</span>}
+            {error && <span className="text-[10px] bg-[#F2EBDC] text-[#5C5246] px-2 py-0.5 rounded-full">模板</span>}
           </div>
           <button onClick={onClose} className="text-[#78716C] hover:bg-[#F2EBDC] rounded-lg"><X className="w-5 h-5" strokeWidth={1.75} /></button>
         </div>
@@ -991,11 +1033,18 @@ www.kiki-tech.com`;
           <div className="bg-[#EDF3E4] border border-[#C9D9B8] text-[#5F8A4D] rounded-lg p-3 mb-4 text-sm">
             📰 基于新闻：{news.title}
           </div>
-          <pre className="whitespace-pre-wrap text-sm text-[#3D3A36] leading-relaxed font-sans">{letter}</pre>
+          {generating ? (
+            <div className="flex flex-col items-center justify-center py-16 text-[#78716C]">
+              <Loader2 className="w-8 h-8 text-[#7BA369] animate-spin mb-3" strokeWidth={1.75} />
+              <p className="text-sm">AI 正在为您撰写开发信...</p>
+            </div>
+          ) : (
+            <pre className="whitespace-pre-wrap text-sm text-[#3D3A36] leading-relaxed font-sans">{letter}</pre>
+          )}
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-dashed border-[#524E48]/25">
           <button onClick={onClose} className="px-4 py-2 text-sm text-[#78716C] hover:bg-[#F2EBDC] rounded-lg">关闭</button>
-          <button onClick={copyLetter} className="flex items-center gap-1.5 px-4 py-2 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927]">
+          <button onClick={copyLetter} disabled={generating} className="flex items-center gap-1.5 px-4 py-2 bg-[#7BA369] text-[#FAF7F2] rounded-lg text-sm font-medium hover:bg-[#5F8A4D] shadow-[2px_2px_0px_0px_#2B2927] hover:shadow-[3px_3px_0px_0px_#2B2927] disabled:opacity-50">
             {copied ? <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> : <Sparkles className="w-4 h-4" strokeWidth={1.75} />}
             {copied ? '已复制' : '复制全文'}
           </button>
@@ -1115,6 +1164,13 @@ export function HomePage({ onNavigate }: HomeProps) {
   const [aiLetterNews, setAiLetterNews] = useState<IndustryNews | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(getTodayStr());
 
+  // 销售励志词条（动态）
+  const [greeting, setGreeting] = useState<string>('');
+  const [greetingLoading, setGreetingLoading] = useState(true);
+
+  // AI写信状态
+  const [aiLetterGenerating, setAiLetterGenerating] = useState(false);
+
   // 风控预警状态
   const [riskAlerts, setRiskAlerts] = useState<RiskAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
@@ -1133,33 +1189,89 @@ export function HomePage({ onNavigate }: HomeProps) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
   }, [todos]);
 
-  // 初始化演示数据 + 获取风控预警
+  // 获取 AI 每日励志词条
+  useEffect(() => {
+    async function loadGreeting() {
+      setGreetingLoading(true);
+      try {
+        const res = await fetch('/api/dashboard?action=greeting&t=' + Date.now());
+        const json = await res.json();
+        if (json.greeting) {
+          setGreeting(json.greeting);
+        }
+      } catch {
+        // 降级：本地随机
+        const localGreetings = [
+          '只有个人进步，才是解决所有问题的最优解。',
+          '真正的成长，始于对自己的不满足。',
+          '认知的边界，就是人生的天花板。',
+          '向内求，向外修。',
+          '你的时间有限，不要为别人而活。',
+          '种一棵树最好的时间是十年前，其次是现在。',
+          '不要等风来，要做自己的风。',
+          '人生没有白走的路，每一步都算数。',
+          '格局决定结局，态度决定高度。',
+          '自律即自由。',
+          '所有的优秀，都源于不将就。',
+          '真正的高手，都是长期主义者。',
+          '慢慢来，比较快。',
+          '日拱一卒，功不唐捐。',
+        ];
+        setGreeting(localGreetings[Math.floor(Math.random() * localGreetings.length)]);
+      }
+      setGreetingLoading(false);
+    }
+    loadGreeting();
+  }, []);
+
+  // 初始化演示数据 + 获取风控预警（升级为AI分析）
   useEffect(() => {
     let cancelled = false;
     async function loadAlerts() {
       setAlertsLoading(true);
       try {
         await ensureSeedData();
-        const [piRes, shipmentRes, customerRes] = await Promise.all([
+        const [piRes, shipmentRes, customerRes, inquiryRes] = await Promise.all([
           supabase.from('proforma_invoices').select('*'),
           supabase.from('shipments').select('*'),
           supabase.from('customers').select('*'),
+          supabase.from('inquiries').select('*'),
         ]);
         if (cancelled) return;
         const invoices = piRes.data || [];
         const shipments = shipmentRes.data || [];
         const customers = customerRes.data || [];
-        const alerts = generateRiskAlerts(invoices, shipments, customers);
-        setRiskAlerts(alerts);
+        const inquiryList = inquiryRes.data || [];
 
-        // 统计仪表盘数据
+        // 尝试AI风控分析
+        try {
+          const aiRes = await fetch('/api/dashboard?action=risk-analysis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invoices, shipments, customers }),
+          });
+          if (aiRes.ok) {
+            const json = await aiRes.json();
+            if (json.alerts && Array.isArray(json.alerts)) {
+              setRiskAlerts(json.alerts);
+            } else {
+              setRiskAlerts(generateRiskAlerts(invoices, shipments, customers));
+            }
+          } else {
+            setRiskAlerts(generateRiskAlerts(invoices, shipments, customers));
+          }
+        } catch {
+          // 降级到本地规则
+          setRiskAlerts(generateRiskAlerts(invoices, shipments, customers));
+        }
+
+        // 统计仪表盘数据（询盘数量从 inquiries 表获取，与询盘管理同步）
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const newInquiryCount = invoices.filter(pi => {
-          const d = pi.created_at ? new Date(pi.created_at) : null;
+        const newInquiryCount = inquiryList.filter((inq: any) => {
+          const d = inq.created_at ? new Date(inq.created_at) : null;
           return d && d >= monthStart;
         }).length;
-        // 待收尾款：付款条件含 balance/70% 且未到账
         const pendingPayment = invoices
           .filter(pi => {
             const terms = (pi.payment_terms || '').toLowerCase();
@@ -1167,7 +1279,6 @@ export function HomePage({ onNavigate }: HomeProps) {
           })
           .reduce((sum, pi) => {
             const total = Number(pi.total_amount) || 0;
-            // 尾款比例默认 70%
             return sum + total * 0.7;
           }, 0);
         setStats({
@@ -1182,12 +1293,12 @@ export function HomePage({ onNavigate }: HomeProps) {
     return () => { cancelled = true; };
   }, []);
 
-  // ===== 行业偏好加载与数据获取 =====
+  // ===== 行业偏好加载与数据获取（升级为AI动态数据）=====
   const loadIndustryData = useCallback(async (industry: string) => {
     if (!industry) return;
     setIndustryLoading(true);
     try {
-      const res = await fetch(`/api/dashboard-industry-data?industry=${encodeURIComponent(industry)}`);
+      const res = await fetch(`/api/dashboard?action=industry-news&industry=${encodeURIComponent(industry)}&t=${Date.now()}`);
       const json = await res.json();
       if (json.data) {
         setIndustryData({
@@ -1195,6 +1306,8 @@ export function HomePage({ onNavigate }: HomeProps) {
           hot_markets: json.data.hot_markets || [],
           hot_products: json.data.hot_products || [],
         });
+      } else {
+        setIndustryData(null);
       }
     } catch {
       setIndustryData(null);
@@ -1303,12 +1416,10 @@ export function HomePage({ onNavigate }: HomeProps) {
         <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#7BA369]/[0.05] blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-medium text-[#78716C] font-handwriting text-[13px] mb-2">
-              <Sparkles className="w-4 h-4 text-[#7BA369]" strokeWidth={1.75} />
-              <span>AI 智能首页</span>
-            </div>
             <div className="flex items-center gap-3 mb-1 flex-wrap">
-              <h1 className="text-3xl font-serif font-bold text-[#2D2A26]">早安，KIKI TECH</h1>
+              <h1 className="text-3xl font-serif font-bold text-[#2D2A26]">
+                {greetingLoading ? '加载中...' : greeting || '向内求，向外修。'}
+              </h1>
               <button
                 onClick={() => setShowIndustryModal(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EBDC] border border-[#E0D5C1] text-[#5C5246] hover:border-[#7BA369] hover:text-[#2D2A26] transition-all text-sm font-semibold"

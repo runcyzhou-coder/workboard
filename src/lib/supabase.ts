@@ -15,7 +15,7 @@ const isValidUrl = (url: string) => {
 };
 
 // 判断是否配置了有效的 Supabase 凭据
-const hasValidSupabaseConfig = isValidUrl(rawUrl) && rawKey && !rawKey.startsWith('your_');
+export const hasValidSupabaseConfig = isValidUrl(rawUrl) && rawKey && !rawKey.startsWith('your_');
 
 // 未配置真实 Supabase 时使用 localStorage 本地适配器，保证应用功能可用
 export const supabase = hasValidSupabaseConfig
@@ -26,6 +26,7 @@ export const supabase = hasValidSupabaseConfig
 export interface BackgroundReport {
   company_type: string;
   scale: string;
+  industry: string;
   main_business: string;
   key_match_products: string[];
   risk_assessment: string;
@@ -37,6 +38,13 @@ export interface BackgroundReport {
   pitch_hook: string;
   matching_point: string;
   generated_at: string;
+  // 新增字段
+  match_score?: number;
+  confidence?: 'high' | 'medium' | 'low';
+  strengths?: string[];
+  risk_factors?: string[];
+  estimated_budget?: string;
+  timeline?: string;
 }
 
 export interface Customer {
@@ -54,6 +62,107 @@ export interface Customer {
   background_report?: BackgroundReport | null;
   created_at: string;
   updated_at: string;
+}
+
+// ====== 外贸客户开发模块 ======
+export type DevSource = 
+  | 'google' | 'linkedin' | 'alibaba' | 'mic' | 'globalsources'
+  | 'exhibition' | 'whatsapp' | 'referral' | 'email' | 'website' | 'other';
+export type CustomerType = 'trader' | 'wholesaler' | 'retailer' | 'factory' | 'brand';
+export type DevStage = 
+  | 'new_not_contacted' | 'first_email_sent' | 'quoted' | 'sample_pending'
+  | 'sample_confirmed' | 'pi_pending' | 'balance_pending' | 'won' | 'lost' | 'dormant';
+export type CooperationGrade = 'A' | 'B' | 'C' | 'D';
+export type FollowupType = 'email' | 'whatsapp' | 'quote' | 'sample' | 'call' | 'visit' | 'other';
+
+export interface DevCustomer {
+  id: string;
+  // 基础信息
+  company_name_en: string;
+  company_name: string | null;
+  country: string | null;
+  city: string | null;
+  website: string | null;
+  customer_type: CustomerType | null;
+  main_market: string | null;
+  main_products: string | null;
+
+  // 开发来源
+  dev_source: DevSource;
+  dev_source_detail: string | null;
+
+  // 联系人信息
+  contact_name: string | null;
+  contact_title: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  phone: string | null;
+  skype: string | null;
+  linkedin_url: string | null;
+  timezone: string | null;
+
+  // 背调信息
+  company_size: string | null;
+  founded_year: number | null;
+  main_sales_region: string | null;
+  current_suppliers: string | null;
+  purchase_frequency: string | null;
+  purchase_volume: string | null;
+  target_price_range: string | null;
+  credit_status: string | null;
+  has_brand: boolean | null;
+  has_distribution: boolean | null;
+  pain_points: string | null;
+  cooperation_grade: CooperationGrade | null;
+  backgound_notes: string | null;
+
+  // 产品业务记录
+  inquiry_products: string | null;
+  inquiry_specs: string | null;
+  target_price: string | null;
+  moq_requirement: string | null;
+  certification_needs: string | null;
+
+  // 跟进状态
+  dev_stage: DevStage;
+  last_contact_date: string | null;
+  next_followup_date: string | null;
+  followup_count: number;
+
+  // 流失信息
+  loss_reason: string | null;
+  lost_at: string | null;
+
+  // 每日记录
+  daily_dev_date: string | null;
+  daily_summary: string | null;
+
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FollowupRecord {
+  id: string;
+  customer_id: string;
+  type: FollowupType;
+  content: string;
+  followup_date: string;
+  next_followup_date: string | null;
+  created_at: string;
+}
+
+export interface DailyDevLog {
+  id: string;
+  log_date: string;
+  new_customers_count: number;
+  emails_sent: number;
+  replies_received: number;
+  quotes_sent: number;
+  samples_sent: number;
+  orders_won: number;
+  summary: string | null;
+  created_at: string;
 }
 
 export interface Product {
@@ -384,7 +493,7 @@ export interface Inquiry {
   inquiry_number: string;
   customer_id: string | null;
   subject: string;
-  status: 'new' | 'quoted' | 'in_progress' | 'closed' | 'lost';
+  status: 'new' | 'quoted' | 'in_progress' | 'won' | 'lost';
   source: string | null;
   currency: string;
   expected_quantity: number;
@@ -399,7 +508,7 @@ export interface Inquiry {
   updated_at: string;
 }
 
-// ============== 物流管理 ==============
+// ============== 订单履约 ==============
 export type ShipmentStatus =
   | 'pending_booking'
   | 'booked'
@@ -408,37 +517,58 @@ export type ShipmentStatus =
   | 'arrived'
   | 'delivered';
 
+export type ShippingScenario = 'our_forwarder' | 'client_forwarder';
+export type PaymentStatus = 'unpaid' | 'partial' | 'paid' | 'balance_pending' | 'bl_released';
+
 export interface Shipment {
   id: string;
   shipment_number: string;
   inquiry_id: string | null;
   customer_id: string | null;
   status: ShipmentStatus;
-  // 货代信息
-  forwarder_name: string | null;
-  forwarder_contact: string | null;
-  // 订舱号
+
+  // ======= 订单履约核心节点 =======
+  // 供应商采购下单日
+  po_date: string | null;
+  // 供应商承诺交期（工厂预计出货时间）
+  factory_eta: string | null;
+  // 我方承诺交货期（给客户的最终交付日）
+  client_deadline: string | null;
+
+  // ======= 物流场景 =======
+  shipping_scenario: ShippingScenario;  // 我方安排 or 客户自货代
+  // 国内物流节点
+  domestic_shipped_date: string | null;     // 国内发货日期
+  forwarder_received_date: string | null;   // 货代收到货日期
+  // 我方安排的运输节点
   so_number: string | null;
-  // 柜号
+  booking_date: string | null;              // 订舱日期
   container_number: string | null;
-  // 提单号
   bl_number: string | null;
-  // 船公司/航空公司
   carrier: string | null;
-  // 船名航次
   vessel_voyage: string | null;
-  // 时间节点
-  cy_cutoff: string | null;       // 截关时间
-  si_cutoff: string | null;       // 截单时间
-  etd: string | null;             // 预计开船
-  atd: string | null;             // 实际开船
-  eta: string | null;             // 预计到港
-  ata: string | null;             // 实际到港
-  // 港口
+  etd: string | null;
+  atd: string | null;
+  eta: string | null;
+  ata: string | null;
   port_of_loading: string | null;
   port_of_discharge: string | null;
-  // 运输方式
   shipping_method: string | null;
+
+  // ======= 货代信息 =======
+  forwarder_name: string | null;
+  forwarder_contact: string | null;
+
+  // ======= 款项节点 =======
+  payment_type: string | null;              // 全款 or 分期
+  total_amount: number;                     // 订单总金额
+  paid_amount: number;                      // 已收到金额
+  balance_amount: number;                   // 尾款金额
+  balance_received_date: string | null;      // 尾款收到日期
+  bl_released_date: string | null;          // 提单放行日期
+  payment_status: PaymentStatus;           // 当前款项状态
+
+  // ======= 备注 =======
   notes: string | null;
   created_at: string;
   updated_at: string;

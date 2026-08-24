@@ -6,13 +6,14 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { classNames, formatDate, generateDocNumber, formatCurrency, CURRENCIES, TRADE_TERMS, PAYMENT_TERMS } from '@/lib/utils';
+import { syncWonInquiriesToShipments } from '@/lib/sync';
 import type { Inquiry, InquiryItem, Customer } from '@/lib/supabase';
 
 const statusOptions: { value: Inquiry['status']; label: string; color: string }[] = [
   { value: 'new', label: '新询盘', color: 'bg-blue-100 text-blue-700' },
   { value: 'quoted', label: '已报价', color: 'bg-amber-100 text-amber-700' },
-  { value: 'in_progress', label: '进行中', color: 'bg-purple-100 text-purple-700' },
-  { value: 'closed', label: '已成交', color: 'bg-emerald-100 text-emerald-700' },
+  { value: 'in_progress', label: '洽谈中', color: 'bg-purple-100 text-purple-700' },
+  { value: 'won', label: '已成交', color: 'bg-emerald-100 text-emerald-700' },
   { value: 'lost', label: '已丢失', color: 'bg-slate-100 text-slate-500' },
 ];
 
@@ -39,6 +40,8 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
   const [genModal, setGenModal] = useState<{ inquiry: Inquiry; customer?: Customer } | null>(null);
   const [genResults, setGenResults] = useState<GenerateResult[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [statusMenuOpen, setStatusMenuOpen] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,6 +54,20 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
     load();
     supabase.from('customers').select('*').then(({ data }) => setCustomers((data as Customer[]) || []));
   }, [load]);
+
+  // 点击外部关闭状态菜单
+  useEffect(() => {
+    if (!statusMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-status-menu-button]') || target.closest('[data-status-menu-item]')) {
+        return;
+      }
+      setStatusMenuOpen(null);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [statusMenuOpen]);
 
   const filtered = useMemo(() => inquiries.filter(q => {
     const matchSearch = !search ||
@@ -150,6 +167,26 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
   async function remove(id: string) {
     if (!confirm('确定删除此询盘？关联的售后单不会被删除。')) return;
     await supabase.from('inquiries').delete().eq('id', id);
+    load();
+  }
+
+  async function updateStatus(id: string, newStatus: Inquiry['status']) {
+    setUpdatingStatus(id);
+    setStatusMenuOpen(null);
+    await supabase.from('inquiries').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
+
+    // 当询盘标记为"已成交"时，自动创建订单履约记录
+    if (newStatus === 'won') {
+      try {
+        // 使用同步工具为所有需要同步的询盘创建履约记录
+        const result = await syncWonInquiriesToShipments();
+        console.log('[自动同步] 结果:', result);
+      } catch (e) {
+        console.error('创建履约记录失败:', e);
+      }
+    }
+
+    setUpdatingStatus(null);
     load();
   }
 
@@ -451,8 +488,10 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
             const statusInfo = statusOptions.find(s => s.value === q.status);
             const totalAmt = (q.items || []).reduce((s, i) => s + (i.total || 0), 0);
             const totalQty = (q.items || []).reduce((s, i) => s + (i.quantity || 0), 0);
+            const isStatusMenuOpen = statusMenuOpen === q.id;
+            const isUpdating = updatingStatus === q.id;
             return (
-              <div key={q.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div key={q.id} className="bg-white rounded-xl border border-slate-200 overflow-visible">
                 <div className="p-4 flex items-center gap-4">
                   <button onClick={() => setExpanded(isExpanded ? null : q.id)} className="p-1 text-slate-400 hover:text-slate-600">
                     {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -460,7 +499,48 @@ export function Inquiries({ onNavigateDoc }: { onNavigateDoc?: (docType: string)
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-xs text-slate-500">{q.inquiry_number}</span>
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${statusInfo?.color}`}>{statusInfo?.label}</span>
+                      {/* 可点击的状态标签 */}
+                      <div className="relative inline-block">
+                        <button
+                          data-status-menu-button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setStatusMenuOpen(isStatusMenuOpen ? null : q.id);
+                          }}
+                          disabled={isUpdating}
+                          className={`px-2 py-0.5 rounded text-[11px] font-medium cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 ${statusInfo?.color} ${isUpdating ? 'opacity-60' : ''}`}
+                          title="点击更改状态"
+                        >
+                          {isUpdating ? (
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                              更新中...
+                            </span>
+                          ) : (
+                            <>
+                              {statusInfo?.label}
+                              <ChevronDown className="w-3 h-3 opacity-60" />
+                            </>
+                          )}
+                        </button>
+                        {/* 状态下拉菜单 - absolute定位，父容器overflow-visible所以不会被裁剪 */}
+                        {isStatusMenuOpen && !isUpdating && (
+                          <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-slate-200 rounded-lg shadow-xl py-1 min-w-[120px]">
+                            {statusOptions.map(s => (
+                              <button
+                                key={s.value}
+                                data-status-menu-item
+                                onClick={(e) => { e.stopPropagation(); updateStatus(q.id, s.value); }}
+                                className={`w-full px-3 py-1.5 text-left text-xs hover:bg-slate-50 flex items-center gap-2 ${q.status === s.value ? 'bg-blue-50 font-medium' : ''}`}
+                              >
+                                <span className={`w-2 h-2 rounded-full ${s.color.split(' ')[0]}`} />
+                                {s.label}
+                                {q.status === s.value && <span className="ml-auto text-blue-500">✓</span>}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       {q.source && <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[11px]">{q.source}</span>}
                     </div>
                     <h3 className="font-semibold text-slate-900 mt-1 truncate">{q.subject}</h3>

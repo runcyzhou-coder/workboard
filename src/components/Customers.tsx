@@ -490,7 +490,7 @@ export function Customers() {
     setResearchLoading(true);
     setResearchReport(null);
     try {
-      const res = await fetch('/api/client-research', {
+      const res = await fetch('/api/whatsapp-fetch?action=research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -499,6 +499,9 @@ export function Customers() {
           country: researchCustomer.country,
           contact_name: researchCustomer.contact_name,
           notes: researchCustomer.notes,
+          email: researchCustomer.email,
+          phone: researchCustomer.phone,
+          industry: researchCustomer.industry,
         }),
       });
       const data = await res.json();
@@ -688,7 +691,7 @@ Website: www.kiki-tech.com`;
                         setAnalyzing(true);
                         setAiAnalysis(null);
                         try {
-                          const res = await fetch('/api/customer-analysis', {
+                          const res = await fetch('/api/whatsapp-fetch?action=analyze', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(c),
@@ -1272,7 +1275,7 @@ Website: www.kiki-tech.com`;
                     <div className="flex items-start justify-between mb-3">
                       <div className="min-w-0">
                         <h3 className="text-lg font-bold text-slate-900">{researchCustomer.company_name}</h3>
-                        <p className="text-sm text-slate-500 mt-0.5 truncate">{researchReport.main_business.split('.')[0]}</p>
+                        <p className="text-sm text-slate-500 mt-0.5 truncate">{(researchReport.main_business || '').split('.')[0]}</p>
                       </div>
                       <button
                         onClick={runResearch}
@@ -1320,7 +1323,7 @@ Website: www.kiki-tech.com`;
                         {researchReport.risk_level === 'low' ? '低风险' : researchReport.risk_level === 'medium' ? '中风险' : '高风险'}
                       </span>
                       {/* 额外标签 */}
-                      {researchReport.tags.slice(0, 2).map((tag, i) => (
+                      {(researchReport.tags || []).slice(0, 2).map((tag, i) => (
                         <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-600 border border-indigo-100">
                           {tag}
                         </span>
@@ -1336,7 +1339,7 @@ Website: www.kiki-tech.com`;
                       <span className="text-xs text-slate-400 font-normal">AI 识别的关键职位，点击在 LinkedIn 查找</span>
                     </h3>
                     <div className="space-y-2">
-                      {researchReport.decision_makers.length > 0 ? researchReport.decision_makers.map((dm, i) => {
+                      {(researchReport.decision_makers || []).length > 0 ? (researchReport.decision_makers || []).map((dm, i) => {
                         const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(researchCustomer.company_name + ' ' + dm.title)}`;
                         return (
                           <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group">
@@ -1387,7 +1390,7 @@ Website: www.kiki-tech.com`;
                     </h3>
                     <p className="text-sm text-slate-700 leading-relaxed mb-4">{researchReport.matching_point || researchReport.main_business}</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {researchReport.key_match_products.map((p, i) => (
+                      {(researchReport.key_match_products || []).map((p, i) => (
                         <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium border border-indigo-100">
                           <CheckCircle className="w-3 h-3" />
                           {p}
@@ -1424,7 +1427,7 @@ Website: www.kiki-tech.com`;
                     </button>
                     <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
                       <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                      报告已保存 · 生成于 {formatDate(researchReport.generated_at)} · 点击上方按钮自动带入 pitch_hook 与 matching_point
+                      报告已保存 · 生成于 {researchReport.generated_at ? formatDate(researchReport.generated_at) : '刚刚'} · 点击上方按钮自动带入 pitch_hook 与 matching_point
                     </div>
                   </div>
                 </div>
