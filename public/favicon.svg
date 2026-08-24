@@ -1,28 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <!-- White background -->
-  <rect width="64" height="64" rx="12" fill="#FFFFFF"/>
+  <!-- Light green background -->
+  <rect width="64" height="64" rx="12" fill="#E8F0E0"/>
   
-  <!-- Globe: green circle with grid lines -->
-  <circle cx="34" cy="38" r="18" fill="#A8D5A2"/>
-  <!-- Globe grid - horizontal lines -->
-  <ellipse cx="34" cy="38" rx="18" ry="6" fill="none" stroke="#4A8B3E" stroke-width="1.2"/>
-  <ellipse cx="34" cy="38" rx="18" ry="12" fill="none" stroke="#4A8B3E" stroke-width="1"/>
-  <!-- Globe grid - vertical lines -->
-  <ellipse cx="34" cy="38" rx="6" ry="18" fill="none" stroke="#4A8B3E" stroke-width="1"/>
-  <ellipse cx="34" cy="38" rx="12" ry="18" fill="none" stroke="#4A8B3E" stroke-width="1"/>
-  <!-- Center vertical line -->
-  <line x1="34" y1="20" x2="34" y2="56" stroke="#4A8B3E" stroke-width="1"/>
-  <!-- Center horizontal line -->
-  <line x1="16" y1="38" x2="52" y2="38" stroke="#4A8B3E" stroke-width="1"/>
+  <!-- Open book shape -->
+  <!-- Left page -->
+  <path d="M 8 20 L 32 18 L 32 54 L 8 52 Q 8 48 8 44 Z" fill="#FAF7F2" stroke="#8B9A7B" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Right page -->
+  <path d="M 56 20 L 32 18 L 32 54 L 56 52 Q 56 48 56 44 Z" fill="#FAF7F2" stroke="#8B9A7B" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Book spine -->
+  <line x1="32" y1="18" x2="32" y2="54" stroke="#8B9A7B" stroke-width="0.8" stroke-dasharray="1 1"/>
+  <!-- Book bottom edge -->
+  <path d="M 8 52 L 32 54 L 56 52" fill="none" stroke="#8B9A7B" stroke-width="1" stroke-linejoin="round"/>
   
-  <!-- Upward arrow (dark green) -->
-  <path d="M 20 48 L 20 32 L 30 22 L 36 22 L 26 32 L 40 32 L 40 48 Z" fill="#1F6B3A" stroke="#1F6B3A" stroke-width="0.5" stroke-linejoin="round"/>
-  <!-- Arrow head -->
-  <path d="M 36 14 L 52 24 L 40 28 L 38 34 L 30 34 L 32 28 L 26 24 Z" fill="#1F6B3A" stroke="#1F6B3A" stroke-width="0.5" stroke-linejoin="round"/>
+  <!-- Large K letter -->
+  <path d="M 23 24 L 23 44 M 23 34 L 33 24 M 23 34 L 33 44" fill="none" stroke="#2D5A3D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
   
-  <!-- Chat bubbles (light green, left side) -->
-  <rect x="6" y="26" width="14" height="10" rx="3" fill="#7BC67E"/>
-  <polygon points="10,36 12,40 14,36" fill="#7BC67E"/>
-  <rect x="10" y="18" width="12" height="8" rx="3" fill="#5BB85F"/>
-  <polygon points="14,26 15,29 16,26" fill="#5BB85F"/>
+  <!-- Decorative leaves -->
+  <path d="M 12 22 Q 14 18 18 20 Q 16 24 12 22" fill="#7BA369"/>
+  <path d="M 52 22 Q 50 18 46 20 Q 48 24 52 22" fill="#7BA369"/>
+  <path d="M 14 48 Q 18 52 22 50 Q 20 46 14 48" fill="#5B8A4A"/>
+  <path d="M 50 48 Q 46 52 42 50 Q 44 46 50 48" fill="#5B8A4A"/>
+  
+  <!-- Small stars -->
+  <path d="M 10 32 L 11 34 L 13 35 L 11 36 L 10 38 L 9 36 L 7 35 L 9 34 Z" fill="#D4A840"/>
+  <path d="M 54 32 L 55 34 L 57 35 L 55 36 L 54 38 L 53 36 L 51 35 L 53 34 Z" fill="#D4A840"/>
+  <path d="M 48 42 L 48.5 43 L 49.5 43.5 L 48.5 44 L 48 45 L 47.5 44 L 46.5 43.5 L 47.5 43 Z" fill="#D4A840" opacity="0.7"/>
+  
+  <!-- Small bird in bottom right -->
+  <path d="M 46 52 Q 48 50 50 51 Q 52 52 51 54 Q 50 55 48 54 Q 47 53 46 52" fill="#7BA369"/>
+  <circle cx="49" cy="52" r="0.5" fill="#2D2A26"/>
+  <path d="M 50 51 L 52 50" stroke="#D4A840" stroke-width="0.5" stroke-linecap="round"/>
 </svg>
