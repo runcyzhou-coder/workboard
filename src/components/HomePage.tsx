@@ -1231,38 +1231,49 @@ export function HomePage({ onNavigate }: HomeProps) {
       setAlertsLoading(true);
       try {
         await ensureSeedData();
-        const [piRes, shipmentRes, customerRes, inquiryRes] = await Promise.all([
+        const [piRes, shipmentRes, customerRes, inquiryRes, devCustomerRes] = await Promise.all([
           supabase.from('proforma_invoices').select('*'),
           supabase.from('shipments').select('*'),
           supabase.from('customers').select('*'),
           supabase.from('inquiries').select('*'),
+          supabase.from('dev_customers').select('*'),
         ]);
         if (cancelled) return;
         const invoices = piRes.data || [];
         const shipments = shipmentRes.data || [];
         const customers = customerRes.data || [];
         const inquiryList = inquiryRes.data || [];
+        // 合并客户管理 + 客户开发两个表的客户数量
+        let devCustomers = devCustomerRes.data || [];
+        // 降级：如果Supabase查询失败，从localStorage读取dev_customers
+        if (devCustomerRes.error || devCustomers.length === 0) {
+          try {
+            const localDev = localStorage.getItem('wb_dev_customers');
+            if (localDev) devCustomers = JSON.parse(localDev);
+          } catch {}
+        }
+        const allCustomers = [...customers, ...devCustomers];
 
         // 尝试AI风控分析
         try {
           const aiRes = await fetch('/api/dashboard?action=risk-analysis', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ invoices, shipments, customers }),
+            body: JSON.stringify({ invoices, shipments, customers: allCustomers }),
           });
           if (aiRes.ok) {
             const json = await aiRes.json();
             if (json.alerts && Array.isArray(json.alerts)) {
               setRiskAlerts(json.alerts);
             } else {
-              setRiskAlerts(generateRiskAlerts(invoices, shipments, customers));
+              setRiskAlerts(generateRiskAlerts(invoices, shipments, allCustomers));
             }
           } else {
-            setRiskAlerts(generateRiskAlerts(invoices, shipments, customers));
+            setRiskAlerts(generateRiskAlerts(invoices, shipments, allCustomers));
           }
         } catch {
           // 降级到本地规则
-          setRiskAlerts(generateRiskAlerts(invoices, shipments, customers));
+          setRiskAlerts(generateRiskAlerts(invoices, shipments, allCustomers));
         }
 
         // 统计仪表盘数据（询盘数量从 inquiries 表获取，与询盘管理同步）
@@ -1282,7 +1293,7 @@ export function HomePage({ onNavigate }: HomeProps) {
             return sum + total * 0.7;
           }, 0);
         setStats({
-          customerCount: customers.length,
+          customerCount: allCustomers.length,
           newInquiryCount,
           pendingPayment: Math.round(pendingPayment),
         });
