@@ -15,6 +15,7 @@ import { AfterSales } from '@/components/AfterSales';
 import { TradeTools } from '@/components/TradeTools';
 import { DevCustomers } from '@/components/DevCustomers';
 import { Login } from '@/components/Login';
+import { DataMigration } from '@/components/DataMigration';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 
@@ -143,6 +144,7 @@ function AppContent() {
           {page === 'profit-calculator' && <ProfitCalculator />}
           {page === 'after-sales' && <AfterSales />}
           {page === 'tools' && <TradeTools />}
+          {page === 'data-migration' && <DataMigration />}
         </main>
       </div>
 

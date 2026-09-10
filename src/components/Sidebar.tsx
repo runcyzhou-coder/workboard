@@ -13,6 +13,7 @@ import {
   Truck,
   MessageCircle,
   Compass,
+  Database,
 } from 'lucide-react';
 import { classNames } from '@/lib/utils';
 
@@ -28,7 +29,8 @@ export type Page =
   | 'profit-calculator'
   | 'after-sales'
   | 'tools'
-  | 'dev-customers';
+  | 'dev-customers'
+  | 'data-migration';
 
 interface SidebarProps {
   currentPage: Page;
@@ -50,6 +52,7 @@ const navItems: { id: Page; label: string; icon: typeof Home; kbd: string }[] = 
   { id: 'profit-calculator', label: '防亏核算', icon: Calculator, kbd: 'G A' },
   { id: 'after-sales', label: '售后处理', icon: Headphones, kbd: 'G R' },
   { id: 'tools', label: '贸易工具', icon: Wrench, kbd: 'G T' },
+  { id: 'data-migration', label: '数据迁移', icon: Database, kbd: 'G M' },
 ];
 
 export function Sidebar({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) {

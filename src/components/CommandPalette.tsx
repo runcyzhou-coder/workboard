@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search, X, Home, LayoutDashboard, Users, Package, Calculator,
   Wrench, FolderOpen, Inbox, Headphones, Truck, MessageCircle,
-  ChevronRight, FileText, Quote, Briefcase, Compass,
+  ChevronRight, FileText, Quote, Briefcase, Compass, Database,
 } from 'lucide-react';
 import type { Page } from './Sidebar';
 import { classNames } from '@/lib/utils';
@@ -36,6 +36,7 @@ const navCommands: CommandItem[] = [
   { id: 'profit-calculator', label: '防亏核算', description: '利润计算 · 实时汇率 · 成本分析', icon: Calculator, page: 'profit-calculator', kbd: 'G A', category: '导航' },
   { id: 'after-sales', label: '售后处理', description: '售后工单 · 问题跟进', icon: Headphones, page: 'after-sales', kbd: 'G R', category: '导航' },
   { id: 'tools', label: '贸易工具', description: '汇率 · 翻译 · 计算工具', icon: Wrench, page: 'tools', kbd: 'G T', category: '导航' },
+  { id: 'data-migration', label: '数据迁移', description: '迁移游客账号数据到当前账号', icon: Database, page: 'data-migration', kbd: 'G M', category: '导航' },
 ];
 
 const quickCommands: CommandItem[] = [
