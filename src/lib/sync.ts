@@ -2,6 +2,7 @@
 // 处理询盘管理与订单履约之间的数据同步
 
 import { supabase, hasValidSupabaseConfig } from './supabase';
+import { userScopedKey } from './localClient';
 
 /**
  * 为所有已成交但尚无履约记录的询盘创建订单履约
@@ -116,8 +117,8 @@ export async function syncWonInquiriesToShipments(): Promise<{
       }
     } else {
       // ====== localStorage 模式 ======
-      const rawInquiries = localStorage.getItem('wb_inquiries');
-      const rawShipments = localStorage.getItem('wb_shipments');
+      const rawInquiries = localStorage.getItem(userScopedKey('inquiries'));
+      const rawShipments = localStorage.getItem(userScopedKey('shipments'));
       const inquiriesList = rawInquiries ? JSON.parse(rawInquiries) : [];
       const shipmentsList = rawShipments ? JSON.parse(rawShipments) : [];
 
@@ -179,7 +180,7 @@ export async function syncWonInquiriesToShipments(): Promise<{
         });
         createdCount++;
       }
-      localStorage.setItem('wb_shipments', JSON.stringify(shipmentsList));
+      localStorage.setItem(userScopedKey('shipments'), JSON.stringify(shipmentsList));
     }
 
     const message = createdCount > 0
@@ -223,8 +224,8 @@ export async function getDataStatus(): Promise<any> {
       return { mode: 'Supabase', error: String(e) };
     }
   } else {
-    const rawInquiries = localStorage.getItem('wb_inquiries');
-    const rawShipments = localStorage.getItem('wb_shipments');
+    const rawInquiries = localStorage.getItem(userScopedKey('inquiries'));
+    const rawShipments = localStorage.getItem(userScopedKey('shipments'));
     const inquiriesList = rawInquiries ? JSON.parse(rawInquiries) : [];
     const shipmentsList = rawShipments ? JSON.parse(rawShipments) : [];
     

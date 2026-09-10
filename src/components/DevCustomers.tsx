@@ -7,6 +7,7 @@ import {
   Package, CheckCircle2, MoreHorizontal, Sparkles, Loader2,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { userScopedKey } from '@/lib/localClient';
 import { classNames, formatDate } from '@/lib/utils';
 import type {
   DevCustomer, DevSource, CustomerType, DevStage,
@@ -150,12 +151,12 @@ export function DevCustomers() {
       // Supabase 成功就用 Supabase 数据，否则降级 localStorage
       if (cRes.error) {
         console.error('[客户开发] Supabase查询失败，尝试localStorage:', cRes.error);
-        // 降级读取 localStorage
-        const rawC = localStorage.getItem('wb_dev_customers');
+        // 降级读取 localStorage（按用户命名空间隔离）
+        const rawC = localStorage.getItem(userScopedKey('dev_customers'));
         const localC = rawC ? JSON.parse(rawC) : [];
-        const rawF = localStorage.getItem('wb_followup_records');
+        const rawF = localStorage.getItem(userScopedKey('followup_records'));
         const localF = rawF ? JSON.parse(rawF) : [];
-        const rawD = localStorage.getItem('wb_daily_dev_logs');
+        const rawD = localStorage.getItem(userScopedKey('daily_dev_logs'));
         const localD = rawD ? JSON.parse(rawD) : [];
         localC.sort((a: any, b: any) => (a.created_at < b.created_at ? 1 : -1));
         localF.sort((a: any, b: any) => (a.followup_date < b.followup_date ? 1 : -1));
@@ -171,7 +172,7 @@ export function DevCustomers() {
     } catch (e) {
       console.error('[客户开发] 加载失败:', e);
       // 最终降级
-      const rawC = localStorage.getItem('wb_dev_customers');
+      const rawC = localStorage.getItem(userScopedKey('dev_customers'));
       const localC = rawC ? JSON.parse(rawC) : [];
       setCustomers(localC);
     }
@@ -307,16 +308,16 @@ export function DevCustomers() {
       if (error) throw error;
     } catch (e) {
       console.error('[客户开发] Supabase删除失败，尝试localStorage:', e);
-      // 降级 localStorage
-      const rawC = localStorage.getItem('wb_dev_customers');
+      // 降级 localStorage（按用户命名空间隔离）
+      const rawC = localStorage.getItem(userScopedKey('dev_customers'));
       const listC = rawC ? JSON.parse(rawC) : [];
       const filtered = listC.filter((c: any) => c.id !== id);
-      localStorage.setItem('wb_dev_customers', JSON.stringify(filtered));
+      localStorage.setItem(userScopedKey('dev_customers'), JSON.stringify(filtered));
       // 同时删除跟进记录
-      const rawF = localStorage.getItem('wb_followup_records');
+      const rawF = localStorage.getItem(userScopedKey('followup_records'));
       const listF = rawF ? JSON.parse(rawF) : [];
       const filteredF = listF.filter((f: any) => f.customer_id !== id);
-      localStorage.setItem('wb_followup_records', JSON.stringify(filteredF));
+      localStorage.setItem(userScopedKey('followup_records'), JSON.stringify(filteredF));
     }
     showToast('success', '客户已删除');
     load();
@@ -335,12 +336,12 @@ export function DevCustomers() {
       if (error) throw error;
     } catch (e) {
       console.error('[客户开发] Supabase更新失败，尝试localStorage:', e);
-      const rawC = localStorage.getItem('wb_dev_customers');
+      const rawC = localStorage.getItem(userScopedKey('dev_customers'));
       const listC = rawC ? JSON.parse(rawC) : [];
       const idx = listC.findIndex((item: any) => item.id === c.id);
       if (idx >= 0) {
         listC[idx] = { ...listC[idx], ...updates };
-        localStorage.setItem('wb_dev_customers', JSON.stringify(listC));
+        localStorage.setItem(userScopedKey('dev_customers'), JSON.stringify(listC));
       }
     }
     load();
@@ -1068,9 +1069,9 @@ function CustomerForm({ editing, onClose, onSaved, checkDuplicate, showToast }: 
       errorMsg = e?.message || String(e);
       console.error('[客户开发] Supabase保存失败，尝试localStorage:', errorMsg);
 
-      // 降级：直接操作 localStorage 确保数据不丢失
+      // 降级：直接操作 localStorage 确保数据不丢失（按用户命名空间隔离）
       try {
-        const raw = localStorage.getItem('wb_dev_customers');
+        const raw = localStorage.getItem(userScopedKey('dev_customers'));
         const list = raw ? JSON.parse(raw) : [];
         if (editing) {
           const idx = list.findIndex((c: any) => c.id === editing.id);
@@ -1086,7 +1087,7 @@ function CustomerForm({ editing, onClose, onSaved, checkDuplicate, showToast }: 
             updated_at: new Date().toISOString(),
           });
         }
-        localStorage.setItem('wb_dev_customers', JSON.stringify(list));
+        localStorage.setItem(userScopedKey('dev_customers'), JSON.stringify(list));
         success = true;
         showToast('info', 'Supabase表未创建，数据已存到本地浏览器（请执行SQL迁移脚本）');
       } catch (e2: any) {
@@ -1371,20 +1372,20 @@ function FollowupForm({ customer, followups, onClose, onSaved }: {
     } catch (e: any) {
       console.error('[客户开发] Supabase保存跟进失败，尝试localStorage:', e);
       try {
-        const rawF = localStorage.getItem('wb_followup_records');
+        const rawF = localStorage.getItem(userScopedKey('followup_records'));
         const listF = rawF ? JSON.parse(rawF) : [];
         listF.push({
           ...followupData,
           id: 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
         });
-        localStorage.setItem('wb_followup_records', JSON.stringify(listF));
+        localStorage.setItem(userScopedKey('followup_records'), JSON.stringify(listF));
 
-        const rawC = localStorage.getItem('wb_dev_customers');
+        const rawC = localStorage.getItem(userScopedKey('dev_customers'));
         const listC = rawC ? JSON.parse(rawC) : [];
         const idx = listC.findIndex((c: any) => c.id === customer.id);
         if (idx >= 0) {
           listC[idx] = { ...listC[idx], ...updates };
-          localStorage.setItem('wb_dev_customers', JSON.stringify(listC));
+          localStorage.setItem(userScopedKey('dev_customers'), JSON.stringify(listC));
         }
         success = true;
       } catch (e2: any) {

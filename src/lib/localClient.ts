@@ -1,9 +1,48 @@
 // localStorage-based mock Supabase client
 // 当 Supabase 未配置时，使用 localStorage 存储数据，保证应用功能正常可用
+// 多用户数据隔离：每个用户的数据存储在独立的命名空间下
+
+// 获取当前登录用户ID，用于数据隔离
+function getCurrentUserId(): string {
+  try {
+    const saved = localStorage.getItem('wb_auth_user');
+    if (saved) {
+      const userData = JSON.parse(saved);
+      if (userData.id) return userData.id;
+    }
+  } catch {}
+  return '__anonymous__';
+}
+
+// 返回按用户命名空间的存储键（供直接访问 localStorage 的代码使用）
+export function userScopedKey(table: string): string {
+  const uid = getCurrentUserId();
+  return `wb_${table}__${uid}`;
+}
+
+function storageKey(table: string): string {
+  return userScopedKey(table);
+}
+
+// 迁移旧数据：首次升级时，把旧的无命名空间数据迁移到当前用户名下（仅一次）
+function migrateLegacyData(table: string): void {
+  const legacyKey = `wb_${table}`;
+  const newKey = storageKey(table);
+  try {
+    const legacy = localStorage.getItem(legacyKey);
+    const current = localStorage.getItem(newKey);
+    if (legacy && !current) {
+      localStorage.setItem(newKey, legacy);
+      // 清除旧的共享数据，避免不同用户串数据
+      localStorage.removeItem(legacyKey);
+    }
+  } catch {}
+}
 
 function getTableData(table: string): any[] {
   try {
-    const raw = localStorage.getItem(`wb_${table}`);
+    migrateLegacyData(table);
+    const raw = localStorage.getItem(storageKey(table));
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -11,7 +50,9 @@ function getTableData(table: string): any[] {
 }
 
 function saveTableData(table: string, data: any[]) {
-  localStorage.setItem(`wb_${table}`, JSON.stringify(data));
+  try {
+    localStorage.setItem(storageKey(table), JSON.stringify(data));
+  } catch {}
 }
 
 function genId(): string {

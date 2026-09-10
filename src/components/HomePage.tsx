@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { formatDate, classNames } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { userScopedKey } from '@/lib/localClient';
 import type { CalendarEvent, CalendarEventType, CalendarEventPriority } from '@/lib/supabase';
 import type { Page } from '@/components/Sidebar';
 
@@ -1245,10 +1246,10 @@ export function HomePage({ onNavigate }: HomeProps) {
         const inquiryList = inquiryRes.data || [];
         // 合并客户管理 + 客户开发两个表的客户数量
         let devCustomers = devCustomerRes.data || [];
-        // 降级：如果Supabase查询失败，从localStorage读取dev_customers
+        // 降级：如果Supabase查询失败，从localStorage读取dev_customers（按用户命名空间隔离）
         if (devCustomerRes.error || devCustomers.length === 0) {
           try {
-            const localDev = localStorage.getItem('wb_dev_customers');
+            const localDev = localStorage.getItem(userScopedKey('dev_customers'));
             if (localDev) devCustomers = JSON.parse(localDev);
           } catch {}
         }
@@ -1340,8 +1341,8 @@ export function HomePage({ onNavigate }: HomeProps) {
         }
         // 未设置行业时不主动弹窗，用户点击「选择行业」按钮时再弹出
       } catch {
-        // profiles 表不存在，回退到 localStorage
-        const local = localStorage.getItem('wb_selected_industry');
+        // profiles 表不存在，回退到 localStorage（按用户命名空间隔离）
+        const local = localStorage.getItem(userScopedKey('selected_industry'));
         if (local) {
           setSelectedIndustry(local);
           loadIndustryData(local);
@@ -1365,7 +1366,7 @@ export function HomePage({ onNavigate }: HomeProps) {
         await supabase.from('profiles').insert({ selected_industry: industry });
       }
     } catch {}
-    localStorage.setItem('wb_selected_industry', industry);
+    localStorage.setItem(userScopedKey('selected_industry'), industry);
     loadIndustryData(industry);
   }
 

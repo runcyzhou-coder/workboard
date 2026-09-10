@@ -17,9 +17,30 @@ const isValidUrl = (url: string) => {
 // 判断是否配置了有效的 Supabase 凭据
 export const hasValidSupabaseConfig = isValidUrl(rawUrl) && rawKey && !rawKey.startsWith('your_');
 
-// 未配置真实 Supabase 时使用 localStorage 本地适配器，保证应用功能可用
-export const supabase = hasValidSupabaseConfig
-  ? createClient(rawUrl, rawKey)
+// 混合模式：
+// - 认证（auth）使用真实 Supabase，支持多账号注册/登录
+// - 数据（from）使用 localClient，按用户命名空间隔离，实现不同账号数据独立
+// 这样既保留了真实的账号系统，又确保每个用户的数据互不干扰
+const realSupabase = hasValidSupabaseConfig
+  ? createClient(rawUrl, rawKey, { auth: { persistSession: true, autoRefreshToken: true } })
+  : null;
+
+export const supabase = realSupabase
+  ? new Proxy(localClient as any, {
+      get(target, prop: string) {
+        // auth 相关操作走真实 Supabase
+        if (prop === 'auth') return realSupabase.auth;
+        // channel/realtime 等走真实 Supabase
+        if (prop === 'channel' || prop === 'getChannels' || prop === 'removeAllChannels') {
+          return (...args: any[]) => (realSupabase as any)[prop]?.(...args);
+        }
+        // from 走本地隔离存储
+        if (prop === 'from') return target.from.bind(target);
+        // 其他属性回退到 localClient
+        const val = (target as any)[prop];
+        return typeof val === 'function' ? val.bind(target) : val;
+      },
+    })
   : localClient as any;
 
 // Database types

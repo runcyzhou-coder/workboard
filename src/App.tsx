@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, LogOut } from 'lucide-react';
 import { Sidebar, type Page } from '@/components/Sidebar';
 import { CommandPalette } from '@/components/CommandPalette';
 import { HomePage } from '@/components/HomePage';
@@ -14,8 +14,12 @@ import { ProfitCalculator } from '@/components/ProfitCalculator';
 import { AfterSales } from '@/components/AfterSales';
 import { TradeTools } from '@/components/TradeTools';
 import { DevCustomers } from '@/components/DevCustomers';
+import { Login } from '@/components/Login';
+import { AuthProvider, useAuth } from '@/lib/auth';
+import { Loader2 } from 'lucide-react';
 
-function App() {
+function AppContent() {
+  const { user, loading, signOut } = useAuth();
   const [page, setPage] = useState<Page>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pendingDocType, setPendingDocType] = useState<DocType | null>(null);
@@ -38,6 +42,25 @@ function App() {
     setPaletteOpen(false);
   }, []);
 
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    setPage('home');
+  }, [signOut]);
+
+  // 加载中：显示等待动画
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
+        <Loader2 className="w-8 h-8 text-[#7BA369] animate-spin" strokeWidth={2} />
+      </div>
+    );
+  }
+
+  // 未登录：显示登录页
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <div className="flex min-h-screen bg-[#FAF7F2] text-[#2D2A26]">
       <Sidebar
@@ -54,6 +77,13 @@ function App() {
             <Menu className="w-6 h-6" strokeWidth={1.75} />
           </button>
           <span className="font-serif font-bold text-[#2D2A26]">KIKI TECH</span>
+          <button
+            onClick={handleSignOut}
+            className="ml-auto p-1.5 text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-md transition-colors"
+            title="退出登录"
+          >
+            <LogOut className="w-4 h-4" strokeWidth={1.75} />
+          </button>
         </header>
 
         {/* Desktop top bar — 羊皮纸极简风格，带下划边框 */}
@@ -88,7 +118,15 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs text-[#78716C] font-handwriting text-[13px] hidden xl:inline">guest@kiki-tech.com</span>
+            <span className="text-xs text-[#78716C] font-handwriting text-[13px] hidden xl:inline">{user.email}</span>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-[#78716C] hover:text-[#2D2A26] hover:bg-[#F2EBDC] rounded-md transition-colors"
+              title="退出登录"
+            >
+              <LogOut className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <span className="hidden sm:inline">退出</span>
+            </button>
           </div>
         </header>
 
@@ -115,6 +153,14 @@ function App() {
         onNavigate={handleNavigate}
       />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
