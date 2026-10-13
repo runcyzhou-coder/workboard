@@ -1,9 +1,24 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { supabase, hasValidSupabaseConfig } from './supabase';
-import type { User } from '@supabase/supabase-js';
+
+// ===== 本地账号系统 =====
+// 账号与密码保存在浏览器本地，不依赖任何外部服务（Supabase / 网络）。
+// 这样无论网络如何、后端是否可用，登录与注册都始终可以正常使用。
+// 不同账号的数据通过用户ID命名空间隔离，互不干扰。
+
+export interface SimpleUser {
+  id: string;
+  email: string;
+}
+
+interface StoredUser {
+  id: string;
+  email: string;
+  password: string;
+  created_at: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: SimpleUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -13,119 +28,131 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const USERS_KEY = 'wb_users';
+const SESSION_KEY = 'wb_auth_user';
+
+// ===== 安全的本地存储读写 =====
+// 兼容：隐私模式禁用 localStorage、存储配额不足、存储被清理等异常场景
+const memoryFallback: Record<string, string> = {};
+
+function safeGet(key: string): string | null {
+  try {
+    const v = localStorage.getItem(key);
+    if (v !== null) return v;
+  } catch {}
+  return key in memoryFallback ? memoryFallback[key] : null;
+}
+
+function safeSet(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+  // 同时在内存中保留一份，避免 localStorage 不可用时直接崩溃
+  memoryFallback[key] = value;
+}
+
+function safeRemove(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+  delete memoryFallback[key];
+}
+
+function genId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'u-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+function loadUsers(): StoredUser[] {
+  const raw = safeGet(USERS_KEY);
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((u: any) => u && u.email && u.id) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveUsers(users: StoredUser[]): void {
+  safeSet(USERS_KEY, JSON.stringify(users));
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SimpleUser | null>(null);
   const [loading, setLoading] = useState(true);
-  // 本地降级模式：未配置Supabase时用localStorage模拟多用户
-  const [isLocalMode] = useState(!hasValidSupabaseConfig);
 
+  // 启动时恢复登录状态
   useEffect(() => {
-    if (isLocalMode) {
-      // 本地模式：从localStorage恢复登录状态
-      try {
-        const saved = localStorage.getItem('wb_auth_user');
-        if (saved) {
-          const userData = JSON.parse(saved);
-          setUser({ id: userData.id, email: userData.email } as User);
+    try {
+      const raw = safeGet(SESSION_KEY);
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u && u.id && u.email) {
+          setUser({ id: u.id, email: u.email });
         }
-      } catch {}
-      setLoading(false);
-      return;
-    }
-
-    // Supabase 模式：监听认证状态变化
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      // 同步用户ID到 wb_auth_user，供 localClient 做数据命名空间隔离使用
-      if (u) {
-        localStorage.setItem('wb_auth_user', JSON.stringify({ id: u.id, email: u.email }));
-      } else {
-        localStorage.removeItem('wb_auth_user');
       }
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      // 同步用户ID到 wb_auth_user，供 localClient 做数据命名空间隔离使用
-      if (u) {
-        localStorage.setItem('wb_auth_user', JSON.stringify({ id: u.id, email: u.email }));
-      } else {
-        localStorage.removeItem('wb_auth_user');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [isLocalMode]);
+    } catch {}
+    setLoading(false);
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    if (isLocalMode) {
-      // 本地模式：用localStorage模拟登录
-      const users = JSON.parse(localStorage.getItem('wb_users') || '[]');
-      const found = users.find((u: any) => u.email === email && u.password === password);
-      if (!found) {
-        return { error: '邮箱或密码错误' };
-      }
-      const userData = { id: found.id, email: found.email };
-      localStorage.setItem('wb_auth_user', JSON.stringify(userData));
-      setUser(userData as User);
-      return { error: null };
+    const target = (email || '').trim().toLowerCase();
+    if (!target || !password) return { error: '请填写邮箱和密码' };
+
+    const users = loadUsers();
+    const found = users.find((u) => u.email.toLowerCase() === target);
+    if (!found) {
+      return { error: '该邮箱还未注册，请先点击上方「注册」创建账号' };
+    }
+    if (found.password !== password) {
+      return { error: '密码不正确，请重新输入' };
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    // 登录成功后同步用户ID到 wb_auth_user，供 localClient 数据隔离使用
-    if (data.user) {
-      localStorage.setItem('wb_auth_user', JSON.stringify({ id: data.user.id, email: data.user.email }));
-    }
+    const session = { id: found.id, email: found.email };
+    safeSet(SESSION_KEY, JSON.stringify(session));
+    setUser(session);
     return { error: null };
-  }, [isLocalMode]);
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
-    if (isLocalMode) {
-      // 本地模式：注册新用户到localStorage
-      const users = JSON.parse(localStorage.getItem('wb_users') || '[]');
-      if (users.some((u: any) => u.email === email)) {
-        return { error: '该邮箱已注册' };
-      }
-      const newUser = {
-        id: 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
-        email,
-        password,
-      };
-      users.push(newUser);
-      localStorage.setItem('wb_users', JSON.stringify(users));
-      const userData = { id: newUser.id, email: newUser.email };
-      localStorage.setItem('wb_auth_user', JSON.stringify(userData));
-      setUser(userData as User);
-      return { error: null };
+    const target = (email || '').trim().toLowerCase();
+    if (!target || !password) return { error: '请填写邮箱和密码' };
+    if (!EMAIL_RE.test(target)) return { error: '邮箱格式不正确，请检查后重试' };
+    if (password.length < 6) return { error: '密码至少需要 6 位' };
+
+    const users = loadUsers();
+    if (users.some((u) => u.email.toLowerCase() === target)) {
+      return { error: '该邮箱已注册，请直接登录' };
     }
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return { error: error.message };
-    // 注册成功后同步用户ID到 wb_auth_user，供 localClient 数据隔离使用
-    if (data.user) {
-      localStorage.setItem('wb_auth_user', JSON.stringify({ id: data.user.id, email: data.user.email }));
-    }
+    const created: StoredUser = {
+      id: genId(),
+      email: target,
+      password,
+      created_at: new Date().toISOString(),
+    };
+    users.push(created);
+    saveUsers(users);
+
+    // 注册成功后自动登录，直接进入应用
+    const session = { id: created.id, email: created.email };
+    safeSet(SESSION_KEY, JSON.stringify(session));
+    setUser(session);
     return { error: null };
-  }, [isLocalMode]);
+  }, []);
 
   const signOut = useCallback(async () => {
-    if (isLocalMode) {
-      localStorage.removeItem('wb_auth_user');
-      setUser(null);
-      return;
-    }
-    await supabase.auth.signOut();
-    // 清除本地用户标识
-    localStorage.removeItem('wb_auth_user');
+    safeRemove(SESSION_KEY);
     setUser(null);
-  }, [isLocalMode]);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isLocalMode }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isLocalMode: true }}>
       {children}
     </AuthContext.Provider>
   );
@@ -137,14 +164,13 @@ export function useAuth() {
   return ctx;
 }
 
-// 获取当前用户ID（用于数据查询时过滤/命名空间隔离）
+// 获取当前用户ID（用于数据按用户隔离）
 export function getCurrentUserId(): string | null {
-  // 从 wb_auth_user 获取（登录时已同步写入）
   try {
-    const saved = localStorage.getItem('wb_auth_user');
-    if (saved) {
-      const userData = JSON.parse(saved);
-      return userData.id;
+    const raw = safeGet(SESSION_KEY);
+    if (raw) {
+      const u = JSON.parse(raw);
+      if (u && u.id) return u.id;
     }
   } catch {}
   return null;

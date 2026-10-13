@@ -3,7 +3,7 @@ import { BookOpen, Mail, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 export function Login() {
-  const { signIn, signUp, isLocalMode } = useAuth();
+  const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -128,11 +128,9 @@ export function Login() {
             </button>
           </form>
 
-          {isLocalMode && (
-            <p className="mt-4 text-xs text-[#A8A29E] text-center">
-              演示模式：数据存储在本地浏览器，不同浏览器/设备数据不互通
-            </p>
-          )}
+          <p className="mt-4 text-xs text-[#A8A29E] text-center leading-relaxed">
+            账号与数据保存在当前浏览器中，不同账号的数据相互独立
+          </p>
         </div>
 
         <p className="text-center mt-6 text-xs text-[#78716C] font-handwriting">

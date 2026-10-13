@@ -25,17 +25,24 @@ const realSupabase = hasValidSupabaseConfig
   ? createClient(rawUrl, rawKey, { auth: { persistSession: true, autoRefreshToken: true } })
   : null;
 
+// 将 realSupabase 的所有非 data 方法合并到混合代理
+// 确保 auth.getSession、auth.signInWithPassword、auth.signUp、auth.onAuthStateChange 都能正常工作
 export const supabase = realSupabase
   ? new Proxy(localClient as any, {
       get(target, prop: string) {
-        // auth 相关操作走真实 Supabase
-        if (prop === 'auth') return realSupabase.auth;
-        // channel/realtime 等走真实 Supabase
-        if (prop === 'channel' || prop === 'getChannels' || prop === 'removeAllChannels') {
-          return (...args: any[]) => (realSupabase as any)[prop]?.(...args);
+        // auth 必须返回真实 Supabase 的 auth 对象（绑定 this 到 realSupabase）
+        if (prop === 'auth') {
+          return realSupabase.auth;
+        }
+        // 顶级属性优先取 realSupabase 的，处理诸如 auth 在顶级不存在？
+        if ((realSupabase as any)[prop] !== undefined && !['from'].includes(prop)) {
+          const val = (realSupabase as any)[prop];
+          return typeof val === 'function' ? val.bind(realSupabase) : val;
         }
         // from 走本地隔离存储
-        if (prop === 'from') return target.from.bind(target);
+        if (prop === 'from') {
+          return target.from.bind(target);
+        }
         // 其他属性回退到 localClient
         const val = (target as any)[prop];
         return typeof val === 'function' ? val.bind(target) : val;
