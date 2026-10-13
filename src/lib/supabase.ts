@@ -17,38 +17,21 @@ const isValidUrl = (url: string) => {
 // 判断是否配置了有效的 Supabase 凭据
 export const hasValidSupabaseConfig = isValidUrl(rawUrl) && rawKey && !rawKey.startsWith('your_');
 
-// 混合模式：
-// - 认证（auth）使用真实 Supabase，支持多账号注册/登录
-// - 数据（from）使用 localClient，按用户命名空间隔离，实现不同账号数据独立
-// 这样既保留了真实的账号系统，又确保每个用户的数据互不干扰
-const realSupabase = hasValidSupabaseConfig
+// ===== 真实云端 Supabase Client =====
+// 当 hasValidSupabaseConfig 时：
+//   - supabase.auth  → Supabase Auth（真正的云端账号系统）
+//   - supabase.from  → Supabase Postgres（真正的云端数据库，按 user_id 隔离）
+// 当 Supabase 不可用时 → 自动降级 localClient（浏览器本地）
+//
+// RLS 策略保证每个用户只能看到自己的数据：
+//   CREATE POLICY users_xxx_all ON xxx FOR ALL TO authenticated
+//     USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
+const realClient = hasValidSupabaseConfig
   ? createClient(rawUrl, rawKey, { auth: { persistSession: true, autoRefreshToken: true } })
   : null;
 
-// 将 realSupabase 的所有非 data 方法合并到混合代理
-// 确保 auth.getSession、auth.signInWithPassword、auth.signUp、auth.onAuthStateChange 都能正常工作
-export const supabase = realSupabase
-  ? new Proxy(localClient as any, {
-      get(target, prop: string) {
-        // auth 必须返回真实 Supabase 的 auth 对象（绑定 this 到 realSupabase）
-        if (prop === 'auth') {
-          return realSupabase.auth;
-        }
-        // 顶级属性优先取 realSupabase 的，处理诸如 auth 在顶级不存在？
-        if ((realSupabase as any)[prop] !== undefined && !['from'].includes(prop)) {
-          const val = (realSupabase as any)[prop];
-          return typeof val === 'function' ? val.bind(realSupabase) : val;
-        }
-        // from 走本地隔离存储
-        if (prop === 'from') {
-          return target.from.bind(target);
-        }
-        // 其他属性回退到 localClient
-        const val = (target as any)[prop];
-        return typeof val === 'function' ? val.bind(target) : val;
-      },
-    })
-  : localClient as any;
+export const supabase = realClient as any;
 
 // Database types
 export interface BackgroundReport {
