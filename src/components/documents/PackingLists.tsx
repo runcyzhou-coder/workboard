@@ -143,16 +143,16 @@ export function PackingLists() {
         </div>
       )}
 
-      {viewing && <PlViewModal pl={viewing} onClose={() => setViewing(null)} />}
+      {viewing && <PlViewModal pl={viewing} onClose={() => setViewing(null)} onEdit={() => { const p = viewing; setViewing(null); startEdit(p); }} />}
     </div>
   );
 }
 
-function PlViewModal({ pl, onClose }: { pl: PackingList & { customer?: Customer; items: PlItem[] }; onClose: () => void }) {
+function PlViewModal({ pl, onClose, onEdit }: { pl: PackingList & { customer?: Customer; items: PlItem[] }; onClose: () => void; onEdit?: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 print:p-0 print:bg-white" onClick={onClose}>
       <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto print:max-h-none print:rounded-none print:shadow-none" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 print:hidden"><div className="flex items-center gap-3"><button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-lg font-semibold text-slate-900">Preview Packing List</h2></div><button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button></div>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 print:hidden"><div className="flex items-center gap-3"><button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-lg font-semibold text-slate-900">Preview Packing List</h2></div><div className="flex items-center gap-2">{onEdit && <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm"><Edit2 className="w-4 h-4" />编辑</button>}<button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button></div></div>
         <div className="p-8 print:p-10" id="pi-document">
           <DocHeader title="PACKING LIST" docNumber={pl.pl_number} />
           <div className="grid grid-cols-2 gap-6 mb-6 text-sm">

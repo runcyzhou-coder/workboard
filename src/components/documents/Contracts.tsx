@@ -142,17 +142,17 @@ export function Contracts() {
         </div>
       )}
 
-      {viewing && <ContractViewModal contract={viewing} onClose={() => setViewing(null)} />}
+      {viewing && <ContractViewModal contract={viewing} onClose={() => setViewing(null)} onEdit={() => { const c = viewing; setViewing(null); startEdit(c); }} />}
     </div>
   );
 }
 
-function ContractViewModal({ contract, onClose }: { contract: Contract & { customer?: Customer; items: ContractItem[] }; onClose: () => void }) {
+function ContractViewModal({ contract, onClose, onEdit }: { contract: Contract & { customer?: Customer; items: ContractItem[] }; onClose: () => void; onEdit?: () => void }) {
   const total = contract.items.reduce((s, i) => s + i.total, 0);
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 print:p-0 print:bg-white" onClick={onClose}>
       <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto print:max-h-none print:rounded-none print:shadow-none" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 print:hidden"><div className="flex items-center gap-3"><button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-lg font-semibold text-slate-900">Preview Contract</h2></div><button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button></div>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 print:hidden"><div className="flex items-center gap-3"><button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-lg font-semibold text-slate-900">Preview Contract</h2></div><div className="flex items-center gap-2">{onEdit && <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm"><Edit2 className="w-4 h-4" />编辑</button>}<button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button></div></div>
         <div className="p-8 print:p-10" id="pi-document">
           <DocHeader title="SALES CONTRACT" docNumber={contract.contract_number} />
           <div className="grid grid-cols-2 gap-6 mb-6 text-sm">

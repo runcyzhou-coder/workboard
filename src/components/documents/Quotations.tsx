@@ -255,7 +255,7 @@ export function Quotations() {
                 <button onClick={() => setViewing(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
                 <h2 className="text-lg font-semibold text-slate-900">Preview Quotation</h2>
               </div>
-              <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button>
+              <div className="flex items-center gap-2"><button onClick={() => { const q = viewing; setViewing(null); startEdit(q); }} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm"><Edit2 className="w-4 h-4" />编辑</button><button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium text-sm"><Printer className="w-4 h-4" />Print / PDF</button></div>
             </div>
 
             <div className="p-8 print:p-10" id="pi-document">
