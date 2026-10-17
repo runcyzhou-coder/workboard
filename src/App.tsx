@@ -1,23 +1,36 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Menu, Search, LogOut } from 'lucide-react';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import { Menu, Search, LogOut, Loader2 } from 'lucide-react';
 import { Sidebar, type Page } from '@/components/Sidebar';
 import { CommandPalette } from '@/components/CommandPalette';
 import { HomePage } from '@/components/HomePage';
-import { Dashboard } from '@/components/Dashboard';
-import { Customers } from '@/components/Customers';
-import { Inquiries } from '@/components/Inquiries';
-import { Shipments } from '@/components/Shipments';
-import { Products } from '@/components/Products';
-// import { AIChat } from '@/components/AIChat'; // 暂时隐藏：流程未跑通
-import { DocumentCenter, type DocType } from '@/components/DocumentCenter';
-import { ProfitCalculator } from '@/components/ProfitCalculator';
-import { AfterSales } from '@/components/AfterSales';
-import { TradeTools } from '@/components/TradeTools';
-import { DevCustomers } from '@/components/DevCustomers';
 import { Login } from '@/components/Login';
-import { DataMigration } from '@/components/DataMigration';
 import { AuthProvider, useAuth } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+
+// ===== 路由级代码分割 =====
+// 所有非首屏页面用 React.lazy + import()，点到哪个才下载哪个
+const Dashboard = lazy(() => import('@/components/Dashboard').then(m => ({ default: m.Dashboard })));
+const Customers = lazy(() => import('@/components/Customers').then(m => ({ default: m.Customers })));
+const Inquiries = lazy(() => import('@/components/Inquiries').then(m => ({ default: m.Inquiries })));
+const Shipments = lazy(() => import('@/components/Shipments').then(m => ({ default: m.Shipments })));
+const Products = lazy(() => import('@/components/Products').then(m => ({ default: m.Products })));
+const ProfitCalculator = lazy(() => import('@/components/ProfitCalculator').then(m => ({ default: m.ProfitCalculator })));
+const AfterSales = lazy(() => import('@/components/AfterSales').then(m => ({ default: m.AfterSales })));
+const TradeTools = lazy(() => import('@/components/TradeTools').then(m => ({ default: m.TradeTools })));
+const DevCustomers = lazy(() => import('@/components/DevCustomers').then(m => ({ default: m.DevCustomers })));
+const DataMigration = lazy(() => import('@/components/DataMigration').then(m => ({ default: m.DataMigration })));
+const DocumentCenterLazy = lazy(() => import('@/components/DocumentCenter').then(m => ({ default: m.DocumentCenter })));
+
+export type { DocType } from '@/components/DocumentCenter';
+
+// 懒加载页面的 fallback
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 className="w-6 h-6 text-[#7BA369] animate-spin" strokeWidth={2} />
+      <span className="ml-3 text-sm text-[#78716C]">加载中...</span>
+    </div>
+  );
+}
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
@@ -133,18 +146,20 @@ function AppContent() {
 
         <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           {page === 'home' && <HomePage onNavigate={handleNavigate} />}
-          {page === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
-          {page === 'dev-customers' && <DevCustomers />}
-          {page === 'customers' && <Customers />}
-          {page === 'inquiries' && <Inquiries onNavigateDoc={(t) => { setPendingDocType(t as DocType); setPage('document-center'); }} />}
-          {page === 'shipments' && <Shipments />}
-          {page === 'products' && <Products />}
-          {/* {page === 'ai-chat' && <AIChat />} */} {/* 暂时隐藏：流程未跑通 */}
-          {page === 'document-center' && <DocumentCenter initialDocType={pendingDocType ?? undefined} onConsumed={() => setPendingDocType(null)} />}
-          {page === 'profit-calculator' && <ProfitCalculator />}
-          {page === 'after-sales' && <AfterSales />}
-          {page === 'tools' && <TradeTools />}
-          {page === 'data-migration' && <DataMigration />}
+          <Suspense fallback={<PageLoader />}>
+            {page === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
+            {page === 'dev-customers' && <DevCustomers />}
+            {page === 'customers' && <Customers />}
+            {page === 'inquiries' && <Inquiries onNavigateDoc={(t) => { setPendingDocType(t as DocType); setPage('document-center'); }} />}
+            {page === 'shipments' && <Shipments />}
+            {page === 'products' && <Products />}
+            {/* {page === 'ai-chat' && <AIChat />} */} {/* 暂时隐藏：流程未跑通 */}
+            {page === 'document-center' && <DocumentCenterLazy initialDocType={pendingDocType ?? undefined} onConsumed={() => setPendingDocType(null)} />}
+            {page === 'profit-calculator' && <ProfitCalculator />}
+            {page === 'after-sales' && <AfterSales />}
+            {page === 'tools' && <TradeTools />}
+            {page === 'data-migration' && <DataMigration />}
+          </Suspense>
         </main>
       </div>
 
